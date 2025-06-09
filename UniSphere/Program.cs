@@ -1,18 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
+using UniSphere.Api;
 using UniSphere.Api.Database;
 using UniSphere.Api.Extensions;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
-    builder.Configuration.GetConnectionString("Database"),
-    sqlserverOptions => sqlserverOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName,Schemes.Application)
-    )
-);
+builder.AddControllers()
+    .AddErrorHanding()
+    .AddDatabase()
+    .AddObservability()
+    .AddApplicationServices();
+
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
