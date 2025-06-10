@@ -14,11 +14,10 @@ public static class DependenciesInjection
     {
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
-
         return builder;
     }
 
-    public static WebApplicationBuilder AddErrorHanding(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddErrorHandling(this WebApplicationBuilder builder)
     {
 
         return builder;

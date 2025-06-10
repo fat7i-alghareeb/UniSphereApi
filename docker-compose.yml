@@ -3,12 +3,12 @@ services:
     image: ${DOCKER_REGISTRY-}unisphereapi
     build:
       context: .
-      dockerfile: UniSphere.Api/Dockerfile
+      dockerfile: UniSphere/Dockerfile
     ports:
         - 5000:8080
         - 5001:8081
     environment:
-        - OTEL_EXPORTER_OTLP_ENDPOINT=http://devhabit.aspire-dashboard:18889
+        - OTEL_EXPORTER_OTLP_ENDPOINT=http://unisphere.aspire-dashboard:18889
         - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
   unisphere.aspire-dashboard:
     image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0

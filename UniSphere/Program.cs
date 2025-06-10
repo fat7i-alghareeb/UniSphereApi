@@ -1,14 +1,11 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations;
 using UniSphere.Api;
-using UniSphere.Api.Database;
 using UniSphere.Api.Extensions;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 
 builder.AddControllers()
-    .AddErrorHanding()
+    .AddErrorHandling()
     .AddDatabase()
     .AddObservability()
     .AddApplicationServices();
