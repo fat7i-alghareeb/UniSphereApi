@@ -4,9 +4,9 @@ using UniSphere.Api.Entities;
 
 namespace UniSphere.Api.Database.Configurations;
 
-public class SubjectLecturerConfiguration : IEntityTypeConfiguration<SubjectLecturer>
+public class SubjectLecturerConfiguration : IEntityTypeConfiguration<SubjectProfessorLink>
 {
-    public void Configure(EntityTypeBuilder<SubjectLecturer> builder)
+    public void Configure(EntityTypeBuilder<SubjectProfessorLink> builder)
     {
         builder.HasKey(sl => new { sl.SubjectId, sl.ProfessorId });
         
@@ -22,7 +22,7 @@ public class SubjectLecturerConfiguration : IEntityTypeConfiguration<SubjectLect
             .OnDelete(DeleteBehavior.Cascade);
             
         builder.HasOne(sl => sl.Professor)
-            .WithMany(p => p.SubjectLecturers)
+            .WithMany(p => p.SubjectProfessorLinks)
             .HasForeignKey(sl => sl.ProfessorId)
             .OnDelete(DeleteBehavior.Cascade);
     }

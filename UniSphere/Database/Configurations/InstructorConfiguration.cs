@@ -18,7 +18,7 @@ public class InstructorConfiguration : IEntityTypeConfiguration<Instructor>
             .IsRequired()
             .HasMaxLength(50);
             
-        builder.HasMany(i => i.InstructorLabs)
+        builder.HasMany(i => i.InstructorLabLinks)
             .WithOne(il => il.Instructor)
             .HasForeignKey(il => il.InstructorId)
             .OnDelete(DeleteBehavior.Cascade);

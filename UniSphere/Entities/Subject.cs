@@ -24,7 +24,7 @@ public class Subject
     
     public Major Major { get; set; } = null!;
     public Lab? Lab { get; set; }
-    public List<SubjectLecturer> SubjectLecturers { get; set; } = new();
+    public List<SubjectProfessorLink> SubjectLecturers { get; set; } = new();
     public List<SubjectStudentLink> SubjectStudentLinks { get; set; } = new();
 }
 

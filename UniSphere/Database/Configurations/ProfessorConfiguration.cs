@@ -11,14 +11,14 @@ public class ProfessorConfiguration : IEntityTypeConfiguration<Professor>
         builder.HasKey(p => p.Id);
         
         builder.Property(p => p.FirstName)
-            .IsRequired()
-            .HasMaxLength(50);
+            .HasColumnType("jsonb")
+            .IsRequired();
             
         builder.Property(p => p.LastName)
-            .IsRequired()
-            .HasMaxLength(50);
+            .HasColumnType("jsonb")
+            .IsRequired();
             
-        builder.HasMany(p => p.SubjectLecturers)
+        builder.HasMany(p => p.SubjectProfessorLinks)
             .WithOne(sl => sl.Professor)
             .HasForeignKey(sl => sl.ProfessorId)
             .OnDelete(DeleteBehavior.Cascade);

@@ -10,6 +10,5 @@ public class Faculty
     public Guid UniversityId { get; set; }
     public University University { get; set; } = null!;
     public List<Major> Majors { get; set; } = new();
-    public List<StudentCredential> StudentCredentials { get; set; } = new();
     public List<Schedule> Schedules { get; set; } = new();
 } 

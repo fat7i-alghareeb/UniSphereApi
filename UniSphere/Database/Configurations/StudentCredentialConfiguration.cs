@@ -19,17 +19,20 @@ public class StudentCredentialConfiguration : IEntityTypeConfiguration<StudentCr
             .HasMaxLength(100);
             
         builder.Property(s => s.FirstName)
-            .IsRequired()
-            .HasMaxLength(50);
+            .HasColumnType("jsonb")
+            .IsRequired();
             
         builder.Property(s => s.LastName)
-            .IsRequired()
-            .HasMaxLength(50);
+            .HasColumnType("jsonb")
+            .IsRequired();
             
         builder.Property(s => s.FatherName)
-            .HasMaxLength(50);
+            .HasColumnType("jsonb");
             
         builder.Property(s => s.Year)
+            .IsRequired();
+            
+        builder.Property(s => s.FacultyId)
             .IsRequired();
             
         builder.Property(s => s.MajorId)
@@ -37,15 +40,6 @@ public class StudentCredentialConfiguration : IEntityTypeConfiguration<StudentCr
             
         builder.Property(s => s.EnrollmentStatusId)
             .IsRequired();
-            
-        // Unique index on Email
-        builder.HasIndex(s => s.Email)
-            .IsUnique();
-            
-        builder.HasOne(s => s.Faculty)
-            .WithMany(f => f.StudentCredentials)
-            .HasForeignKey(s => s.FacultyId)
-            .OnDelete(DeleteBehavior.Cascade);
             
         builder.HasOne(s => s.Major)
             .WithMany(m => m.StudentCredentials)
@@ -58,8 +52,8 @@ public class StudentCredentialConfiguration : IEntityTypeConfiguration<StudentCr
             .OnDelete(DeleteBehavior.Restrict);
             
         builder.HasMany(s => s.SubjectStudentLinks)
-            .WithOne(l => l.StudentCredential)
-            .HasForeignKey(l => new { l.StudentId, l.FacultyId })
+            .WithOne(ssl => ssl.StudentCredential)
+            .HasForeignKey(ssl => new { ssl.StudentId, ssl.FacultyId })
             .OnDelete(DeleteBehavior.Cascade);
     }
 } 

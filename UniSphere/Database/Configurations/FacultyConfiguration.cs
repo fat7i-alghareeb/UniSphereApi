@@ -27,14 +27,6 @@ public class FacultyConfiguration : IEntityTypeConfiguration<Faculty>
             .HasForeignKey(m => m.FacultyId)
             .OnDelete(DeleteBehavior.Cascade);
             
-        builder.HasMany(f => f.StudentCredentials)
-            .WithOne(s => s.Faculty)
-            .HasForeignKey(s => s.FacultyId)
-            .OnDelete(DeleteBehavior.Cascade);
             
-        builder.HasMany(f => f.Schedules)
-            .WithOne(s => s.Faculty)
-            .HasForeignKey(s => s.FacultyId)
-            .OnDelete(DeleteBehavior.Cascade);
     }
 } 

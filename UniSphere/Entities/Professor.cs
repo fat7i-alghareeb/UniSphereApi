@@ -5,8 +5,8 @@ namespace UniSphere.Api.Entities;
 public class Professor
 {
     public Guid Id { get; set; }
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
+    public MultilingualText FirstName { get; set; }=new();
+    public MultilingualText LastName { get; set; }=new();
     public string? Image { get; set; }
-    public List<SubjectLecturer> SubjectLecturers { get; set; } = new();
+    public List<SubjectProfessorLink> SubjectProfessorLinks { get; set; } = new();
 } 

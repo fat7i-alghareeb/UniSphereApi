@@ -17,7 +17,7 @@ public class LabConfiguration : IEntityTypeConfiguration<Lab>
         builder.Property(l => l.Description)
             .HasColumnType("jsonb");
             
-        builder.HasMany(l => l.InstructorLabs)
+        builder.HasMany(l => l.InstructorLabLinks)
             .WithOne(il => il.Lab)
             .HasForeignKey(il => il.LabId)
             .OnDelete(DeleteBehavior.Cascade);

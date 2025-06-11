@@ -8,6 +8,6 @@ public class Lab
     public MultilingualText Name { get; set; } = new();
     public MultilingualText? Description { get; set; }
     public string? Image { get; set; }
-    public List<InstructorLab> InstructorLabs { get; set; } = new();
+    public List<InstructorLabLink> InstructorLabLinks { get; set; } = new();
     public List<Subject> Subjects { get; set; } = new();
 } 

@@ -5,8 +5,12 @@ namespace UniSphere.Api.Entities;
 public class Instructor
 {
     public Guid Id { get; set; }
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
+    public MultilingualText FirstName { get; set; } = new();
+    public MultilingualText LastName { get; set; } = new();
+    public MultilingualText? FatherName { get; set; }
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
     public string? Image { get; set; }
-    public List<InstructorLab> InstructorLabs { get; set; } = new();
+    
+    public List<InstructorLabLink>? InstructorLabLinks { get; set; }
 } 
