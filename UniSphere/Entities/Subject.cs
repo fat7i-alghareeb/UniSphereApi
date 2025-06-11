@@ -1,19 +1,36 @@
-﻿using FluentValidation;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using FluentValidation;
 
 namespace UniSphere.Api.Entities;
 
 public class Subject
 {
-    public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-
+    public Guid Id { get; set; }
+    public MultilingualText Name { get; set; } = new();
+    public Guid MajorId { get; set; }
+    public Guid? LabId { get; set; }
+    public MultilingualText? Description { get; set; }
+    public int? Year { get; set; }
+    public int? Semester { get; set; }
+    public bool IsPassed { get; set; }
+    public int? MidtermGrade { get; set; }
+    public int? FinalGrade { get; set; }
+    public bool CanEnroll { get; set; }
+    public bool IsLabRequired { get; set; }
+    public bool IsMultipleChoice { get; set; }
+    public bool IsOpenBook { get; set; }
+    public string? Image { get; set; }
+    
+    public Major Major { get; set; } = null!;
+    public Lab? Lab { get; set; }
+    public List<SubjectLecturer> SubjectLecturers { get; set; } = new();
+    public List<SubjectStudentLink> SubjectStudentLinks { get; set; } = new();
 }
 
-
+/* Commented out DTOs
 public class SubjectDto
 {
-    
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -54,6 +71,6 @@ public class CreateSubjectDtoValidator : AbstractValidator<CreateSubjectDto>
         RuleFor(x => x.Description)
             .NotEmpty().WithMessage("Description is required.")
             .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
-        
     }
 }
+*/
