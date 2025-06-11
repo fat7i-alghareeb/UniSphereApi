@@ -4,7 +4,9 @@
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
       "serviceActions": {
-        "unisphere.api": "StartDebugging"
+        "unisphere.api": "StartDebugging",
+        "unisphere.aspire-dashboard": "StartWithoutDebugging",
+        "unisphere.sql": "StartWithoutDebugging"
       }
     }
   }
