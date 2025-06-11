@@ -45,7 +45,7 @@ public class CreateSubjectDto
 }
 
 public class CreateSubjectDtoValidator : AbstractValidator<CreateSubjectDto>
-{
+{ 
     public CreateSubjectDtoValidator()
     {
         RuleFor(x => x.Name)

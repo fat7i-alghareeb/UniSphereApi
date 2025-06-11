@@ -7,6 +7,8 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using UniSphere.Api.Database;
 using UniSphere.Api.Middleware;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 namespace UniSphere.Api;
 
@@ -15,7 +17,10 @@ public static class DependenciesInjection
     public static WebApplicationBuilder AddControllers(this WebApplicationBuilder builder)
     {
         builder.Services.AddControllers();
-        builder.Services.AddOpenApi();
+        builder.Services.AddSwaggerGen(options =>
+        {
+            options.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+        });
         return builder;
     }
 
@@ -35,9 +40,9 @@ public static class DependenciesInjection
 
     public static WebApplicationBuilder AddDatabase(this WebApplicationBuilder builder)
     {
-        builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
+        builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(
                 builder.Configuration.GetConnectionString("Database"),
-                sqlserverOptions => sqlserverOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemes.Application)
+                npgsqlOptions => npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemes.Application)
             )
         );
         return builder;
