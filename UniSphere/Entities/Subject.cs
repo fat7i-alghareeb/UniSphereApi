@@ -11,12 +11,10 @@ public class Subject
     public Guid MajorId { get; set; }
     public Guid? LabId { get; set; }
     public MultilingualText? Description { get; set; }
-    public int? Year { get; set; }
-    public int? Semester { get; set; }
-    public bool IsPassed { get; set; }
-    public int? MidtermGrade { get; set; }
-    public int? FinalGrade { get; set; }
-    public bool CanEnroll { get; set; }
+    public int Year { get; set; }
+    public int Semester { get; set; }
+    public int MidtermGrade { get; set; }
+    public int FinalGrade { get; set; }
     public bool IsLabRequired { get; set; }
     public bool IsMultipleChoice { get; set; }
     public bool IsOpenBook { get; set; }

@@ -1,1 +1,34 @@
- 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using UniSphere.Api.Entities;
+
+namespace UniSphere.Api.Database.Configurations;
+
+public class SubjectStudentLinkConfiguration : IEntityTypeConfiguration<SubjectStudentLink>
+{
+    public void Configure(EntityTypeBuilder<SubjectStudentLink> builder)
+    {
+        builder.HasKey(ssl => new { ssl.SubjectId, ssl.StudentId, ssl.FacultyId });
+        
+        builder.Property(ssl => ssl.AttemptNumber)
+            .IsRequired()
+            .HasDefaultValue(1);
+            
+        builder.Property(ssl => ssl.IsCurrentlyEnrolled)
+            .IsRequired()
+            .HasDefaultValue(false);
+            
+        builder.Property(ssl => ssl.Notes)
+            .HasColumnType("jsonb");
+            
+        builder.HasOne(ssl => ssl.Subject)
+            .WithMany(s => s.SubjectStudentLinks)
+            .HasForeignKey(ssl => ssl.SubjectId)
+            .OnDelete(DeleteBehavior.Restrict);
+            
+        builder.HasOne(ssl => ssl.StudentCredential)
+            .WithMany(sc => sc.SubjectStudentLinks)
+            .HasForeignKey(ssl => new { ssl.StudentId, ssl.FacultyId })
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}

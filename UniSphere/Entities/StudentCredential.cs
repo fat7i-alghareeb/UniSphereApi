@@ -10,7 +10,6 @@ public class StudentCredential
     public Guid FacultyId { get; set; }
     public Guid MajorId { get; set; }
     public string Email { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
     public int? OneTimeCode { get; set; }
     public MultilingualText FirstName { get; set; } = new();
     public MultilingualText LastName { get; set; } = new();

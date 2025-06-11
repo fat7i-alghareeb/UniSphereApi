@@ -12,8 +12,8 @@ public class SubjectStudentLink
     public int? MidtermGrade { get; set; }
     public int? FinalGrade { get; set; }
     public bool IsCurrentlyEnrolled { get; set; }
-    public string? Status { get; set; }
-    public string? Notes { get; set; }
+    public bool? IsPassed { get; set; }
+    public MultilingualText? Notes { get; set; }
     
     public Subject Subject { get; set; } = null!;
     public StudentCredential StudentCredential { get; set; } = null!;

@@ -21,19 +21,22 @@ public class SubjectConfiguration : IEntityTypeConfiguration<Subject>
             .IsRequired();
             
         builder.Property(s => s.IsLabRequired)
+            .HasDefaultValue(false)
             .IsRequired();
             
         builder.Property(s => s.IsMultipleChoice)
+            .HasDefaultValue(false)
             .IsRequired();
             
         builder.Property(s => s.IsOpenBook)
+            .HasDefaultValue(false)
             .IsRequired();
             
-        builder.Property(s => s.IsPassed)
-            .HasDefaultValue(false);
+        builder.Property(s => s.MidtermGrade)
+            .HasDefaultValue(30);
             
-        builder.Property(s => s.CanEnroll)
-            .HasDefaultValue(false);
+        builder.Property(s => s.FinalGrade)
+            .HasDefaultValue(70);
             
         builder.HasOne(s => s.Major)
             .WithMany(m => m.Subjects)

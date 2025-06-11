@@ -16,6 +16,9 @@ public class ScheduleConfiguration : IEntityTypeConfiguration<Schedule>
         builder.Property(s => s.Year)
             .IsRequired();
             
+        builder.Property(s => s.ScheduleDate)
+            .IsRequired();
+            
         builder.HasOne(s => s.Major)
             .WithMany(m => m.Schedules)
             .HasForeignKey(s => s.MajorId)

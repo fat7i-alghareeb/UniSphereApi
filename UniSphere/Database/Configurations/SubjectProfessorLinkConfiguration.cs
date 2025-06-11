@@ -4,7 +4,7 @@ using UniSphere.Api.Entities;
 
 namespace UniSphere.Api.Database.Configurations;
 
-public class SubjectLecturerConfiguration : IEntityTypeConfiguration<SubjectProfessorLink>
+public class SubjectProfessorLinkConfiguration : IEntityTypeConfiguration<SubjectProfessorLink>
 {
     public void Configure(EntityTypeBuilder<SubjectProfessorLink> builder)
     {
