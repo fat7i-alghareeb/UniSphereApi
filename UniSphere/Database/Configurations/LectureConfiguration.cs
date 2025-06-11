@@ -18,7 +18,8 @@ public class LectureConfiguration : IEntityTypeConfiguration<Lecture>
             .IsRequired();
             
         builder.Property(l => l.LecturerName)
-            .HasColumnType("jsonb");
+            .HasColumnType("jsonb")
+            .IsRequired();
             
         builder.Property(l => l.StartTime)
             .IsRequired();
@@ -27,8 +28,8 @@ public class LectureConfiguration : IEntityTypeConfiguration<Lecture>
             .IsRequired();
             
         builder.Property(l => l.LectureHall)
-            .IsRequired()
-            .HasMaxLength(100);
+            .HasColumnType("jsonb")
+            .IsRequired();
             
         builder.HasOne(l => l.Schedule)
             .WithMany(s => s.Lectures)

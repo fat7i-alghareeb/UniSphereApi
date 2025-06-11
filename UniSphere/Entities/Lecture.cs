@@ -5,7 +5,7 @@ public class Lecture
     public Guid Id { get; set; }
     public Guid ScheduleId { get; set; }
     public MultilingualText SubjectName { get; set; } = new();
-    public MultilingualText? LecturerName { get; set; }
+    public MultilingualText LecturerName { get; set; }
     public TimeSpan StartTime { get; set; }
     public TimeSpan EndTime { get; set; }
     public MultilingualText LectureHall { get; set; } = new();

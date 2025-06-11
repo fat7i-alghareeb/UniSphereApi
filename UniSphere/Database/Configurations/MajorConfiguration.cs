@@ -39,9 +39,6 @@ public class MajorConfiguration : IEntityTypeConfiguration<Major>
             .WithOne(s => s.Major)
             .HasForeignKey(s => s.MajorId)
             .OnDelete(DeleteBehavior.Cascade);
-            
-        // Unique index on (Name, FacultyId)
-        builder.HasIndex(m => new { m.Name, m.FacultyId })
-            .IsUnique();
+        
     }
 } 

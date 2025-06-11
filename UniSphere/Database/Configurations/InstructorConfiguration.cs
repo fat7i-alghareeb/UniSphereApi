@@ -11,16 +11,27 @@ public class InstructorConfiguration : IEntityTypeConfiguration<Instructor>
         builder.HasKey(i => i.Id);
         
         builder.Property(i => i.FirstName)
-            .IsRequired()
-            .HasMaxLength(50);
+            .HasColumnType("jsonb")
+            .IsRequired();
             
         builder.Property(i => i.LastName)
+            .HasColumnType("jsonb")
+            .IsRequired();
+            
+        builder.Property(i => i.FatherName)
+            .HasColumnType("jsonb");
+            
+        builder.Property(i => i.Email)
             .IsRequired()
-            .HasMaxLength(50);
+            .HasMaxLength(256);
+            
+        builder.Property(i => i.Password)
+            .IsRequired()
+            .HasMaxLength(256);
             
         builder.HasMany(i => i.InstructorLabLinks)
-            .WithOne(il => il.Instructor)
-            .HasForeignKey(il => il.InstructorId)
+            .WithOne(ill => ill.Instructor)
+            .HasForeignKey(ill => ill.InstructorId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 } 
