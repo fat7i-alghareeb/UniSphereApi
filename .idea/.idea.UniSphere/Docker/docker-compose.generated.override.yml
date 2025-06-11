@@ -1,0 +1,20 @@
+# This is a generated file. Not intended for manual editing.
+services:
+  unisphere.api:
+    build:
+      context: "C:\\Users\\Fat7i\\graduationProject\\UniShpereApi\\UniSphere"
+      dockerfile: "UniSphere/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net9.0/UniSphere.Api.dll"
+    environment:
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "unisphereapi:dev"
+    ports: []
+    volumes:
+    - "C:\\Users\\Fat7i\\graduationProject\\UniShpereApi\\UniSphere\\UniSphere:/app:rw"
+    - "C:\\Users\\Fat7i\\graduationProject\\UniShpereApi\\UniSphere:/src:rw"
+    - "C:\\Users\\Fat7i\\.nuget\\packages:/home/app/.nuget/packages"
+    working_dir: "/app"

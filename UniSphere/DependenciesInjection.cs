@@ -1,10 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using UniSphere.Api.Database;
+using UniSphere.Api.Middleware;
 
 namespace UniSphere.Api;
 
@@ -19,7 +21,15 @@ public static class DependenciesInjection
 
     public static WebApplicationBuilder AddErrorHandling(this WebApplicationBuilder builder)
     {
-
+        builder.Services.AddProblemDetails(options =>
+        {
+            options.CustomizeProblemDetails = context =>
+            {
+                context.ProblemDetails.Extensions.Add("requestId", context.HttpContext.TraceIdentifier);
+            };
+        });
+        builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
         return builder;
     }
 
@@ -67,7 +77,7 @@ public static class DependenciesInjection
     /// <returns></returns>
     public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder)
     {
-
+        builder.Services.AddValidatorsFromAssemblyContaining<Program>();
         return builder;
     }
 }
