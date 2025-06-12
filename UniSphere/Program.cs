@@ -25,7 +25,7 @@ if (app.Environment.IsDevelopment())
     await app.ApplyMigrationsAsync();
     using IServiceScope scope = app.Services.CreateScope();
     DatabaseSeeder seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
-    await seeder.ClearAllDataAsync();
+   // await seeder.ClearAllDataAsync();
      await seeder.SeedAsync();
 }
 
