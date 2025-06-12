@@ -50,6 +50,7 @@ public class StudentCredentialConfiguration : IEntityTypeConfiguration<StudentCr
         builder.HasMany(s => s.SubjectStudentLinks)
             .WithOne(ssl => ssl.StudentCredential)
             .HasForeignKey(ssl => new { ssl.StudentId, ssl.FacultyId })
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);
     }
 } 

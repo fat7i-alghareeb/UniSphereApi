@@ -19,11 +19,13 @@ public class SubjectProfessorLinkConfiguration : IEntityTypeConfiguration<Subjec
         builder.HasOne(sl => sl.Subject)
             .WithMany(s => s.SubjectLecturers)
             .HasForeignKey(sl => sl.SubjectId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);
             
         builder.HasOne(sl => sl.Professor)
             .WithMany(p => p.SubjectProfessorLinks)
             .HasForeignKey(sl => sl.ProfessorId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);
     }
 } 

@@ -24,11 +24,13 @@ public class SubjectStudentLinkConfiguration : IEntityTypeConfiguration<SubjectS
         builder.HasOne(ssl => ssl.Subject)
             .WithMany(s => s.SubjectStudentLinks)
             .HasForeignKey(ssl => ssl.SubjectId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
             
         builder.HasOne(ssl => ssl.StudentCredential)
             .WithMany(sc => sc.SubjectStudentLinks)
             .HasForeignKey(ssl => new { ssl.StudentId, ssl.FacultyId })
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

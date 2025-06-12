@@ -6,6 +6,6 @@ public class SubjectProfessorLink
 {
     public Guid SubjectId { get; set; }
     public Guid ProfessorId { get; set; }
-    public Subject Subject { get; set; } = null!;
-    public Professor Professor { get; set; } = null!;
+    public Subject? Subject { get; set; }
+    public Professor? Professor { get; set; }
 } 

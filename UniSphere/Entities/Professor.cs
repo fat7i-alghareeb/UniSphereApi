@@ -8,5 +8,5 @@ public class Professor
     public MultilingualText FirstName { get; set; }=new();
     public MultilingualText LastName { get; set; }=new();
     public string? Image { get; set; }
-    public List<SubjectProfessorLink> SubjectProfessorLinks { get; set; } = new();
-} 
+    public List<SubjectProfessorLink>? SubjectProfessorLinks { get; set; }
+}

@@ -21,5 +21,5 @@ public class StudentCredential
     // Navigation properties
     public Major Major { get; set; } = null!;
     public EnrollmentStatus EnrollmentStatus { get; set; } = null!;
-    public List<SubjectStudentLink> SubjectStudentLinks { get; set; } = new();
+    public List<SubjectStudentLink>? SubjectStudentLinks { get; set; }
 } 

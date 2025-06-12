@@ -51,11 +51,13 @@ public class SubjectConfiguration : IEntityTypeConfiguration<Subject>
         builder.HasMany(s => s.SubjectLecturers)
             .WithOne(sl => sl.Subject)
             .HasForeignKey(sl => sl.SubjectId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);
             
         builder.HasMany(s => s.SubjectStudentLinks)
             .WithOne(ssl => ssl.Subject)
             .HasForeignKey(ssl => ssl.SubjectId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
