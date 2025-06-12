@@ -28,12 +28,12 @@ public class DatabaseSeeder(
 
         // Delete in reverse dependency order to avoid FK issues
         await context.Lectures.ExecuteDeleteAsync();
-        await context.InstructorLabLink.ExecuteDeleteAsync();
         await context.SubjectStudentLinks.ExecuteDeleteAsync();
         await context.SubjectProfessorLinks.ExecuteDeleteAsync();
         await context.StudentCredentials.ExecuteDeleteAsync();
         await context.Instructors.ExecuteDeleteAsync();
         await context.Labs.ExecuteDeleteAsync();
+        await context.InstructorLabLink.ExecuteDeleteAsync();
         await context.Subjects.ExecuteDeleteAsync();
         await context.Professors.ExecuteDeleteAsync();
         await context.EnrollmentStatuses.ExecuteDeleteAsync();

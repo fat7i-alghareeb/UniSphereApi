@@ -27,28 +27,12 @@ public class Subject
 }
 
 /* Commented out DTOs
-public class SubjectDto
-{
-    public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    
-    public static SubjectDto FromEntity(Subject subject)
-    {
-        return new SubjectDto
-        {
-            Id = subject.Id,
-            Name = subject.Name,
-            Description = subject.Description
-        };
-    }
-}
 
 public class CreateSubjectDto
 {
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    
+
     public Subject ToEntity()
     {
         return new Subject
@@ -60,7 +44,7 @@ public class CreateSubjectDto
 }
 
 public class CreateSubjectDtoValidator : AbstractValidator<CreateSubjectDto>
-{ 
+{
     public CreateSubjectDtoValidator()
     {
         RuleFor(x => x.Name)

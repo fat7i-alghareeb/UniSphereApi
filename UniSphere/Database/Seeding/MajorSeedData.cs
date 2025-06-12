@@ -16,6 +16,7 @@ public class MajorSeedData(ApplicationDbContext context) : SeedData(context)
             }
             var majors = new List<Major>
             {
+                // Informatics Engineering Majors
                 new()
                 {
                     Id = Guid.NewGuid(),
@@ -36,6 +37,135 @@ public class MajorSeedData(ApplicationDbContext context) : SeedData(context)
                     Name = new MultilingualText { Ar = "هندسة الحاسوب", En = "Computer Engineering" },
                     FacultyId = faculties[0].Id,
                     NumberOfYears = 4
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = new MultilingualText { Ar = "هندسة الذكاء الاصطناعي", En = "Artificial Intelligence Engineering" },
+                    FacultyId = faculties[0].Id,
+                    NumberOfYears = 4
+                },
+
+                // Mechanical and Electrical Engineering Majors
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = new MultilingualText { Ar = "هندسة الميكانيك", En = "Mechanical Engineering" },
+                    FacultyId = faculties[1].Id,
+                    NumberOfYears = 5
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = new MultilingualText { Ar = "هندسة الكهرباء", En = "Electrical Engineering" },
+                    FacultyId = faculties[1].Id,
+                    NumberOfYears = 5
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = new MultilingualText { Ar = "هندسة الإلكترون", En = "Electronics Engineering" },
+                    FacultyId = faculties[1].Id,
+                    NumberOfYears = 5
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = new MultilingualText { Ar = "هندسة الاتصالات", En = "Communications Engineering" },
+                    FacultyId = faculties[1].Id,
+                    NumberOfYears = 5
+                },
+
+                // Civil Engineering Majors
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = new MultilingualText { Ar = "هندسة الإنشاءات", En = "Structural Engineering" },
+                    FacultyId = faculties[2].Id,
+                    NumberOfYears = 5
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = new MultilingualText { Ar = "هندسة المياه", En = "Water Engineering" },
+                    FacultyId = faculties[2].Id,
+                    NumberOfYears = 5
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = new MultilingualText { Ar = "هندسة الطرق", En = "Road Engineering" },
+                    FacultyId = faculties[2].Id,
+                    NumberOfYears = 5
+                },
+
+                // Architecture Majors
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = new MultilingualText { Ar = "العمارة", En = "Architecture" },
+                    FacultyId = faculties[3].Id,
+                    NumberOfYears = 5
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = new MultilingualText { Ar = "التخطيط العمراني", En = "Urban Planning" },
+                    FacultyId = faculties[3].Id,
+                    NumberOfYears = 5
+                },
+
+                // Medical Majors
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = new MultilingualText { Ar = "الطب البشري", En = "Human Medicine" },
+                    FacultyId = faculties[4].Id,
+                    NumberOfYears = 6
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = new MultilingualText { Ar = "طب الأسنان", En = "Dentistry" },
+                    FacultyId = faculties[5].Id,
+                    NumberOfYears = 5
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = new MultilingualText { Ar = "الصيدلة", En = "Pharmacy" },
+                    FacultyId = faculties[6].Id,
+                    NumberOfYears = 5
+                },
+
+                // Science Majors
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = new MultilingualText { Ar = "الرياضيات", En = "Mathematics" },
+                    FacultyId = faculties[7].Id,
+                    NumberOfYears = 4
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = new MultilingualText { Ar = "الفيزياء", En = "Physics" },
+                    FacultyId = faculties[7].Id,
+                    NumberOfYears = 4
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = new MultilingualText { Ar = "الكيمياء", En = "Chemistry" },
+                    FacultyId = faculties[7].Id,
+                    NumberOfYears = 4
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = new MultilingualText { Ar = "علوم الحياة", En = "Life Sciences" },
+                    FacultyId = faculties[7].Id,
+                    NumberOfYears = 4
                 }
             };
 
@@ -46,7 +176,9 @@ public class MajorSeedData(ApplicationDbContext context) : SeedData(context)
             var enrollmentStatuses = new List<EnrollmentStatus>
             {
                 new() { Name = new MultilingualText { Ar = "منتظم", En = "Regular" } },
-                new() { Name = new MultilingualText { Ar = "محول", En = "Transferred" } }
+                new() { Name = new MultilingualText { Ar = "محول", En = "Transferred" } },
+                new() { Name = new MultilingualText { Ar = "مستمع", En = "Auditor" } },
+                new() { Name = new MultilingualText { Ar = "موازي", En = "Parallel" } }
             };
 
             await Context.EnrollmentStatuses.AddRangeAsync(enrollmentStatuses);
@@ -64,6 +196,16 @@ public class MajorSeedData(ApplicationDbContext context) : SeedData(context)
                 {
                     FirstName = new MultilingualText { Ar = "سارة", En = "Sarah" },
                     LastName = new MultilingualText { Ar = "علي", En = "Ali" }
+                },
+                new()
+                {
+                    FirstName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
+                    LastName = new MultilingualText { Ar = "خالد", En = "Khaled" }
+                },
+                new()
+                {
+                    FirstName = new MultilingualText { Ar = "فاطمة", En = "Fatima" },
+                    LastName = new MultilingualText { Ar = "حسين", En = "Hussein" }
                 }
             };
 
@@ -94,6 +236,28 @@ public class MajorSeedData(ApplicationDbContext context) : SeedData(context)
                     IsOpenBook = false,
                     MidtermGrade = 30,
                     FinalGrade = 70
+                },
+                new()
+                {
+                    Name = new MultilingualText { Ar = "الذكاء الاصطناعي", En = "Artificial Intelligence" },
+                    Description = new MultilingualText { Ar = "مقدمة في الذكاء الاصطناعي", En = "Introduction to Artificial Intelligence" },
+                    MajorId = majors[3].Id,
+                    IsLabRequired = true,
+                    IsMultipleChoice = false,
+                    IsOpenBook = false,
+                    MidtermGrade = 30,
+                    FinalGrade = 70
+                },
+                new()
+                {
+                    Name = new MultilingualText { Ar = "تحليل الدوائر الكهربائية", En = "Electrical Circuit Analysis" },
+                    Description = new MultilingualText { Ar = "تحليل الدوائر الكهربائية الأساسية", En = "Basic Electrical Circuit Analysis" },
+                    MajorId = majors[5].Id,
+                    IsLabRequired = true,
+                    IsMultipleChoice = false,
+                    IsOpenBook = false,
+                    MidtermGrade = 30,
+                    FinalGrade = 70
                 }
             };
 
@@ -104,7 +268,9 @@ public class MajorSeedData(ApplicationDbContext context) : SeedData(context)
             var subjectProfessorLinks = new List<SubjectProfessorLink>
             {
                 new() { SubjectId = subjects[0].Id, ProfessorId = professors[0].Id },
-                new() { SubjectId = subjects[1].Id, ProfessorId = professors[1].Id }
+                new() { SubjectId = subjects[1].Id, ProfessorId = professors[1].Id },
+                new() { SubjectId = subjects[2].Id, ProfessorId = professors[2].Id },
+                new() { SubjectId = subjects[3].Id, ProfessorId = professors[3].Id }
             };
 
             await Context.SubjectProfessorLinks.AddRangeAsync(subjectProfessorLinks);
@@ -136,6 +302,30 @@ public class MajorSeedData(ApplicationDbContext context) : SeedData(context)
                     Year = 2,
                     MajorId = majors[0].Id,
                     EnrollmentStatusId = enrollmentStatuses[0].Id
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    FacultyId = faculties[1].Id,
+                    Email = "student3@example.com",
+                    FirstName = new MultilingualText { Ar = "علي", En = "Ali" },
+                    LastName = new MultilingualText { Ar = "حسين", En = "Hussein" },
+                    FatherName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
+                    Year = 3,
+                    MajorId = majors[4].Id,
+                    EnrollmentStatusId = enrollmentStatuses[0].Id
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    FacultyId = faculties[4].Id,
+                    Email = "student4@example.com",
+                    FirstName = new MultilingualText { Ar = "سارة", En = "Sarah" },
+                    LastName = new MultilingualText { Ar = "خالد", En = "Khaled" },
+                    FatherName = new MultilingualText { Ar = "أحمد", En = "Ahmed" },
+                    Year = 4,
+                    MajorId = majors[12].Id,
+                    EnrollmentStatusId = enrollmentStatuses[0].Id
                 }
             };
 
@@ -158,6 +348,22 @@ public class MajorSeedData(ApplicationDbContext context) : SeedData(context)
                     SubjectId = subjects[1].Id,
                     StudentId = studentCredentials[0].Id,
                     FacultyId = studentCredentials[0].FacultyId,
+                    AttemptNumber = 1,
+                    IsCurrentlyEnrolled = true
+                },
+                new()
+                {
+                    SubjectId = subjects[2].Id,
+                    StudentId = studentCredentials[1].Id,
+                    FacultyId = studentCredentials[1].FacultyId,
+                    AttemptNumber = 1,
+                    IsCurrentlyEnrolled = true
+                },
+                new()
+                {
+                    SubjectId = subjects[3].Id,
+                    StudentId = studentCredentials[2].Id,
+                    FacultyId = studentCredentials[2].FacultyId,
                     AttemptNumber = 1,
                     IsCurrentlyEnrolled = true
                 }
