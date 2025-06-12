@@ -6,6 +6,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using UniSphere.Api.Database;
+using UniSphere.Api.Database.Seeding;
 using UniSphere.Api.Middleware;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
@@ -46,6 +47,24 @@ public static class DependenciesInjection
                 npgsqlOptions => npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemes.Application)
             ).UseSnakeCaseNamingConvention()
         );
+
+        // Register seeders
+        builder.Services.AddScoped<UniversitySeedData>();
+        builder.Services.AddScoped<FacultySeedData>();
+        builder.Services.AddScoped<MajorSeedData>();
+        builder.Services.AddScoped<EnrollmentStatusSeedData>();
+        builder.Services.AddScoped<ProfessorSeedData>();
+        builder.Services.AddScoped<SubjectSeedData>();
+        builder.Services.AddScoped<StudentCredentialSeedData>();
+        builder.Services.AddScoped<SubjectProfessorLinkSeedData>();
+        builder.Services.AddScoped<SubjectStudentLinkSeedData>();
+        builder.Services.AddScoped<LabSeedData>();
+        builder.Services.AddScoped<InstructorSeedData>();
+        builder.Services.AddScoped<InstructorLabLinkSeedData>();
+        builder.Services.AddScoped<ScheduleSeedData>();
+        builder.Services.AddScoped<LectureSeedData>();
+        builder.Services.AddScoped<DatabaseSeeder>();
+
         return builder;
     }
     /// <summary>

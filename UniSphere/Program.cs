@@ -1,5 +1,6 @@
 using UniSphere.Api;
 using UniSphere.Api.Extensions;
+using UniSphere.Api.Database.Seeding;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,9 @@ if (app.Environment.IsDevelopment())
 
     });
     await app.ApplyMigrationsAsync();
+    using IServiceScope scope = app.Services.CreateScope();
+    DatabaseSeeder seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+    await seeder.SeedAsync();
 }
 
 app.UseHttpsRedirection();
