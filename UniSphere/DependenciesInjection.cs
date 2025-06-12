@@ -13,6 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL;
 namespace UniSphere.Api;
 
 public static class DependenciesInjection
+
 {
     public static WebApplicationBuilder AddControllers(this WebApplicationBuilder builder)
     {
@@ -43,7 +44,7 @@ public static class DependenciesInjection
         builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(
                 builder.Configuration.GetConnectionString("Database"),
                 npgsqlOptions => npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemes.Application)
-            )
+            ).UseSnakeCaseNamingConvention()
         );
         return builder;
     }

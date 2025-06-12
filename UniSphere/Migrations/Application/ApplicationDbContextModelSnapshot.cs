@@ -28,396 +28,498 @@ namespace UniSphere.Api.Migrations.Application
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<MultilingualText>("Name")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("name");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_enrollment_statuses");
 
-                    b.ToTable("EnrollmentStatuses", "uni_sphere");
+                    b.ToTable("enrollment_statuses", "uni_sphere");
                 });
 
             modelBuilder.Entity("UniSphere.Api.Entities.Faculty", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<MultilingualText>("Name")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("name");
 
                     b.Property<Guid>("UniversityId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("university_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_faculties");
 
-                    b.HasIndex("UniversityId");
+                    b.HasIndex("UniversityId")
+                        .HasDatabaseName("ix_faculties_university_id");
 
-                    b.ToTable("Faculties", "uni_sphere");
+                    b.ToTable("faculties", "uni_sphere");
                 });
 
             modelBuilder.Entity("UniSphere.Api.Entities.Instructor", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("email");
 
                     b.Property<MultilingualText>("FatherName")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("father_name");
 
                     b.Property<MultilingualText>("FirstName")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("first_name");
 
                     b.Property<string>("Image")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("image");
 
                     b.Property<MultilingualText>("LastName")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("last_name");
 
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("password");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_instructors");
 
-                    b.ToTable("Instructors", "uni_sphere");
+                    b.ToTable("instructors", "uni_sphere");
                 });
 
             modelBuilder.Entity("UniSphere.Api.Entities.InstructorLabLink", b =>
                 {
                     b.Property<Guid>("InstructorId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("instructor_id");
 
                     b.Property<Guid>("LabId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("lab_id");
 
-                    b.HasKey("InstructorId", "LabId");
+                    b.HasKey("InstructorId", "LabId")
+                        .HasName("pk_instructor_lab_link");
 
-                    b.HasIndex("LabId");
+                    b.HasIndex("LabId")
+                        .HasDatabaseName("ix_instructor_lab_link_lab_id");
 
-                    b.ToTable("InstructorLabLink", "uni_sphere");
+                    b.ToTable("instructor_lab_link", "uni_sphere");
                 });
 
             modelBuilder.Entity("UniSphere.Api.Entities.Lab", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<MultilingualText>("Description")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("description");
 
                     b.Property<string>("Image")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("image");
 
                     b.Property<MultilingualText>("Name")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("name");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_labs");
 
-                    b.ToTable("Labs", "uni_sphere");
+                    b.ToTable("labs", "uni_sphere");
                 });
 
             modelBuilder.Entity("UniSphere.Api.Entities.Lecture", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<TimeSpan>("EndTime")
-                        .HasColumnType("interval");
+                        .HasColumnType("interval")
+                        .HasColumnName("end_time");
 
                     b.Property<MultilingualText>("LectureHall")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("lecture_hall");
 
                     b.Property<MultilingualText>("LecturerName")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("lecturer_name");
 
                     b.Property<Guid>("ScheduleId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("schedule_id");
 
                     b.Property<TimeSpan>("StartTime")
-                        .HasColumnType("interval");
+                        .HasColumnType("interval")
+                        .HasColumnName("start_time");
 
                     b.Property<MultilingualText>("SubjectName")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("subject_name");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_lectures");
 
-                    b.HasIndex("ScheduleId");
+                    b.HasIndex("ScheduleId")
+                        .HasDatabaseName("ix_lectures_schedule_id");
 
-                    b.ToTable("Lectures", "uni_sphere");
+                    b.ToTable("lectures", "uni_sphere");
                 });
 
             modelBuilder.Entity("UniSphere.Api.Entities.Major", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid>("FacultyId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("faculty_id");
 
                     b.Property<MultilingualText>("Name")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("name");
 
                     b.Property<int>("NumberOfYears")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("number_of_years");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_majors");
 
-                    b.HasIndex("FacultyId");
+                    b.HasIndex("FacultyId")
+                        .HasDatabaseName("ix_majors_faculty_id");
 
-                    b.ToTable("Majors", "uni_sphere");
+                    b.ToTable("majors", "uni_sphere");
                 });
 
             modelBuilder.Entity("UniSphere.Api.Entities.Professor", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<MultilingualText>("FirstName")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("first_name");
 
                     b.Property<string>("Image")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("image");
 
                     b.Property<MultilingualText>("LastName")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("last_name");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_professors");
 
-                    b.ToTable("Professors", "uni_sphere");
+                    b.ToTable("professors", "uni_sphere");
                 });
 
             modelBuilder.Entity("UniSphere.Api.Entities.Schedule", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid?>("FacultyId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("faculty_id");
 
                     b.Property<Guid>("MajorId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("major_id");
 
                     b.Property<DateTime>("ScheduleDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("schedule_date");
 
                     b.Property<int>("Year")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("year");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_schedules");
 
-                    b.HasIndex("FacultyId");
+                    b.HasIndex("FacultyId")
+                        .HasDatabaseName("ix_schedules_faculty_id");
 
-                    b.HasIndex("MajorId");
+                    b.HasIndex("MajorId")
+                        .HasDatabaseName("ix_schedules_major_id");
 
-                    b.ToTable("Schedules", "uni_sphere");
+                    b.ToTable("schedules", "uni_sphere");
                 });
 
             modelBuilder.Entity("UniSphere.Api.Entities.StudentCredential", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid>("FacultyId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("faculty_id");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("email");
 
                     b.Property<Guid>("EnrollmentStatusId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("enrollment_status_id");
 
                     b.Property<MultilingualText>("FatherName")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("father_name");
 
                     b.Property<MultilingualText>("FirstName")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("first_name");
 
                     b.Property<string>("Image")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("image");
 
                     b.Property<MultilingualText>("LastName")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("last_name");
 
                     b.Property<Guid>("MajorId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("major_id");
 
                     b.Property<int?>("OneTimeCode")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("one_time_code");
 
                     b.Property<int>("Year")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("year");
 
-                    b.HasKey("Id", "FacultyId");
+                    b.HasKey("Id", "FacultyId")
+                        .HasName("pk_student_credentials");
 
-                    b.HasIndex("EnrollmentStatusId");
+                    b.HasIndex("EnrollmentStatusId")
+                        .HasDatabaseName("ix_student_credentials_enrollment_status_id");
 
-                    b.HasIndex("MajorId");
+                    b.HasIndex("MajorId")
+                        .HasDatabaseName("ix_student_credentials_major_id");
 
-                    b.ToTable("StudentCredentials", "uni_sphere");
+                    b.ToTable("student_credentials", "uni_sphere");
                 });
 
             modelBuilder.Entity("UniSphere.Api.Entities.Subject", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<MultilingualText>("Description")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("description");
 
                     b.Property<int>("FinalGrade")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasDefaultValue(70);
+                        .HasDefaultValue(70)
+                        .HasColumnName("final_grade");
 
                     b.Property<string>("Image")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("image");
 
                     b.Property<bool>("IsLabRequired")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_lab_required");
 
                     b.Property<bool>("IsMultipleChoice")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_multiple_choice");
 
                     b.Property<bool>("IsOpenBook")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_open_book");
 
                     b.Property<Guid?>("LabId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("lab_id");
 
                     b.Property<Guid>("MajorId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("major_id");
 
                     b.Property<int>("MidtermGrade")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasDefaultValue(30);
+                        .HasDefaultValue(30)
+                        .HasColumnName("midterm_grade");
 
                     b.Property<MultilingualText>("Name")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("name");
 
                     b.Property<int>("Semester")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("semester");
 
                     b.Property<int>("Year")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("year");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_subjects");
 
-                    b.HasIndex("LabId");
+                    b.HasIndex("LabId")
+                        .HasDatabaseName("ix_subjects_lab_id");
 
-                    b.HasIndex("MajorId");
+                    b.HasIndex("MajorId")
+                        .HasDatabaseName("ix_subjects_major_id");
 
-                    b.ToTable("Subjects", "uni_sphere");
+                    b.ToTable("subjects", "uni_sphere");
                 });
 
             modelBuilder.Entity("UniSphere.Api.Entities.SubjectProfessorLink", b =>
                 {
                     b.Property<Guid>("SubjectId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("subject_id");
 
                     b.Property<Guid>("ProfessorId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("professor_id");
 
-                    b.HasKey("SubjectId", "ProfessorId");
+                    b.HasKey("SubjectId", "ProfessorId")
+                        .HasName("pk_subject_professor_links");
 
-                    b.HasIndex("ProfessorId");
+                    b.HasIndex("ProfessorId")
+                        .HasDatabaseName("ix_subject_professor_links_professor_id");
 
-                    b.ToTable("SubjectProfessorLinks", "uni_sphere");
+                    b.ToTable("subject_professor_links", "uni_sphere");
                 });
 
             modelBuilder.Entity("UniSphere.Api.Entities.SubjectStudentLink", b =>
                 {
                     b.Property<Guid>("SubjectId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("subject_id");
 
                     b.Property<Guid>("StudentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("student_id");
 
                     b.Property<Guid>("FacultyId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("faculty_id");
 
                     b.Property<int>("AttemptNumber")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasDefaultValue(1);
+                        .HasDefaultValue(1)
+                        .HasColumnName("attempt_number");
 
                     b.Property<int?>("FinalGrade")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("final_grade");
 
                     b.Property<bool>("IsCurrentlyEnrolled")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_currently_enrolled");
 
                     b.Property<bool?>("IsPassed")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_passed");
 
                     b.Property<int?>("MidtermGrade")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("midterm_grade");
 
                     b.Property<MultilingualText>("Notes")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("notes");
 
-                    b.HasKey("SubjectId", "StudentId", "FacultyId");
+                    b.HasKey("SubjectId", "StudentId", "FacultyId")
+                        .HasName("pk_subject_student_links");
 
-                    b.HasIndex("StudentId", "FacultyId");
+                    b.HasIndex("StudentId", "FacultyId")
+                        .HasDatabaseName("ix_subject_student_links_student_id_faculty_id");
 
-                    b.ToTable("SubjectStudentLinks", "uni_sphere");
+                    b.ToTable("subject_student_links", "uni_sphere");
                 });
 
             modelBuilder.Entity("UniSphere.Api.Entities.University", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<MultilingualText>("Name")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("name");
 
                     b.Property<MultilingualText>("Type")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("type");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_universities");
 
-                    b.ToTable("Universities", "uni_sphere");
+                    b.ToTable("universities", "uni_sphere");
                 });
 
             modelBuilder.Entity("UniSphere.Api.Entities.Faculty", b =>
@@ -426,7 +528,8 @@ namespace UniSphere.Api.Migrations.Application
                         .WithMany("Faculties")
                         .HasForeignKey("UniversityId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_faculties_universities_university_id");
 
                     b.Navigation("University");
                 });
@@ -437,13 +540,15 @@ namespace UniSphere.Api.Migrations.Application
                         .WithMany("InstructorLabLinks")
                         .HasForeignKey("InstructorId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_instructor_lab_link_instructors_instructor_id");
 
                     b.HasOne("UniSphere.Api.Entities.Lab", "Lab")
                         .WithMany("InstructorLabLinks")
                         .HasForeignKey("LabId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_instructor_lab_link_labs_lab_id");
 
                     b.Navigation("Instructor");
 
@@ -456,7 +561,8 @@ namespace UniSphere.Api.Migrations.Application
                         .WithMany("Lectures")
                         .HasForeignKey("ScheduleId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_lectures_schedules_schedule_id");
 
                     b.Navigation("Schedule");
                 });
@@ -467,7 +573,8 @@ namespace UniSphere.Api.Migrations.Application
                         .WithMany("Majors")
                         .HasForeignKey("FacultyId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_majors_faculties_faculty_id");
 
                     b.Navigation("Faculty");
                 });
@@ -476,13 +583,15 @@ namespace UniSphere.Api.Migrations.Application
                 {
                     b.HasOne("UniSphere.Api.Entities.Faculty", null)
                         .WithMany("Schedules")
-                        .HasForeignKey("FacultyId");
+                        .HasForeignKey("FacultyId")
+                        .HasConstraintName("fk_schedules_faculties_faculty_id");
 
                     b.HasOne("UniSphere.Api.Entities.Major", "Major")
                         .WithMany("Schedules")
                         .HasForeignKey("MajorId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_schedules_majors_major_id");
 
                     b.Navigation("Major");
                 });
@@ -493,13 +602,15 @@ namespace UniSphere.Api.Migrations.Application
                         .WithMany("StudentCredentials")
                         .HasForeignKey("EnrollmentStatusId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_student_credentials_enrollment_statuses_enrollment_status_id");
 
                     b.HasOne("UniSphere.Api.Entities.Major", "Major")
                         .WithMany("StudentCredentials")
                         .HasForeignKey("MajorId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_student_credentials_majors_major_id");
 
                     b.Navigation("EnrollmentStatus");
 
@@ -511,13 +622,15 @@ namespace UniSphere.Api.Migrations.Application
                     b.HasOne("UniSphere.Api.Entities.Lab", "Lab")
                         .WithMany("Subjects")
                         .HasForeignKey("LabId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_subjects_labs_lab_id");
 
                     b.HasOne("UniSphere.Api.Entities.Major", "Major")
                         .WithMany("Subjects")
                         .HasForeignKey("MajorId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_subjects_majors_major_id");
 
                     b.Navigation("Lab");
 
@@ -530,13 +643,15 @@ namespace UniSphere.Api.Migrations.Application
                         .WithMany("SubjectProfessorLinks")
                         .HasForeignKey("ProfessorId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_subject_professor_links_professors_professor_id");
 
                     b.HasOne("UniSphere.Api.Entities.Subject", "Subject")
                         .WithMany("SubjectLecturers")
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_subject_professor_links_subjects_subject_id");
 
                     b.Navigation("Professor");
 
@@ -549,13 +664,15 @@ namespace UniSphere.Api.Migrations.Application
                         .WithMany("SubjectStudentLinks")
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_subject_student_links_subjects_subject_id");
 
                     b.HasOne("UniSphere.Api.Entities.StudentCredential", "StudentCredential")
                         .WithMany("SubjectStudentLinks")
                         .HasForeignKey("StudentId", "FacultyId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_subject_student_links_student_credentials_student_id_facult");
 
                     b.Navigation("StudentCredential");
 
