@@ -14,7 +14,7 @@ public sealed class ValidationExceptionHandler(IProblemDetailsService problemDet
         {
             return false;
         }
-
+        httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
         var context = new ProblemDetailsContext
         {
             HttpContext = httpContext,

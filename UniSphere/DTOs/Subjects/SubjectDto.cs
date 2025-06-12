@@ -4,3 +4,5 @@ public sealed record SubjectDto
 {
     public required Guid Id { get; init; }
 }
+
+

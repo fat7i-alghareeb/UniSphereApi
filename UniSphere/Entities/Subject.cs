@@ -26,33 +26,3 @@ public class Subject
     public List<SubjectStudentLink>? SubjectStudentLinks { get; set; }
 }
 
-/* Commented out DTOs
-
-public class CreateSubjectDto
-{
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-
-    public Subject ToEntity()
-    {
-        return new Subject
-        {
-            Name = Name,
-            Description = Description
-        };
-    }
-}
-
-public class CreateSubjectDtoValidator : AbstractValidator<CreateSubjectDto>
-{
-    public CreateSubjectDtoValidator()
-    {
-        RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("Name is required.")
-            .MaximumLength(100).WithMessage("Name cannot exceed 100 characters.");
-        RuleFor(x => x.Description)
-            .NotEmpty().WithMessage("Description is required.")
-            .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
-    }
-}
-*/

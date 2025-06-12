@@ -19,8 +19,8 @@ internal static class SubjectMappings
 
         Subject subject = new()
         {
-            Id = dto.Id,
-            Name = new MultilingualText { Ar = "برمجة الويب", En = "Web Programming" },
+            Id = Guid.NewGuid(),
+            Name = new MultilingualText { Ar = dto.Name, En = dto.Name },
             Description = new MultilingualText { Ar = "مقدمة في تطوير تطبيقات الويب", En = "Introduction to Web Application Development" },
             MajorId = dto.MajorId,
             IsLabRequired = true,
