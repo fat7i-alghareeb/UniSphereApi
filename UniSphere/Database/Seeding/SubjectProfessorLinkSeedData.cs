@@ -21,70 +21,70 @@ public class SubjectProfessorLinkSeedData(ApplicationDbContext context) : SeedDa
                 new() 
                 { 
                     SubjectId = subjects[0].Id, // Web Programming
-                    ProfessorId = professors[0].Id 
+                    ProfessorId = professors[0].Id // Ahmed Mohammed
                 },
                 new() 
                 { 
                     SubjectId = subjects[1].Id, // Databases
-                    ProfessorId = professors[1].Id 
+                    ProfessorId = professors[1].Id // Sarah Ali
                 },
                 new() 
                 { 
                     SubjectId = subjects[2].Id, // Advanced Programming
-                    ProfessorId = professors[2].Id 
+                    ProfessorId = professors[2].Id // Mohammed Khaled
                 },
                 new() 
                 { 
                     SubjectId = subjects[3].Id, // AI
-                    ProfessorId = professors[3].Id 
+                    ProfessorId = professors[0].Id // Ahmed Mohammed
                 },
 
                 // Computer Engineering Subjects
                 new() 
                 { 
                     SubjectId = subjects[4].Id, // Computer Architecture
-                    ProfessorId = professors[4].Id 
+                    ProfessorId = professors[2].Id // Mohammed Khaled
                 },
                 new() 
                 { 
                     SubjectId = subjects[5].Id, // Computer Networks
-                    ProfessorId = professors[5].Id 
+                    ProfessorId = professors[1].Id // Sarah Ali
                 },
 
                 // Electrical Engineering Subjects
                 new() 
                 { 
                     SubjectId = subjects[6].Id, // Electric Circuits
-                    ProfessorId = professors[6].Id 
+                    ProfessorId = professors[3].Id // Ali Hussein
                 },
                 new() 
                 { 
                     SubjectId = subjects[7].Id, // Electrical Machines
-                    ProfessorId = professors[7].Id 
+                    ProfessorId = professors[4].Id // Fatima Ahmed
                 },
 
                 // Civil Engineering Subjects
                 new() 
                 { 
                     SubjectId = subjects[8].Id, // Soil Mechanics
-                    ProfessorId = professors[8].Id 
+                    ProfessorId = professors[7].Id // Omar Hussein
                 },
                 new() 
                 { 
                     SubjectId = subjects[9].Id, // Concrete Structure Design
-                    ProfessorId = professors[9].Id 
+                    ProfessorId = professors[8].Id // Layla Ahmed
                 },
 
                 // Medical Subjects
                 new() 
                 { 
                     SubjectId = subjects[10].Id, // Anatomy
-                    ProfessorId = professors[10].Id 
+                    ProfessorId = professors[9].Id // Dr. Mohammed Ali
                 },
                 new() 
                 { 
                     SubjectId = subjects[11].Id, // Physiology
-                    ProfessorId = professors[11].Id 
+                    ProfessorId = professors[9].Id // Dr. Mohammed Ali
                 }
             };
 

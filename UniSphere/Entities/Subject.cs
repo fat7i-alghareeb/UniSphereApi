@@ -13,8 +13,8 @@ public class Subject
     public MultilingualText? Description { get; set; }
     public int Year { get; set; }
     public int Semester { get; set; }
-    public int MidtermGrade { get; set; }
-    public int FinalGrade { get; set; }
+    public int MidtermGrade { get; set; } = 30;
+    public int FinalGrade { get; set; } = 70;
     public bool IsLabRequired { get; set; }
     public bool IsMultipleChoice { get; set; }
     public bool IsOpenBook { get; set; }
