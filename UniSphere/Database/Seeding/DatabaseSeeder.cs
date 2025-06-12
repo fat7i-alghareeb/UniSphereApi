@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace UniSphere.Api.Database.Seeding;
 
@@ -17,11 +18,40 @@ public class DatabaseSeeder(
     InstructorSeedData instructorSeedData,
     InstructorLabLinkSeedData instructorLabLinkSeedData,
     ScheduleSeedData scheduleSeedData,
-    LectureSeedData lectureSeedData)
+    LectureSeedData lectureSeedData,
+    ILogger<DatabaseSeeder> logger)
 {
+
+    public async Task ClearAllDataAsync()
+    {
+        logger.LogInformation("Starting to delete all data from the database...");
+
+        // Delete in reverse dependency order to avoid FK issues
+        await context.Lectures.ExecuteDeleteAsync();
+        await context.InstructorLabLink.ExecuteDeleteAsync();
+        await context.SubjectStudentLinks.ExecuteDeleteAsync();
+        await context.SubjectProfessorLinks.ExecuteDeleteAsync();
+        await context.StudentCredentials.ExecuteDeleteAsync();
+        await context.Instructors.ExecuteDeleteAsync();
+        await context.Labs.ExecuteDeleteAsync();
+        await context.Subjects.ExecuteDeleteAsync();
+        await context.Professors.ExecuteDeleteAsync();
+        await context.EnrollmentStatuses.ExecuteDeleteAsync();
+        await context.Schedules.ExecuteDeleteAsync();
+        await context.Majors.ExecuteDeleteAsync();
+        await context.Faculties.ExecuteDeleteAsync();
+        await context.Universities.ExecuteDeleteAsync();
+        await context.SaveChangesAsync();
+        logger.LogInformation("All data deleted from the database.");
+    }
+
     public async Task SeedAsync()
     {
+        logger.LogInformation("Starting database seeding...");
         await context.Database.EnsureCreatedAsync();
+
+        // Uncomment the next line if you want to clear all data before seeding
+        // await ClearAllDataAsync();
 
         // Seed in the correct order based on dependencies
         await universitySeedData.SeedAsync();
@@ -38,5 +68,6 @@ public class DatabaseSeeder(
         await subjectStudentLinkSeedData.SeedAsync();
         await instructorLabLinkSeedData.SeedAsync();
         await lectureSeedData.SeedAsync();
+        logger.LogInformation("Database seeding completed.");
     }
-} 
+}
