@@ -1,6 +1,9 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -8,8 +11,6 @@ using OpenTelemetry.Trace;
 using UniSphere.Api.Database;
 using UniSphere.Api.Database.Seeding;
 using UniSphere.Api.Middleware;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 namespace UniSphere.Api;
 
@@ -42,9 +43,21 @@ public static class DependenciesInjection
 
     public static WebApplicationBuilder AddDatabase(this WebApplicationBuilder builder)
     {
-        builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(
-                builder.Configuration.GetConnectionString("Database"),
-                npgsqlOptions => npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemes.Application)
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(
+            builder.Configuration.GetConnectionString("Database")!
+        );
+
+        // ✅ Enable dynamic JSON using System.Text.Json
+        dataSourceBuilder.EnableDynamicJson();
+
+        // Optionally: use Newtonsoft.Json instead
+        // dataSourceBuilder.UseJsonNet();
+
+        NpgsqlDataSource? dataSource = dataSourceBuilder.Build();
+
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseNpgsql(dataSource, npgsqlOptions =>
+                npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemes.Application)
             ).UseSnakeCaseNamingConvention()
         );
 
