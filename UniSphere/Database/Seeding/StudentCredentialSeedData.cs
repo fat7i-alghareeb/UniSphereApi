@@ -12,7 +12,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
             List<Faculty> faculties = await Context.Faculties.ToListAsync();
             List<Major> majors = await Context.Majors.ToListAsync();
             List<EnrollmentStatus> enrollmentStatuses = await Context.EnrollmentStatuses.ToListAsync();
-            if(faculties.Count == 0 || majors.Count == 0 || enrollmentStatuses.Count == 0)
+            if (faculties.Count == 0 || majors.Count == 0 || enrollmentStatuses.Count == 0)
             {
                 return;
             }
@@ -22,7 +22,6 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    FacultyId = faculties[0].Id,
                     Email = "student1@example.com",
                     FirstName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
                     LastName = new MultilingualText { Ar = "أحمد", En = "Ahmed" },
@@ -34,7 +33,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    FacultyId = faculties[0].Id,
+
                     Email = "student2@example.com",
                     FirstName = new MultilingualText { Ar = "فاطمة", En = "Fatima" },
                     LastName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
@@ -46,7 +45,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    FacultyId = faculties[0].Id,
+
                     Email = "student3@example.com",
                     FirstName = new MultilingualText { Ar = "علي", En = "Ali" },
                     LastName = new MultilingualText { Ar = "حسين", En = "Hussein" },
@@ -58,7 +57,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    FacultyId = faculties[0].Id,
+
                     Email = "student4@example.com",
                     FirstName = new MultilingualText { Ar = "سارة", En = "Sarah" },
                     LastName = new MultilingualText { Ar = "خالد", En = "Khaled" },
@@ -72,7 +71,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    FacultyId = faculties[1].Id,
+
                     Email = "student5@example.com",
                     FirstName = new MultilingualText { Ar = "عمر", En = "Omar" },
                     LastName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
@@ -84,7 +83,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    FacultyId = faculties[1].Id,
+
                     Email = "student6@example.com",
                     FirstName = new MultilingualText { Ar = "ليلى", En = "Layla" },
                     LastName = new MultilingualText { Ar = "أحمد", En = "Ahmed" },
@@ -98,7 +97,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    FacultyId = faculties[1].Id,
+
                     Email = "student7@example.com",
                     FirstName = new MultilingualText { Ar = "خالد", En = "Khaled" },
                     LastName = new MultilingualText { Ar = "علي", En = "Ali" },
@@ -110,7 +109,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    FacultyId = faculties[1].Id,
+
                     Email = "student8@example.com",
                     FirstName = new MultilingualText { Ar = "نور", En = "Nour" },
                     LastName = new MultilingualText { Ar = "أحمد", En = "Ahmed" },
@@ -124,7 +123,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    FacultyId = faculties[2].Id,
+
                     Email = "student9@example.com",
                     FirstName = new MultilingualText { Ar = "أحمد", En = "Ahmed" },
                     LastName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
@@ -136,7 +135,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    FacultyId = faculties[2].Id,
+
                     Email = "student10@example.com",
                     FirstName = new MultilingualText { Ar = "سارة", En = "Sarah" },
                     LastName = new MultilingualText { Ar = "خالد", En = "Khaled" },
@@ -150,7 +149,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    FacultyId = faculties[4].Id,
+
                     Email = "student11@example.com",
                     FirstName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
                     LastName = new MultilingualText { Ar = "علي", En = "Ali" },
@@ -162,7 +161,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    FacultyId = faculties[4].Id,
+
                     Email = "student12@example.com",
                     FirstName = new MultilingualText { Ar = "فاطمة", En = "Fatima" },
                     LastName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
@@ -177,4 +176,4 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
             await Context.SaveChangesAsync();
         }
     }
-} 
+}

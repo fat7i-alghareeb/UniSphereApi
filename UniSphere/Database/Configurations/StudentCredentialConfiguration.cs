@@ -8,7 +8,7 @@ public class StudentCredentialConfiguration : IEntityTypeConfiguration<StudentCr
 {
     public void Configure(EntityTypeBuilder<StudentCredential> builder)
     {
-        builder.HasKey(s => new { s.Id, s.FacultyId });
+        builder.HasKey(s => s.Id);
         
         builder.Property(s => s.Email)
             .IsRequired()
@@ -27,9 +27,11 @@ public class StudentCredentialConfiguration : IEntityTypeConfiguration<StudentCr
             
         builder.Property(s => s.Year)
             .IsRequired();
+        
             
-        builder.Property(s => s.FacultyId)
-            .IsRequired();
+        builder.Property(s => s.IdentityId)
+            .IsRequired().HasMaxLength(500);
+        
             
         builder.Property(s => s.MajorId)
             .IsRequired();
@@ -49,8 +51,9 @@ public class StudentCredentialConfiguration : IEntityTypeConfiguration<StudentCr
             
         builder.HasMany(s => s.SubjectStudentLinks)
             .WithOne(ssl => ssl.StudentCredential)
-            .HasForeignKey(ssl => new { ssl.StudentId, ssl.FacultyId })
+            .HasForeignKey(ssl => ssl.StudentId )
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);
+        builder.HasIndex(s => s.IdentityId).IsUnique();
     }
 } 

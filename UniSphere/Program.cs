@@ -9,7 +9,8 @@ builder.AddControllers()
     .AddErrorHandling()
     .AddDatabase()
     .AddObservability()
-    .AddApplicationServices();
+    .AddApplicationServices()
+    .AddAuthenticationServices();
 
 WebApplication app = builder.Build();
 
@@ -24,14 +25,15 @@ if (app.Environment.IsDevelopment())
     });
     await app.ApplyMigrationsAsync();
     using IServiceScope scope = app.Services.CreateScope();
-    DatabaseSeeder seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+  //  DatabaseSeeder seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
     //await seeder.ClearAllDataAsync();
-    await seeder.SeedAsync();
+   // await seeder.SeedAsync();
 }
 app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

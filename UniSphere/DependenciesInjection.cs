@@ -1,7 +1,10 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 using OpenTelemetry;
@@ -11,6 +14,8 @@ using OpenTelemetry.Trace;
 using UniSphere.Api.Database;
 using UniSphere.Api.Database.Seeding;
 using UniSphere.Api.Middleware;
+using UniSphere.Api.Services;
+using UniSphere.Api.Settings;
 
 namespace UniSphere.Api;
 
@@ -60,6 +65,11 @@ public static class DependenciesInjection
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(dataSource, npgsqlOptions =>
                 npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemes.Application)
+            ).UseSnakeCaseNamingConvention()
+        );
+        builder.Services.AddDbContext<ApplicationIdentityDbContext>(options =>
+            options.UseNpgsql(dataSource, npgsqlOptions =>
+                npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemes.Identity)
             ).UseSnakeCaseNamingConvention()
         );
 
@@ -120,8 +130,40 @@ public static class DependenciesInjection
     public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+        builder.Services.AddTransient<TokenProvider>();
         return builder;
     }
+
+    public static WebApplicationBuilder AddAuthenticationServices(this WebApplicationBuilder builder)
+    {
+        builder.Services
+            .AddIdentity<IdentityUser, IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationIdentityDbContext>();
+        builder.Services.Configure<JwtAuthOptions>(builder.Configuration.GetSection("jwt"));
+        JwtAuthOptions jwtAuthOptions = builder.Configuration.GetSection("Jwt").Get<JwtAuthOptions>()!;   
+        builder.Services
+            .AddAuthentication(option =>
+            {
+
+                option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+          
+                    ValidIssuer = jwtAuthOptions.Issuer,
+                    ValidAudience = jwtAuthOptions.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        System.Text.Encoding.UTF8.GetBytes(jwtAuthOptions.Key)
+                    )
+                };
+            });
+        builder.Services.AddAuthorization();
+        return builder;
+    }
+
 }
 
 

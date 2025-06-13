@@ -8,7 +8,7 @@ public class SubjectStudentLinkConfiguration : IEntityTypeConfiguration<SubjectS
 {
     public void Configure(EntityTypeBuilder<SubjectStudentLink> builder)
     {
-        builder.HasKey(ssl => new { ssl.SubjectId, ssl.StudentId, ssl.FacultyId });
+        builder.HasKey(ssl => new { ssl.SubjectId, ssl.StudentId});
         
         builder.Property(ssl => ssl.AttemptNumber)
             .IsRequired()
@@ -29,7 +29,7 @@ public class SubjectStudentLinkConfiguration : IEntityTypeConfiguration<SubjectS
             
         builder.HasOne(ssl => ssl.StudentCredential)
             .WithMany(sc => sc.SubjectStudentLinks)
-            .HasForeignKey(ssl => new { ssl.StudentId, ssl.FacultyId })
+            .HasForeignKey(ssl => ssl.StudentId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
     }

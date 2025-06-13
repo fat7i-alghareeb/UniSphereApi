@@ -7,7 +7,6 @@ public class SubjectStudentLink
 {
     public Guid SubjectId { get; set; }
     public Guid StudentId { get; set; }
-    public Guid FacultyId { get; set; }
     public int AttemptNumber { get; set; }
     public int? MidtermGrade { get; set; }
     public int? FinalGrade { get; set; }

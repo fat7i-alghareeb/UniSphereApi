@@ -7,7 +7,8 @@ namespace UniSphere.Api.Entities;
 public class StudentCredential
 {
     public Guid Id { get; set; }
-    public Guid FacultyId { get; set; }
+    public string StudentNumber { get; set; }
+    public string IdentityId { get; set; }
     public Guid MajorId { get; set; }
     public string Email { get; set; } = string.Empty;
     public int? OneTimeCode { get; set; }
