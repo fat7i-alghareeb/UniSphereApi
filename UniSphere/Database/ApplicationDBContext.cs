@@ -23,6 +23,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<FacultyAnnouncement> FacultyAnnouncements { get; set; }
     public DbSet<MajorAnnouncement> MajorAnnouncements { get; set; }
 
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schemes.Application);
