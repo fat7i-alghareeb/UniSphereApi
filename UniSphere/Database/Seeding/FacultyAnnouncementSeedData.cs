@@ -9,7 +9,7 @@ public class FacultyAnnouncementSeedData(ApplicationDbContext context) : SeedDat
     {
         if (!await Context.FacultyAnnouncements.AnyAsync())
         {
-            var faculties = await Context.Faculties
+            List<Faculty> faculties = await Context.Faculties
                 .Where(f =>
                     f.Name.En == "Faculty of Informatics Engineering" ||
                     f.Name.En == "Faculty of Mechanical and Electrical Engineering" ||
@@ -20,11 +20,12 @@ public class FacultyAnnouncementSeedData(ApplicationDbContext context) : SeedDat
                     f.Name.En == "Faculty of Pharmacy" ||
                     f.Name.En == "Faculty of Science" ||
                     f.Name.En == "Faculty of Economics")
-                .ToListAsync();
+                   .ToListAsync();
+        
 
             var announcements = new List<FacultyAnnouncement>();
 
-            foreach (var faculty in faculties)
+            foreach (Faculty faculty in faculties)
             {
                 List<FacultyAnnouncement> facultyAnnouncements = faculty.Name.En switch
                 {
@@ -33,22 +34,22 @@ public class FacultyAnnouncementSeedData(ApplicationDbContext context) : SeedDat
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("تنويه تقني", "Tech Notice"),
-                            Content = new("تم تحديث نظام تسجيل المقررات.", "The course registration system has been updated."),
+                            Title = new MultilingualText { Ar = "تنويه تقني", En = "Tech Notice" },
+                            Content = new MultilingualText { Ar = "تم تحديث نظام تسجيل المقررات.", En = "The course registration system has been updated." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("إعلان ورشة برمجة", "Programming Workshop"),
-                            Content = new("ندعوكم لحضور ورشة عمل حول تطوير تطبيقات الويب.", "Join us for a web app development workshop."),
+                            Title = new MultilingualText { Ar = "إعلان ورشة برمجة", En = "Programming Workshop" },
+                            Content = new MultilingualText { Ar = "ندعوكم لحضور ورشة عمل حول تطوير تطبيقات الويب.", En = "Join us for a web app development workshop." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("أمن المعلومات", "Cybersecurity Update"),
-                            Content = new("يرجى تغيير كلمات المرور الخاصة بحسابات الطلاب.", "Please update your student account passwords."),
+                            Title = new MultilingualText { Ar = "أمن المعلومات", En = "Cybersecurity Update" },
+                            Content = new MultilingualText { Ar = "يرجى تغيير كلمات المرور الخاصة بحسابات الطلاب.", En = "Please update your student account passwords." },
                             FacultyId = faculty.Id
                         }
                     },
@@ -58,22 +59,22 @@ public class FacultyAnnouncementSeedData(ApplicationDbContext context) : SeedDat
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("صيانة مخابر", "Lab Maintenance"),
-                            Content = new("المخابر ستكون مغلقة للصيانة يوم الأحد.", "Labs will be closed for maintenance on Sunday."),
+                            Title = new MultilingualText { Ar = "صيانة مخابر", En = "Lab Maintenance" },
+                            Content = new MultilingualText { Ar = "المخابر ستكون مغلقة للصيانة يوم الأحد.", En = "Labs will be closed for maintenance on Sunday." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("ندوة محركات", "Engines Seminar"),
-                            Content = new("محاضرة خاصة بمحركات الاحتراق الداخلي يوم الثلاثاء.", "Internal combustion engines lecture on Tuesday."),
+                            Title = new MultilingualText { Ar = "ندوة محركات", En = "Engines Seminar" },
+                            Content = new MultilingualText { Ar = "محاضرة خاصة بمحركات الاحتراق الداخلي يوم الثلاثاء.", En = "Internal combustion engines lecture on Tuesday." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("ورشة طاقة متجددة", "Renewable Energy Workshop"),
-                            Content = new("دعوة لحضور ورشة الطاقة المتجددة.", "Invitation to attend renewable energy workshop."),
+                            Title = new MultilingualText { Ar = "ورشة طاقة متجددة", En = "Renewable Energy Workshop" },
+                            Content = new MultilingualText { Ar = "دعوة لحضور ورشة الطاقة المتجددة.", En = "Invitation to attend renewable energy workshop." },
                             FacultyId = faculty.Id
                         }
                     },
@@ -83,22 +84,22 @@ public class FacultyAnnouncementSeedData(ApplicationDbContext context) : SeedDat
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("إغلاق مؤقت", "Temporary Closure"),
-                            Content = new("مبنى الكلية سيُغلق مؤقتًا بسبب أعمال ترميم.", "The faculty building will be temporarily closed for renovation."),
+                            Title = new MultilingualText { Ar = "إغلاق مؤقت", En = "Temporary Closure" },
+                            Content = new MultilingualText { Ar = "مبنى الكلية سيُغلق مؤقتًا بسبب أعمال ترميم.", En = "The faculty building will be temporarily closed for renovation." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("رحلة ميدانية", "Field Trip"),
-                            Content = new("تنظم الكلية رحلة إلى موقع بناء في ضواحي دمشق.", "A field trip to a construction site near Damascus is planned."),
+                            Title = new MultilingualText { Ar = "رحلة ميدانية", En = "Field Trip" },
+                            Content = new MultilingualText { Ar = "تنظم الكلية رحلة إلى موقع بناء في ضواحي دمشق.", En = "A field trip to a construction site near Damascus is planned." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("مؤتمر هندسي", "Engineering Conference"),
-                            Content = new("دعوة للمشاركة في مؤتمر الهندسة المدنية السنوي.", "Invitation to the annual civil engineering conference."),
+                            Title = new MultilingualText { Ar = "مؤتمر هندسي", En = "Engineering Conference" },
+                            Content = new MultilingualText { Ar = "دعوة للمشاركة في مؤتمر الهندسة المدنية السنوي.", En = "Invitation to the annual civil engineering conference." },
                             FacultyId = faculty.Id
                         }
                     },
@@ -108,22 +109,22 @@ public class FacultyAnnouncementSeedData(ApplicationDbContext context) : SeedDat
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("مسابقة تصميم", "Design Competition"),
-                            Content = new("إطلاق مسابقة لأفضل تصميم داخلي.", "Launching a competition for best interior design."),
+                            Title = new MultilingualText { Ar = "مسابقة تصميم", En = "Design Competition" },
+                            Content = new MultilingualText { Ar = "إطلاق مسابقة لأفضل تصميم داخلي.", En = "Launching a competition for best interior design." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("عرض مشاريع", "Project Exhibition"),
-                            Content = new("عرض مشاريع السنة النهائية الأسبوع المقبل.", "Final year projects exhibition next week."),
+                            Title = new MultilingualText { Ar = "عرض مشاريع", En = "Project Exhibition" },
+                            Content = new MultilingualText { Ar = "عرض مشاريع السنة النهائية الأسبوع المقبل.", En = "Final year projects exhibition next week." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("محاضرة ضيف", "Guest Lecture"),
-                            Content = new("محاضرة معمارية من ضيف دولي يوم الأربعاء.", "Architecture talk by an international guest on Wednesday."),
+                            Title = new MultilingualText { Ar = "محاضرة ضيف", En = "Guest Lecture" },
+                            Content = new MultilingualText { Ar = "محاضرة معمارية من ضيف دولي يوم الأربعاء.", En = "Architecture talk by an international guest on Wednesday." },
                             FacultyId = faculty.Id
                         }
                     },
@@ -133,22 +134,22 @@ public class FacultyAnnouncementSeedData(ApplicationDbContext context) : SeedDat
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("دورة إسعافات", "First Aid Course"),
-                            Content = new("تبدأ دورة الإسعافات الأولية يوم الإثنين.", "First aid course starts on Monday."),
+                            Title = new MultilingualText { Ar = "دورة إسعافات", En = "First Aid Course" },
+                            Content = new MultilingualText { Ar = "تبدأ دورة الإسعافات الأولية يوم الإثنين.", En = "First aid course starts on Monday." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("مؤتمر علمي", "Medical Conference"),
-                            Content = new("مؤتمر حول التطورات الحديثة في الطب يوم الجمعة.", "Conference on modern medical advances on Friday."),
+                            Title = new MultilingualText { Ar = "مؤتمر علمي", En = "Medical Conference" },
+                            Content = new MultilingualText { Ar = "مؤتمر حول التطورات الحديثة في الطب يوم الجمعة.", En = "Conference on modern medical advances on Friday." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("سحب دم تطوعي", "Blood Donation"),
-                            Content = new("ندعوكم للتبرع بالدم في بهو الكلية.", "Please donate blood in the faculty hall."),
+                            Title = new MultilingualText { Ar = "سحب دم تطوعي", En = "Blood Donation" },
+                            Content = new MultilingualText { Ar = "ندعوكم للتبرع بالدم في بهو الكلية.", En = "Please donate blood in the faculty hall." },
                             FacultyId = faculty.Id
                         }
                     },
@@ -158,22 +159,22 @@ public class FacultyAnnouncementSeedData(ApplicationDbContext context) : SeedDat
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("مخبر جديد", "New Lab Opening"),
-                            Content = new("افتتاح مخبر تشخيص جديد في الطابق الثاني.", "New diagnostic lab opened on the second floor."),
+                            Title = new MultilingualText { Ar = "مخبر جديد", En = "New Lab Opening" },
+                            Content = new MultilingualText { Ar = "افتتاح مخبر تشخيص جديد في الطابق الثاني.", En = "New diagnostic lab opened on the second floor." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("دورة تعقيم", "Sterilization Training"),
-                            Content = new("ورشة حول إجراءات التعقيم الحديثة.", "Workshop on modern sterilization procedures."),
+                            Title = new MultilingualText { Ar = "دورة تعقيم", En = "Sterilization Training" },
+                            Content = new MultilingualText { Ar = "ورشة حول إجراءات التعقيم الحديثة.", En = "Workshop on modern sterilization procedures." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("إعلانات هامة", "Important Notices"),
-                            Content = new("تحديث حول استخدام المعدات السنية.", "Update regarding dental equipment usage."),
+                            Title = new MultilingualText { Ar = "إعلانات هامة", En = "Important Notices" },
+                            Content = new MultilingualText { Ar = "تحديث حول استخدام المعدات السنية.", En = "Update regarding dental equipment usage." },
                             FacultyId = faculty.Id
                         }
                     },
@@ -183,22 +184,22 @@ public class FacultyAnnouncementSeedData(ApplicationDbContext context) : SeedDat
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("محاضرة دوائية", "Pharmacology Lecture"),
-                            Content = new("محاضرة حول الأدوية الجديدة في السوق.", "Lecture on new market drugs."),
+                            Title = new MultilingualText { Ar = "محاضرة دوائية", En = "Pharmacology Lecture" },
+                            Content = new MultilingualText { Ar = "محاضرة حول الأدوية الجديدة في السوق.", En = "Lecture on new market drugs." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("تدريب صيدلي", "Pharmacy Training"),
-                            Content = new("تدريب عملي في صيدليات الجامعة.", "Practical training in campus pharmacies."),
+                            Title = new MultilingualText { Ar = "تدريب صيدلي", En = "Pharmacy Training" },
+                            Content = new MultilingualText { Ar = "تدريب عملي في صيدليات الجامعة.", En = "Practical training in campus pharmacies." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("إعلان مختبرات", "Lab Notice"),
-                            Content = new("يرجى إحضار المعاطف البيضاء لمختبر الغد.", "Please bring lab coats for tomorrow's session."),
+                            Title = new MultilingualText { Ar = "إعلان مختبرات", En = "Lab Notice" },
+                            Content = new MultilingualText { Ar = "يرجى إحضار المعاطف البيضاء لمختبر الغد.", En = "Please bring lab coats for tomorrow's session." },
                             FacultyId = faculty.Id
                         }
                     },
@@ -208,22 +209,22 @@ public class FacultyAnnouncementSeedData(ApplicationDbContext context) : SeedDat
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("أسبوع العلوم", "Science Week"),
-                            Content = new("فعاليات أسبوع العلوم تبدأ الأحد.", "Science week activities start Sunday."),
+                            Title = new MultilingualText { Ar = "أسبوع العلوم", En = "Science Week" },
+                            Content = new MultilingualText { Ar = "فعاليات أسبوع العلوم تبدأ الأحد.", En = "Science week activities start Sunday." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("ندوة كيميائية", "Chemistry Seminar"),
-                            Content = new("ندوة خاصة حول المواد الكيميائية النانوية.", "Special seminar on nano-chemical materials."),
+                            Title = new MultilingualText { Ar = "ندوة كيميائية", En = "Chemistry Seminar" },
+                            Content = new MultilingualText { Ar = "ندوة خاصة حول المواد الكيميائية النانوية.", En = "Special seminar on nano-chemical materials." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("مشروع أبحاث", "Research Projects"),
-                            Content = new("يرجى تقديم مقترحات مشاريع البحث.", "Please submit your research project proposals."),
+                            Title = new MultilingualText { Ar = "مشروع أبحاث", En = "Research Projects" },
+                            Content = new MultilingualText { Ar = "يرجى تقديم مقترحات مشاريع البحث.", En = "Please submit your research project proposals." },
                             FacultyId = faculty.Id
                         }
                     },
@@ -233,22 +234,22 @@ public class FacultyAnnouncementSeedData(ApplicationDbContext context) : SeedDat
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("تحليل سوق", "Market Analysis"),
-                            Content = new("ورشة حول تحليل السوق المالية المحلية.", "Workshop on analyzing the local financial market."),
+                            Title = new MultilingualText { Ar = "تحليل سوق", En = "Market Analysis" },
+                            Content = new MultilingualText { Ar = "ورشة حول تحليل السوق المالية المحلية.", En = "Workshop on analyzing the local financial market." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("مراجعة اختبارات", "Exam Review"),
-                            Content = new("جلسة مراجعة لاختبار الاقتصاد الكلي.", "Macroeconomics exam review session."),
+                            Title = new MultilingualText { Ar = "مراجعة اختبارات", En = "Exam Review" },
+                            Content = new MultilingualText { Ar = "جلسة مراجعة لاختبار الاقتصاد الكلي.", En = "Macroeconomics exam review session." },
                             FacultyId = faculty.Id
                         },
                         new()
                         {
                             Id = Guid.NewGuid(),
-                            Title = new("فرص تدريب", "Internship Offers"),
-                            Content = new("فرص تدريبية في بنوك محلية متاحة الآن.", "Internship opportunities now available in local banks."),
+                            Title = new MultilingualText { Ar = "فرص تدريب", En = "Internship Offers" },
+                            Content = new MultilingualText { Ar = "فرص تدريبية في بنوك محلية متاحة الآن.", En = "Internship opportunities now available in local banks." },
                             FacultyId = faculty.Id
                         }
                     },

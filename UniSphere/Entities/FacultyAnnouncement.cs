@@ -9,6 +9,7 @@ public class FacultyAnnouncement
     public MultilingualText Title { get; set; } 
     public MultilingualText Content { get; set; } 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public Faculty Faculty { get; set; }
     public Guid FacultyId { get; set; }
     //public List<Image>? Images { get; set; } = new();
 }

@@ -10,6 +10,8 @@ public class MajorAnnouncement
     public MultilingualText Content { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public int Year { get; set; }
+    public Subject Subject { get; set; }
+    public Major Major { get; set; }
     public Guid SubjectId { get; set; }
     public Guid MajorId { get; set; }
 }

@@ -10,16 +10,18 @@ public class MajorAnnouncementSeedData(ApplicationDbContext context) : SeedData(
         if (!await Context.MajorAnnouncements.AnyAsync())
         {
             // Load majors with subjects eagerly loaded
-            var majors = await Context.Majors.Include(m => m.Subjects).ToListAsync();
+            List<Major> majors = await Context.Majors.Include(m => m.Subjects).ToListAsync();
 
             if (majors.Count == 0)
-                return;
+                {
+                  return;
+                }
 
             var announcements = new List<MajorAnnouncement>();
 
-            foreach (var major in majors)
+            foreach (Major major in majors)
             {
-                var subjects = major.Subjects;
+                List<Subject> subjects = major.Subjects;
                 if (subjects.Count == 0)
                 {
                     // If no subjects, skip or create general announcements without subject reference
@@ -30,7 +32,7 @@ public class MajorAnnouncementSeedData(ApplicationDbContext context) : SeedData(
                 for (int year = 1; year <= 3; year++)
                 {
                     // Round robin selection of subjects for announcements
-                    var subject = subjects[(year - 1) % subjects.Count];
+                    Subject  subject = subjects[(year - 1) % subjects.Count];
 
                     var title = new MultilingualText
                     {

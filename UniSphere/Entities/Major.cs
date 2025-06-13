@@ -13,4 +13,5 @@ public class Major
     public List<Subject> Subjects { get; set; } = new();
     public List<StudentCredential> StudentCredentials { get; set; } = new();
     public List<Schedule> Schedules { get; set; } = new();
+    public ICollection<MajorAnnouncement> MajorAnnouncements { get; set; }
 } 
