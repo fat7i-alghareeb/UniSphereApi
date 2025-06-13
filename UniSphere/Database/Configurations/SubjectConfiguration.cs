@@ -59,5 +59,10 @@ public class SubjectConfiguration : IEntityTypeConfiguration<Subject>
             .HasForeignKey(ssl => ssl.SubjectId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(s => s.MajorAnnouncements)
+            .WithOne(ma => ma.Subject)
+            .HasForeignKey(ma => ma.SubjectId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

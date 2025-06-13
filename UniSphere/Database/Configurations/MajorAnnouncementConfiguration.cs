@@ -21,5 +21,15 @@ public class MajorAnnouncementConfiguration : IEntityTypeConfiguration<MajorAnno
             .IsRequired();
 
         builder.HasIndex(m => m.CreatedAt);
+
+        builder.HasOne(ma => ma.Subject)
+            .WithMany(s => s.MajorAnnouncements)
+            .HasForeignKey(ma => ma.SubjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(ma => ma.Major)
+            .WithMany(m => m.MajorAnnouncements)
+            .HasForeignKey(ma => ma.MajorId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

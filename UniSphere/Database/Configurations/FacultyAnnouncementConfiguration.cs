@@ -21,5 +21,11 @@ public class FacultyAnnouncementConfiguration : IEntityTypeConfiguration<Faculty
             .IsRequired();
 
         builder.HasIndex(fa => fa.CreatedAt);
+
+        builder.HasOne(fa => fa.Faculty)
+            .WithMany(f => f.FacultyAnnouncements)
+            .HasForeignKey(fa => fa.FacultyId)
+            .OnDelete(DeleteBehavior.Cascade);
+
     }
 }

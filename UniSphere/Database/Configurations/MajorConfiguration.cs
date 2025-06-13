@@ -40,5 +40,9 @@ public class MajorConfiguration : IEntityTypeConfiguration<Major>
             .HasForeignKey(s => s.MajorId)
             .OnDelete(DeleteBehavior.Cascade);
         
+        builder.HasMany(m => m.MajorAnnouncements)
+            .WithOne(ma => ma.Major)
+            .HasForeignKey(ma => ma.MajorId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 } 
