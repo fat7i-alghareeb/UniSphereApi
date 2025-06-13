@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UniSphere.Api.Database;
@@ -38,12 +39,14 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
         IValidator<CreateSubjectDto> validator)
     {
         await validator.ValidateAndThrowAsync(createSubjectDto);
+
+
         if (!await dbContext.Majors.AnyAsync(mj => mj.Id == createSubjectDto.MajorId))
         {
 
             return Problem(
                     detail: "The specified Major does not exist.",
-                    statusCode:StatusCodes.Status404NotFound
+                    statusCode: StatusCodes.Status404NotFound
             );
         }
         Subject subject = createSubjectDto.ToEntity();
@@ -52,5 +55,45 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
         await dbContext.SaveChangesAsync();
         SubjectDto subjectDto = subject.ToDto();
         return CreatedAtAction(nameof(GetSubjectById), new { id = subject.Id }, subjectDto);
+    }
+
+    [HttpPatch("{id}")]
+    public async Task<ActionResult<SubjectDto>> UpdateSubject(Guid id, JsonPatchDocument<SubjectDto> pathDocument)
+    {
+        Subject? subject = await dbContext.Subjects.FindAsync(id);
+        if (subject is null)
+        {
+            return NotFound();
+        }
+        SubjectDto subjectDto = subject.ToDto();
+        pathDocument.ApplyTo(subjectDto, ModelState);
+        if (!TryValidateModel(subjectDto))
+        {
+            return ValidationProblem(ModelState);
+        }
+        if (!await dbContext.Majors.AnyAsync(mj => mj.Id == subjectDto.MajorId))
+        {
+            return Problem(
+                detail: "The specified Major does not exist.",
+                statusCode: StatusCodes.Status404NotFound
+            );
+        }
+        subject = subject.UpdateFromDto(subjectDto);
+        await dbContext.SaveChangesAsync();
+        return Ok(subject.ToDto());
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteSubject(Guid id)
+    {
+        Subject? subject = await dbContext.Subjects.FindAsync(id);
+        if (subject is null)
+        {
+            return NotFound();
+        }
+
+        dbContext.Subjects.Remove(subject);
+        await dbContext.SaveChangesAsync();
+        return NoContent();
     }
 }
