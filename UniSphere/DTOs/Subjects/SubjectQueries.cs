@@ -11,6 +11,7 @@ internal static class SubjectQueries
         return subject => new SubjectDto
         {
             Id = subject.Id,
+            MajorId = subject.MajorId
         };
     }
 }

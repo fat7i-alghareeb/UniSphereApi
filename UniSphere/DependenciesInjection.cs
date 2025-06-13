@@ -19,7 +19,9 @@ public static class DependenciesInjection
 {
     public static WebApplicationBuilder AddControllers(this WebApplicationBuilder builder)
     {
-        builder.Services.AddControllers();
+        builder.Services.AddControllers(opetion=>opetion.ReturnHttpNotAcceptable=true).
+            AddNewtonsoftJson()
+            .AddXmlSerializerFormatters();
         builder.Services.AddSwaggerGen(options =>
         {
             options.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());

@@ -14,7 +14,7 @@ public static class DatabaseExtension
 
         try
         {
-            await dBContext.Database.MigrateAsync();
+            //await dBContext.Database.MigrateAsync();
             app.Logger.LogInformation("Database migrations applied successfully.");
 
         }

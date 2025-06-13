@@ -10,7 +10,8 @@ internal static class SubjectMappings
         return new SubjectDto
         {
 
-            Id = subject.Id
+            Id = subject.Id,
+            MajorId = subject.MajorId
 
         };
     }
@@ -30,5 +31,13 @@ internal static class SubjectMappings
             FinalGrade = 70
         };
         return subject;
+    }
+
+    public static Subject UpdateFromDto(this Subject subject, SubjectDto subjectDto)
+    {
+        subject.Id = subjectDto.Id;
+        subject.MajorId = subjectDto.MajorId;
+        return subject;
+
     }
 }

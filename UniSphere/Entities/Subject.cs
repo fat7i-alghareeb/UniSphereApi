@@ -19,7 +19,7 @@ public class Subject
     public bool IsMultipleChoice { get; set; }
     public bool IsOpenBook { get; set; }
     public string? Image { get; set; }
-    
+        
     public Major Major { get; set; } = null!;
     public Lab? Lab { get; set; }
     public List<SubjectProfessorLink>? SubjectLecturers { get; set; }
