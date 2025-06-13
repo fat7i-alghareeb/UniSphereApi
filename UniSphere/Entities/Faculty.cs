@@ -11,4 +11,5 @@ public class Faculty
     public University University { get; set; } = null!;
     public List<Major> Majors { get; set; } = new();
     public List<Schedule> Schedules { get; set; } = new();
+    public List<FacultyAnnouncement>? FacultyAnnouncements { get; set; }
 } 
