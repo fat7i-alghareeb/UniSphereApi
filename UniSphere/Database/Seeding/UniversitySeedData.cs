@@ -32,7 +32,7 @@ public class UniversitySeedData(ApplicationDbContext context) : SeedData(context
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    Name = new MultilingualText { Ar = "جامعة البعث", En = "Al-Baath University" },
+                    Name = new MultilingualText { Ar = "جامعة قرطبة", En = "Al-Baath University" },
                     Type = new MultilingualText { Ar = "حكومية", En = "Public" }
                 },
                 new()
