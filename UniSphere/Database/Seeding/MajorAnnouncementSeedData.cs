@@ -3,67 +3,61 @@ using UniSphere.Api.Entities;
 
 namespace UniSphere.Api.Database.Seeding;
 
-public class MajorAnnouncementSeedData(ApplicationDbContext context) : SeedData(context)
+public class MajorAnnouncementSeedData : SeedData
 {
+    public MajorAnnouncementSeedData(ApplicationDbContext context) : base(context)
+    {
+    }
+
     public override async Task SeedAsync()
     {
-        if (!await Context.MajorAnnouncements.AnyAsync())
+        if (await Context.Set<MajorAnnouncement>().AnyAsync())
         {
-            // Load majors with subjects eagerly loaded
-            var majors = await Context.Majors.Include(m => m.Subjects).ToListAsync();
-
-            if (majors.Count == 0)
-                return;
-
-            var announcements = new List<MajorAnnouncement>();
-
-            foreach (var major in majors)
-            {
-                var subjects = major.Subjects;
-                if (subjects.Count == 0)
-                {
-                    // If no subjects, skip or create general announcements without subject reference
-                    continue;
-                }
-
-                // Create 3 unique announcements per major
-                for (int year = 1; year <= 3; year++)
-                {
-                    // Round robin selection of subjects for announcements
-                    var subject = subjects[(year - 1) % subjects.Count];
-
-                    var title = new MultilingualText
-                    {
-                        Ar = $"إعلان هام لسنة {year} - {subject.Name.Ar}",
-                        En = $"Important Announcement for Year {year} - {subject.Name.En}"
-                    };
-
-                    var content = new MultilingualText
-                    {
-                        Ar = $"يرجى ملاحظة أن نتائج منتصف الفصل في مادة {subject.Name.Ar} للسنة {year} ستصدر قريبًا. " +
-                             $"الامتحان النصفي يشكل {subject.MidtermGrade}% من الدرجة النهائية، والامتحان النهائي يشكل {subject.FinalGrade}%. " +
-                             "يرجى التحضير جيدًا.",
-
-                        En = $"Please note that the midterm results for {subject.Name.En} for year {year} will be released soon. " +
-                             $"The midterm exam accounts for {subject.MidtermGrade}% of the final grade, and the final exam accounts for {subject.FinalGrade}%. " +
-                             "Please prepare accordingly."
-                    };
-
-                    announcements.Add(new MajorAnnouncement
-                    {
-                        Id = Guid.NewGuid(),
-                        Title = title,
-                        Content = content,
-                        CreatedAt = DateTime.UtcNow,
-                        Year = year,
-                        SubjectId = subject.Id,
-                        MajorId = major.Id
-                    });
-                }
-            }
-
-            await Context.MajorAnnouncements.AddRangeAsync(announcements);
-            await Context.SaveChangesAsync();
+            return;
         }
+
+        List<Major> majorId = await Context.Majors.ToListAsync();
+        List<Subject> subjectId = await Context.Subjects.ToListAsync();
+
+        var majorAnnouncements = new List<MajorAnnouncement>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Title = new MultilingualText
+                {
+                    Ar = "موعد امتحان البرمجة المتقدمة",
+                    En = "Advanced Programming Exam Schedule"
+                },
+                Content = new MultilingualText
+                {
+                    Ar = "سيتم عقد امتحان البرمجة المتقدمة يوم الثلاثاء القادم في القاعة رقم 302. يرجى الحضور قبل الموعد بـ 15 دقيقة.",
+                    En = "The Advanced Programming exam will be held next Tuesday in Room 302. Please arrive 15 minutes before the scheduled time."
+                },
+                CreatedAt = DateTime.UtcNow.AddDays(-3),
+                MajorId = majorId[0].Id,
+                SubjectId = subjectId[0].Id
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Title = new MultilingualText
+                {
+                    Ar = "تغيير موعد محاضرة قواعد البيانات",
+                    En = "Database Lecture Time Change"
+                },
+                Content = new MultilingualText
+                {
+                    Ar = "تم تغيير موعد محاضرة قواعد البيانات من الساعة 10 صباحاً إلى الساعة 2 ظهراً. يرجى مراعاة هذا التغيير.",
+                    En = "The Database lecture time has been changed from 10 AM to 2 PM. Please take note of this change."
+                },
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                MajorId = majorId[0].Id,
+                SubjectId = subjectId[0].Id
+            }
+        };
+
+        await Context.Set<MajorAnnouncement>().AddRangeAsync(majorAnnouncements);
+        await Context.SaveChangesAsync();
     }
 }

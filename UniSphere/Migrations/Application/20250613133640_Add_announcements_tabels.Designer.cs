@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using UniSphere.Api.Database;
@@ -12,9 +13,11 @@ using UniSphere.Api.Entities;
 namespace UniSphere.Api.Migrations.Application
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250613133640_Add_announcements_tabels")]
+    partial class Add_announcements_tabels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -93,15 +96,15 @@ namespace UniSphere.Api.Migrations.Application
                         .HasColumnName("title");
 
                     b.HasKey("Id")
-                        .HasName("pk_faculty_announcements");
+                        .HasName("pk_faculty_announcement");
 
                     b.HasIndex("CreatedAt")
-                        .HasDatabaseName("ix_faculty_announcements_created_at");
+                        .HasDatabaseName("ix_faculty_announcement_created_at");
 
                     b.HasIndex("FacultyId")
-                        .HasDatabaseName("ix_faculty_announcements_faculty_id");
+                        .HasDatabaseName("ix_faculty_announcement_faculty_id");
 
-                    b.ToTable("faculty_announcements", "uni_sphere");
+                    b.ToTable("faculty_announcement", "uni_sphere");
                 });
 
             modelBuilder.Entity("UniSphere.Api.Entities.Instructor", b =>
@@ -298,18 +301,18 @@ namespace UniSphere.Api.Migrations.Application
                         .HasColumnName("year");
 
                     b.HasKey("Id")
-                        .HasName("pk_major_announcements");
+                        .HasName("pk_major_announcement");
 
                     b.HasIndex("CreatedAt")
-                        .HasDatabaseName("ix_major_announcements_created_at");
+                        .HasDatabaseName("ix_major_announcement_created_at");
 
                     b.HasIndex("MajorId")
-                        .HasDatabaseName("ix_major_announcements_major_id");
+                        .HasDatabaseName("ix_major_announcement_major_id");
 
                     b.HasIndex("SubjectId")
-                        .HasDatabaseName("ix_major_announcements_subject_id");
+                        .HasDatabaseName("ix_major_announcement_subject_id");
 
-                    b.ToTable("major_announcements", "uni_sphere");
+                    b.ToTable("major_announcement", "uni_sphere");
                 });
 
             modelBuilder.Entity("UniSphere.Api.Entities.Professor", b =>
@@ -624,9 +627,9 @@ namespace UniSphere.Api.Migrations.Application
                     b.HasOne("UniSphere.Api.Entities.Faculty", "Faculty")
                         .WithMany("FacultyAnnouncements")
                         .HasForeignKey("FacultyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired()
-                        .HasConstraintName("fk_faculty_announcements_faculties_faculty_id");
+                        .HasConstraintName("fk_faculty_announcement_faculties_faculty_id");
 
                     b.Navigation("Faculty");
                 });
@@ -683,14 +686,14 @@ namespace UniSphere.Api.Migrations.Application
                         .HasForeignKey("MajorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_major_announcements_majors_major_id");
+                        .HasConstraintName("fk_major_announcement_majors_major_id");
 
                     b.HasOne("UniSphere.Api.Entities.Subject", "Subject")
                         .WithMany("MajorAnnouncements")
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_major_announcements_subjects_subject_id");
+                        .HasConstraintName("fk_major_announcement_subjects_subject_id");
 
                     b.Navigation("Major");
 

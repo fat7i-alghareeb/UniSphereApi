@@ -7,7 +7,9 @@ public class DatabaseSeeder(
     ApplicationDbContext context,
     UniversitySeedData universitySeedData,
     FacultySeedData facultySeedData,
+    FacultyAnnouncementSeedData facultyAnnouncementSeedData,
     MajorSeedData majorSeedData,
+    MajorAnnouncementSeedData majorAnnouncementSeedData,
     EnrollmentStatusSeedData enrollmentStatusSeedData,
     ProfessorSeedData professorSeedData,
     SubjectSeedData subjectSeedData,
@@ -34,11 +36,13 @@ public class DatabaseSeeder(
         await context.Instructors.ExecuteDeleteAsync();
         await context.Labs.ExecuteDeleteAsync();
         await context.InstructorLabLink.ExecuteDeleteAsync();
+        await context.MajorAnnouncements.ExecuteDeleteAsync();
         await context.Subjects.ExecuteDeleteAsync();
         await context.Professors.ExecuteDeleteAsync();
         await context.EnrollmentStatuses.ExecuteDeleteAsync();
         await context.Schedules.ExecuteDeleteAsync();
         await context.Majors.ExecuteDeleteAsync();
+        await context.FacultyAnnouncements.ExecuteDeleteAsync();
         await context.Faculties.ExecuteDeleteAsync();
         await context.Universities.ExecuteDeleteAsync();
         await context.SaveChangesAsync();
@@ -56,11 +60,14 @@ public class DatabaseSeeder(
         // Seed in the correct order based on dependencies
         await universitySeedData.SeedAsync();
         await facultySeedData.SeedAsync();
+        await facultySeedData.SeedAsync();
+        await facultyAnnouncementSeedData.SeedAsync();
         await majorSeedData.SeedAsync();
         await scheduleSeedData.SeedAsync();
         await enrollmentStatusSeedData.SeedAsync();
         await professorSeedData.SeedAsync();
         await subjectSeedData.SeedAsync();
+        await majorAnnouncementSeedData.SeedAsync();
         await labSeedData.SeedAsync();
         await instructorSeedData.SeedAsync();
         await studentCredentialSeedData.SeedAsync();

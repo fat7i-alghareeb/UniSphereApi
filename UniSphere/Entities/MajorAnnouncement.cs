@@ -12,4 +12,6 @@ public class MajorAnnouncement
     public int Year { get; set; }
     public Guid SubjectId { get; set; }
     public Guid MajorId { get; set; }
+    public Subject Subject { get; set; }
+    public Major Major{ get; set; }
 }

@@ -78,6 +78,8 @@ public static class DependenciesInjection
         builder.Services.AddScoped<InstructorLabLinkSeedData>();
         builder.Services.AddScoped<ScheduleSeedData>();
         builder.Services.AddScoped<LectureSeedData>();
+        builder.Services.AddScoped<FacultyAnnouncementSeedData>();
+        builder.Services.AddScoped<MajorAnnouncementSeedData>();
         builder.Services.AddScoped<DatabaseSeeder>();
 
         return builder;
