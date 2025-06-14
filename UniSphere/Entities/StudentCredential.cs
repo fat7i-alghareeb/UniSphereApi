@@ -8,10 +8,12 @@ public class StudentCredential
 {
     public Guid Id { get; set; }
     public string StudentNumber { get; set; }
-    public string IdentityId { get; set; }
+    public string? IdentityId { get; set; }
     public Guid MajorId { get; set; }
-    public string Email { get; set; } = string.Empty;
     public int? OneTimeCode { get; set; }
+    public DateTime? OneTimeCodeCreatedDate { get; set; }
+    public int? OneTimeCodeExpirationInMinutes { get; init; }
+
     public MultilingualText FirstName { get; set; } = new();
     public MultilingualText LastName { get; set; } = new();
     public MultilingualText? FatherName { get; set; }

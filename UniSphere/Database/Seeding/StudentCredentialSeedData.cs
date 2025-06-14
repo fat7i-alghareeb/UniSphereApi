@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using UniSphere.Api.Entities;
 
@@ -22,153 +23,191 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    Email = "student1@example.com",
+                    StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    OneTimeCode = 1234,
+                    OneTimeCodeCreatedDate = DateTime.UtcNow,
+                    OneTimeCodeExpirationInMinutes = 10000,
                     FirstName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
                     LastName = new MultilingualText { Ar = "أحمد", En = "Ahmed" },
                     FatherName = new MultilingualText { Ar = "علي", En = "Ali" },
                     Year = 2,
                     MajorId = majors[0].Id,
-                    EnrollmentStatusId = enrollmentStatuses[0].Id
+                    EnrollmentStatusId = enrollmentStatuses[0].Id,
+                    Image = "https://via.placeholder.com/150"
                 },
                 new()
                 {
                     Id = Guid.NewGuid(),
-
-                    Email = "student2@example.com",
+                    StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    OneTimeCode = 1234,
+                    OneTimeCodeCreatedDate = DateTime.UtcNow,
+                    OneTimeCodeExpirationInMinutes = 10000,
                     FirstName = new MultilingualText { Ar = "فاطمة", En = "Fatima" },
                     LastName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
                     FatherName = new MultilingualText { Ar = "أحمد", En = "Ahmed" },
                     Year = 2,
                     MajorId = majors[0].Id,
-                    EnrollmentStatusId = enrollmentStatuses[0].Id
+                    EnrollmentStatusId = enrollmentStatuses[0].Id,
+                    Image = "https://via.placeholder.com/150"
                 },
                 new()
                 {
                     Id = Guid.NewGuid(),
-
-                    Email = "student3@example.com",
+                    StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    OneTimeCode = 1234,
+                    OneTimeCodeCreatedDate = DateTime.UtcNow,
+                    OneTimeCodeExpirationInMinutes = 10000,
                     FirstName = new MultilingualText { Ar = "علي", En = "Ali" },
                     LastName = new MultilingualText { Ar = "حسين", En = "Hussein" },
                     FatherName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
                     Year = 3,
                     MajorId = majors[1].Id,
-                    EnrollmentStatusId = enrollmentStatuses[0].Id
+                    EnrollmentStatusId = enrollmentStatuses[0].Id,
+                    Image = "https://via.placeholder.com/150"
                 },
                 new()
                 {
                     Id = Guid.NewGuid(),
-
-                    Email = "student4@example.com",
+                            
+                    StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    OneTimeCode = 1234,
+                    OneTimeCodeCreatedDate = DateTime.UtcNow,
+                    OneTimeCodeExpirationInMinutes = 10000,
                     FirstName = new MultilingualText { Ar = "سارة", En = "Sarah" },
                     LastName = new MultilingualText { Ar = "خالد", En = "Khaled" },
                     FatherName = new MultilingualText { Ar = "أحمد", En = "Ahmed" },
                     Year = 4,
                     MajorId = majors[2].Id,
-                    EnrollmentStatusId = enrollmentStatuses[0].Id
+                    EnrollmentStatusId = enrollmentStatuses[0].Id,
+                    Image = "https://via.placeholder.com/150"
                 },
 
                 // Electrical Engineering Students
                 new()
                 {
                     Id = Guid.NewGuid(),
-
-                    Email = "student5@example.com",
+                    StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    OneTimeCode = 1234,
+                    OneTimeCodeCreatedDate = DateTime.UtcNow,
+                    OneTimeCodeExpirationInMinutes = 10000,
                     FirstName = new MultilingualText { Ar = "عمر", En = "Omar" },
                     LastName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
                     FatherName = new MultilingualText { Ar = "علي", En = "Ali" },
                     Year = 2,
                     MajorId = majors[4].Id,
-                    EnrollmentStatusId = enrollmentStatuses[0].Id
+                    EnrollmentStatusId = enrollmentStatuses[0].Id,
+                    Image = "https://via.placeholder.com/150"
                 },
                 new()
                 {
                     Id = Guid.NewGuid(),
-
-                    Email = "student6@example.com",
+                    StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    OneTimeCode = 1234,
+                    OneTimeCodeCreatedDate = DateTime.UtcNow,
+                    OneTimeCodeExpirationInMinutes = 10000,
                     FirstName = new MultilingualText { Ar = "ليلى", En = "Layla" },
                     LastName = new MultilingualText { Ar = "أحمد", En = "Ahmed" },
                     FatherName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
                     Year = 3,
                     MajorId = majors[5].Id,
-                    EnrollmentStatusId = enrollmentStatuses[0].Id
+                    EnrollmentStatusId = enrollmentStatuses[0].Id,
+                    Image = "https://via.placeholder.com/150"
                 },
 
                 // Mechanical Engineering Students
                 new()
                 {
                     Id = Guid.NewGuid(),
-
-                    Email = "student7@example.com",
+                    StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    OneTimeCode = 1234,
+                    OneTimeCodeCreatedDate = DateTime.UtcNow,
+                    OneTimeCodeExpirationInMinutes = 10000,
                     FirstName = new MultilingualText { Ar = "خالد", En = "Khaled" },
                     LastName = new MultilingualText { Ar = "علي", En = "Ali" },
                     FatherName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
                     Year = 4,
                     MajorId = majors[4].Id,
-                    EnrollmentStatusId = enrollmentStatuses[0].Id
+                    EnrollmentStatusId = enrollmentStatuses[0].Id,
+                    Image = "https://via.placeholder.com/150"
                 },
                 new()
                 {
                     Id = Guid.NewGuid(),
-
-                    Email = "student8@example.com",
+                    StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    OneTimeCode = 1234,
+                    OneTimeCodeCreatedDate = DateTime.UtcNow,
+                    OneTimeCodeExpirationInMinutes = 10000,
                     FirstName = new MultilingualText { Ar = "نور", En = "Nour" },
                     LastName = new MultilingualText { Ar = "أحمد", En = "Ahmed" },
                     FatherName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
                     Year = 2,
                     MajorId = majors[4].Id,
-                    EnrollmentStatusId = enrollmentStatuses[0].Id
+                    EnrollmentStatusId = enrollmentStatuses[0].Id,
+                    Image = "https://via.placeholder.com/150"
                 },
 
                 // Civil Engineering Students
                 new()
                 {
                     Id = Guid.NewGuid(),
-
-                    Email = "student9@example.com",
+                    StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    OneTimeCode = 1234,
+                    OneTimeCodeCreatedDate = DateTime.UtcNow,
+                    OneTimeCodeExpirationInMinutes = 10000,
                     FirstName = new MultilingualText { Ar = "أحمد", En = "Ahmed" },
                     LastName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
                     FatherName = new MultilingualText { Ar = "علي", En = "Ali" },
                     Year = 3,
                     MajorId = majors[8].Id,
-                    EnrollmentStatusId = enrollmentStatuses[0].Id
+                    EnrollmentStatusId = enrollmentStatuses[0].Id,
+                    Image = "https://via.placeholder.com/150"
                 },
                 new()
                 {
                     Id = Guid.NewGuid(),
-
-                    Email = "student10@example.com",
+                    StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    OneTimeCode = 1234,
+                    OneTimeCodeCreatedDate = DateTime.UtcNow,
+                    OneTimeCodeExpirationInMinutes = 10000,
                     FirstName = new MultilingualText { Ar = "سارة", En = "Sarah" },
                     LastName = new MultilingualText { Ar = "خالد", En = "Khaled" },
                     FatherName = new MultilingualText { Ar = "أحمد", En = "Ahmed" },
                     Year = 4,
                     MajorId = majors[9].Id,
-                    EnrollmentStatusId = enrollmentStatuses[0].Id
+                    EnrollmentStatusId = enrollmentStatuses[0].Id,
+                    Image = "https://via.placeholder.com/150"
                 },
 
                 // Medical Students
                 new()
                 {
                     Id = Guid.NewGuid(),
-
-                    Email = "student11@example.com",
+                    StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    OneTimeCode = 1234,
+                    OneTimeCodeCreatedDate = DateTime.UtcNow,
+                    OneTimeCodeExpirationInMinutes = 10000,
                     FirstName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
                     LastName = new MultilingualText { Ar = "علي", En = "Ali" },
                     FatherName = new MultilingualText { Ar = "أحمد", En = "Ahmed" },
                     Year = 3,
                     MajorId = majors[12].Id,
-                    EnrollmentStatusId = enrollmentStatuses[0].Id
+                    EnrollmentStatusId = enrollmentStatuses[0].Id,
+                    Image = "https://via.placeholder.com/150"
                 },
                 new()
                 {
                     Id = Guid.NewGuid(),
-
-                    Email = "student12@example.com",
+                    StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    OneTimeCode = 1234,
+                    OneTimeCodeCreatedDate = DateTime.UtcNow,
+                    OneTimeCodeExpirationInMinutes = 10000,
                     FirstName = new MultilingualText { Ar = "فاطمة", En = "Fatima" },
                     LastName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
                     FatherName = new MultilingualText { Ar = "أحمد", En = "Ahmed" },
                     Year = 4,
                     MajorId = majors[12].Id,
-                    EnrollmentStatusId = enrollmentStatuses[0].Id
+                    EnrollmentStatusId = enrollmentStatuses[0].Id,
+                    Image = "https://via.placeholder.com/150"
                 }
             };
 

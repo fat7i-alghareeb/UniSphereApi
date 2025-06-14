@@ -13,6 +13,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using UniSphere.Api.Database;
 using UniSphere.Api.Database.Seeding;
+using UniSphere.Api.Entities;
 using UniSphere.Api.Middleware;
 using UniSphere.Api.Services;
 using UniSphere.Api.Settings;
@@ -137,7 +138,7 @@ public static class DependenciesInjection
     public static WebApplicationBuilder AddAuthenticationServices(this WebApplicationBuilder builder)
     {
         builder.Services
-            .AddIdentity<IdentityUser, IdentityRole>()
+            .AddIdentity<ApplicationUser, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationIdentityDbContext>();
         builder.Services.Configure<JwtAuthOptions>(builder.Configuration.GetSection("jwt"));
         JwtAuthOptions jwtAuthOptions = builder.Configuration.GetSection("Jwt").Get<JwtAuthOptions>()!;   

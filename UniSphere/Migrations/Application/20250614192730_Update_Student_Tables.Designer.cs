@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using UniSphere.Api.Database;
@@ -12,9 +13,11 @@ using UniSphere.Api.Entities;
 namespace UniSphere.Api.Migrations.Application
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250614192730_Update_Student_Tables")]
+    partial class Update_Student_Tables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -450,7 +453,6 @@ namespace UniSphere.Api.Migrations.Application
                         .HasDatabaseName("ix_student_credentials_major_id");
 
                     b.HasIndex("StudentNumber", "MajorId")
-                        .IsUnique()
                         .HasDatabaseName("ix_student_credentials_student_number_major_id");
 
                     b.ToTable("student_credentials", "uni_sphere");
