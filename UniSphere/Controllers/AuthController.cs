@@ -74,12 +74,7 @@ TokenProvider tokenProvider
             {
                 { "errors", identityResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
             };
-            return Problem(
-                title: "Registration failed",
-                statusCode: StatusCodes.Status400BadRequest,
-                detail: "Registration failed",
-                extensions: extensions
-            );
+            1
         }
 
         
@@ -92,13 +87,45 @@ TokenProvider tokenProvider
 
         return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken));
     }
-    // [HttpPost("login")]
-    // public async Task<IActionResult> Login(LoginDto loginDto)
-    // {
-    //     return Ok();
-    // }
+    [HttpPost("Login/Student")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    
+    public async Task<ActionResult<FullInfoStudentDto>> Login(LoginStudentDto loginStudentDto)
+    {
+        StudentCredential studentCredential = await applicationDbContext.StudentCredentials.Include(sc => sc.EnrollmentStatus)
+            .Include(sc => sc.Major)
+            .FirstOrDefaultAsync(sc => sc.StudentNumber == loginStudentDto.StudentNumber  && sc.MajorId == loginStudentDto.MajorId);
+        if (studentCredential is null)
+        {
+            return Problem(
+                    detail: "Student not found",
+                    title: "Student not found",
+                    statusCode: StatusCodes.Status404NotFound
+                );
+        }
 
-    private bool IsCodeValid(StudentCredential studentCredential, int code)
+      
+        ApplicationUser? applicationUser = await userManager.Users.FirstOrDefaultAsync(u => u.StudentId == studentCredential.Id);
+        if (applicationUser is null || !await userManager.CheckPasswordAsync(applicationUser, loginStudentDto.Password))
+        {
+            return Problem(
+                detail : "Student not Registered",
+                title : "Student not Registered",
+                statusCode: StatusCodes.Status401Unauthorized
+            );
+        }
+
+        AccessTokensDto accessTokens = tokenProvider.Create(
+            new TokenRequest(studentCredential.Id)
+        );
+
+        return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken));
+
+    }
+
+    private static bool IsCodeValid(StudentCredential studentCredential, int code)
     {
         if (studentCredential.OneTimeCodeCreatedDate is null || studentCredential.OneTimeCodeExpirationInMinutes is null || studentCredential.OneTimeCode is null)
         {

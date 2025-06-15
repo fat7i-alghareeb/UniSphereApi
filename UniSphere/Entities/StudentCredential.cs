@@ -1,6 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json;
 
 namespace UniSphere.Api.Entities;
 
@@ -20,6 +17,7 @@ public class StudentCredential
     public int Year { get; set; }
     public Guid EnrollmentStatusId { get; set; }
     public string? Image { get; set; }
+    
     
     // Navigation properties
     public Major Major { get; set; } = null!;
