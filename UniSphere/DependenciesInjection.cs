@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Npgsql;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 using OpenTelemetry;
@@ -25,12 +26,35 @@ public static class DependenciesInjection
 {
     public static WebApplicationBuilder AddControllers(this WebApplicationBuilder builder)
     {
-        builder.Services.AddControllers(opetion=>opetion.ReturnHttpNotAcceptable=true).
+        builder.Services.AddControllers(opetion => opetion.ReturnHttpNotAcceptable = true).
             AddNewtonsoftJson()
             .AddXmlSerializerFormatters();
         builder.Services.AddSwaggerGen(options =>
         {
             options.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+          options.AddSecurityDefinition("Bearer",
+    new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer", // <--- important: this will add "Bearer " prefix
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter your JWT token like: Bearer {token}"
+    });
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    { Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                        },
+                    Array.Empty<string>()
+                }
+            });
         });
         return builder;
     }
@@ -141,7 +165,7 @@ public static class DependenciesInjection
             .AddIdentity<ApplicationUser, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationIdentityDbContext>();
         builder.Services.Configure<JwtAuthOptions>(builder.Configuration.GetSection("jwt"));
-        JwtAuthOptions jwtAuthOptions = builder.Configuration.GetSection("Jwt").Get<JwtAuthOptions>()!;   
+        JwtAuthOptions jwtAuthOptions = builder.Configuration.GetSection("Jwt").Get<JwtAuthOptions>()!;
         builder.Services
             .AddAuthentication(option =>
             {
@@ -153,7 +177,7 @@ public static class DependenciesInjection
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-          
+
                     ValidIssuer = jwtAuthOptions.Issuer,
                     ValidAudience = jwtAuthOptions.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(

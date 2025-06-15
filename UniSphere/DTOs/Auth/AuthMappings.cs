@@ -15,7 +15,7 @@ internal static class AuthMappings{
             Year = studentCredential.Year
         };
     }
-    public static FullInfoStudentDto ToFullInfoStudentDto(this StudentCredential studentCredential)
+    public static FullInfoStudentDto ToFullInfoStudentDto(this StudentCredential studentCredential,string accessToken,string refreshToken)
     {
         return new FullInfoStudentDto
         {
@@ -28,7 +28,9 @@ internal static class AuthMappings{
             MajorName = studentCredential.Major.Name.Ar,
             MajorId = studentCredential.MajorId,
             StudentId = studentCredential.Id,
-            StudentImageUrl = studentCredential.Image ?? ""
+            StudentImageUrl = studentCredential.Image ?? "",
+            AccessToken = accessToken,
+            RefreshToken = refreshToken
         };
     }
 }

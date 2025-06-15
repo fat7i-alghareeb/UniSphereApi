@@ -12,4 +12,7 @@ public sealed record  FullInfoStudentDto
     public required string StudentImageUrl { get; init; }
     public required Guid MajorId { get; init; }
     public required Guid StudentId { get; init; }
+    
+    public required string AccessToken { get; init; }
+    public required string RefreshToken { get; init; }
 }

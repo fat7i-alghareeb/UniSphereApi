@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using UniSphere.Api.Database;
 using UniSphere.Api.DTOs.Auth;
 using UniSphere.Api.Entities;
+using UniSphere.Api.Services;
 
 namespace UniSphere.Api.Controllers;
 [ApiController]
@@ -16,7 +17,8 @@ namespace UniSphere.Api.Controllers;
 public sealed class AuthController(
 ApplicationDbContext applicationDbContext,
 UserManager<ApplicationUser> userManager,
-ApplicationIdentityDbContext identityDbContext
+ApplicationIdentityDbContext identityDbContext,
+TokenProvider tokenProvider
 ) : ControllerBase
 {
 
@@ -39,7 +41,7 @@ ApplicationIdentityDbContext identityDbContext
         }
         return Ok(studentCredential.ToSimpleStudentDto());
     }
-    [HttpPost("Register")]
+    [HttpPost("Register/Student")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -84,7 +86,11 @@ ApplicationIdentityDbContext identityDbContext
         studentCredential.IdentityId = applicationUser.Id;
         await applicationDbContext.SaveChangesAsync();
         await transaction.CommitAsync();
-        return Ok(studentCredential.ToFullInfoStudentDto());
+        AccessTokensDto accessTokens = tokenProvider.Create(
+            new TokenRequest(registerStudentDto.StudentId)
+            );
+
+        return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken));
     }
     // [HttpPost("login")]
     // public async Task<IActionResult> Login(LoginDto loginDto)
