@@ -85,7 +85,7 @@ public static class DependenciesInjection
         // Optionally: use Newtonsoft.Json instead
         // dataSourceBuilder.UseJsonNet();
 
-        NpgsqlDataSource? dataSource = dataSourceBuilder.Build();
+        NpgsqlDataSource dataSource = dataSourceBuilder.Build();
 
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(dataSource, npgsqlOptions =>
