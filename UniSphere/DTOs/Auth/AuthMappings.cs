@@ -33,4 +33,21 @@ internal static class AuthMappings{
             RefreshToken = refreshToken
         };
     }
+
+    public static BaseStudentDto ToBaseStudentDto(this StudentCredential studentCredential)
+    {
+        return new BaseStudentDto()
+        {
+            FirstName = studentCredential.FirstName.Ar,
+            LastName = studentCredential.LastName.Ar,
+            FatherName = studentCredential.FatherName?.Ar ?? "",
+            EnrollmentStatusName = studentCredential.EnrollmentStatus.Name.Ar,
+            Year = studentCredential.Year,
+            StudentNumber = studentCredential.StudentNumber,
+            MajorName = studentCredential.Major.Name.Ar,
+            MajorId = studentCredential.MajorId,
+            StudentId = studentCredential.Id,
+            StudentImageUrl = studentCredential.Image ?? "",
+        };
+    }
 }

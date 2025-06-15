@@ -1,6 +1,7 @@
 namespace UniSphere.Api.DTOs.Auth;
 
-public sealed record  FullInfoStudentDto
+
+public record BaseStudentDto
 {
     public required string FirstName { get; init; }
     public required string LastName { get; init; }
@@ -12,7 +13,11 @@ public sealed record  FullInfoStudentDto
     public required string StudentImageUrl { get; init; }
     public required Guid MajorId { get; init; }
     public required Guid StudentId { get; init; }
-    
+}
+
+public sealed record FullInfoStudentDto : BaseStudentDto
+{
+   
     public required string AccessToken { get; init; }
     public required string RefreshToken { get; init; }
 }

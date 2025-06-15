@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ namespace UniSphere.Api.Controllers;
 [AllowAnonymous]
 [ProducesResponseType(StatusCodes.Status401Unauthorized)]
 [ProducesResponseType(StatusCodes.Status403Forbidden)]
+[Produces("application/json")]
 public sealed class AuthController(
     ApplicationDbContext applicationDbContext,
     UserManager<ApplicationUser> userManager,
@@ -194,7 +196,9 @@ public sealed class AuthController(
             return Ok(accessTokens);
         }
 
-    private static bool IsCodeValid(StudentCredential studentCredential, int code)
+       
+
+        private static bool IsCodeValid(StudentCredential studentCredential, int code)
     {
         if (studentCredential.OneTimeCodeCreatedDate is null ||
             studentCredential.OneTimeCodeExpirationInMinutes is null || studentCredential.OneTimeCode is null)

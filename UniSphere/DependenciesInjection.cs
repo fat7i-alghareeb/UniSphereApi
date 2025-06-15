@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -26,22 +27,27 @@ public static class DependenciesInjection
 {
     public static WebApplicationBuilder AddControllers(this WebApplicationBuilder builder)
     {
-        builder.Services.AddControllers(option => option.ReturnHttpNotAcceptable = true).
-            AddNewtonsoftJson()
-            .AddXmlSerializerFormatters();
+        builder.Services.AddControllers(options => 
+        {
+            options.ReturnHttpNotAcceptable = true;
+            options.FormatterMappings.SetMediaTypeMappingForFormat("json", "application/json");
+            options.Filters.Add(new ProducesAttribute("application/json"));
+        })
+        .AddNewtonsoftJson();
+
         builder.Services.AddSwaggerGen(options =>
         {
             options.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
-          options.AddSecurityDefinition("Bearer",
-    new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer", // <--- important: this will add "Bearer " prefix
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Enter your JWT token like: Bearer {token}"
-    });
+            options.AddSecurityDefinition("Bearer",
+                new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter your JWT token like: Bearer {token}"
+                });
             options.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
                 {
@@ -51,7 +57,7 @@ public static class DependenciesInjection
                         Type = ReferenceType.SecurityScheme,
                         Id = "Bearer"
                     }
-                        },
+                    },
                     Array.Empty<string>()
                 }
             });
