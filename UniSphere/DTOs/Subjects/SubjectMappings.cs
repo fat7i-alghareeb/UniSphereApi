@@ -28,7 +28,9 @@ internal static class SubjectMappings
             IsMultipleChoice = false,
             IsOpenBook = false,
             MidtermGrade = 30,
-            FinalGrade = 70
+            FinalGrade = 70,
+            Year =1,
+            Semester = 1,
         };
         return subject;
     }

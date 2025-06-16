@@ -19,6 +19,10 @@ public class SubjectConfiguration : IEntityTypeConfiguration<Subject>
             
         builder.Property(s => s.MajorId)
             .IsRequired();
+        builder.Property(s => s.Year)
+            .IsRequired();
+        builder.Property(s => s.Semester)
+            .IsRequired();
             
         builder.Property(s => s.IsLabRequired)
             .HasDefaultValue(false)
@@ -37,7 +41,7 @@ public class SubjectConfiguration : IEntityTypeConfiguration<Subject>
             
         builder.Property(s => s.FinalGrade)
             .HasDefaultValue(70);
-            
+        
         builder.HasOne(s => s.Major)
             .WithMany(m => m.Subjects)
             .HasForeignKey(s => s.MajorId)

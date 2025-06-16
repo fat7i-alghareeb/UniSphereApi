@@ -16,14 +16,16 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
             }
             var subjects = new List<Subject>
             {
-                // Informatics Engineering Subjects
+                // Year 1 - Software Engineering Subjects
                 new()
                 {
                     Id = Guid.NewGuid(),
+                    Year = 1,
                     Name = new MultilingualText { Ar = "برمجة الويب", En = "Web Programming" },
                     Description = new MultilingualText { Ar = "مقدمة في تطوير تطبيقات الويب", En = "Introduction to Web Application Development" },
-                    MajorId = majors[0].Id, // Software Engineering
-                    IsLabRequired = true,
+                    MajorId = majors[0].Id,
+                    Semester = 1,
+                    IsLabRequired = true,       
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
@@ -32,21 +34,26 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 new()
                 {
                     Id = Guid.NewGuid(),
+                    Year = 1,
                     Name = new MultilingualText { Ar = "قواعد البيانات", En = "Databases" },
                     Description = new MultilingualText { Ar = "مقدمة في قواعد البيانات وإدارتها", En = "Introduction to Databases and Management" },
-                    MajorId = majors[0].Id, // Software Engineering
+                    MajorId = majors[0].Id,
+                    Semester = 1,
                     IsLabRequired = true,
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
+
                     FinalGrade = 70
                 },
                 new()
                 {
                     Id = Guid.NewGuid(),
+                    Year = 1,
                     Name = new MultilingualText { Ar = "برمجة متقدمة", En = "Advanced Programming" },
                     Description = new MultilingualText { Ar = "مفاهيم البرمجة المتقدمة وأنماط التصميم", En = "Advanced Programming Concepts and Design Patterns" },
-                    MajorId = majors[0].Id, // Software Engineering
+                    MajorId = majors[0].Id,
+                    Semester = 1,
                     IsLabRequired = true,
                     IsMultipleChoice = false,
                     IsOpenBook = false,
@@ -56,9 +63,169 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 new()
                 {
                     Id = Guid.NewGuid(),
+                    Year = 1,
+                    Name = new MultilingualText { Ar = "الرياضيات", En = "Mathematics" },
+                    Description = new MultilingualText { Ar = "الرياضيات الأساسية للهندسة", En = "Basic Mathematics for Engineering" },
+                    MajorId = majors[0].Id,
+                    Semester = 1,
+                    IsLabRequired = false,
+                    IsMultipleChoice = true,
+                    IsOpenBook = false,
+                    MidtermGrade = 30,
+                    FinalGrade = 70
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Year = 1,
+                    Name = new MultilingualText { Ar = "الفيزياء", En = "Physics" },
+                    Description = new MultilingualText { Ar = "مبادئ الفيزياء الأساسية", En = "Basic Physics Principles" },
+                    MajorId = majors[0].Id,
+                    Semester = 2,
+                    IsLabRequired = true,
+                    IsMultipleChoice = true,
+                    IsOpenBook = false,
+                    MidtermGrade = 30,
+                    FinalGrade = 70
+                },
+
+                // Year 2 - Software Engineering Subjects
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Year = 2,
+                    Name = new MultilingualText { Ar = "هندسة البرمجيات", En = "Software Engineering" },
+                    Description = new MultilingualText { Ar = "مبادئ وأساليب هندسة البرمجيات", En = "Software Engineering Principles and Methods" },
+                    MajorId = majors[0].Id,
+                    Semester = 1,
+                    IsLabRequired = true,
+                    IsMultipleChoice = false,
+                    IsOpenBook = false,
+                    MidtermGrade = 30,
+                    FinalGrade = 70
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Year = 2,
+                    Name = new MultilingualText { Ar = "تحليل وتصميم الخوارزميات", En = "Algorithm Analysis and Design" },
+                    Description = new MultilingualText { Ar = "تحليل وتصميم الخوارزميات المتقدمة", En = "Advanced Algorithm Analysis and Design" },
+                    MajorId = majors[0].Id,
+                    Semester = 1,
+                    IsLabRequired = true,
+                    IsMultipleChoice = false,
+                    IsOpenBook = false,
+                    MidtermGrade = 30,
+                    FinalGrade = 70
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Year = 2,
+                    Name = new MultilingualText { Ar = "برمجة تطبيقات الموبايل", En = "Mobile Application Development" },
+                    Description = new MultilingualText { Ar = "تطوير تطبيقات الهواتف الذكية", En = "Smartphone Application Development" },
+                    MajorId = majors[0].Id,
+                    Semester = 2,
+                    IsLabRequired = true,
+                    IsMultipleChoice = false,
+                    IsOpenBook = false,
+                    MidtermGrade = 30,
+                    FinalGrade = 70
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Year = 2,
+                    Name = new MultilingualText { Ar = "أمن المعلومات", En = "Information Security" },
+                    Description = new MultilingualText { Ar = "مبادئ وأساسيات أمن المعلومات", En = "Information Security Principles and Fundamentals" },
+                    MajorId = majors[0].Id,
+                    Semester = 2,
+                    IsLabRequired = true,
+                    IsMultipleChoice = false,
+                    IsOpenBook = false,
+                    MidtermGrade = 30,
+                    FinalGrade = 70
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Year = 2,
+                    Name = new MultilingualText { Ar = "برمجة الشبكات", En = "Network Programming" },
+                    Description = new MultilingualText { Ar = "برمجة تطبيقات الشبكات", En = "Network Applications Programming" },
+                    MajorId = majors[0].Id,
+                    Semester = 2,
+                    IsLabRequired = true,
+                    IsMultipleChoice = false,
+                    IsOpenBook = false,
+                    MidtermGrade = 30,
+                    FinalGrade = 70
+                },
+
+                // Year 3 - Software Engineering Subjects
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Year = 3,
+                    Name = new MultilingualText { Ar = "تطوير تطبيقات الويب المتقدمة", En = "Advanced Web Development" },
+                    Description = new MultilingualText { Ar = "تطوير تطبيقات الويب المتقدمة والأطر البرمجية", En = "Advanced Web Development and Frameworks" },
+                    MajorId = majors[0].Id,
+                    Semester = 3,
+                    IsLabRequired = true,
+                    IsMultipleChoice = false,
+                    IsOpenBook = false,
+                    MidtermGrade = 30,
+                    FinalGrade = 70
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Year = 3,
+                    Name = new MultilingualText { Ar = "قواعد البيانات المتقدمة", En = "Advanced Databases" },
+                    Description = new MultilingualText { Ar = "إدارة وتصميم قواعد البيانات المتقدمة", En = "Advanced Database Management and Design" },
+                    MajorId = majors[0].Id,
+                    Semester = 3,
+                    IsLabRequired = true,
+                    IsMultipleChoice = false,
+                    IsOpenBook = false,
+                    MidtermGrade = 30,
+                    FinalGrade = 70
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Year = 3,
+                    Name = new MultilingualText { Ar = "تطوير البرمجيات الموزعة", En = "Distributed Software Development" },
+                    Description = new MultilingualText { Ar = "تصميم وتطوير البرمجيات الموزعة", En = "Design and Development of Distributed Software" },
+                    MajorId = majors[0].Id,
+                    Semester = 3,
+                    IsLabRequired = true,
+                    IsMultipleChoice = false,
+                    IsOpenBook = false,
+                    MidtermGrade = 30,
+                    FinalGrade = 70
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Year = 3,
                     Name = new MultilingualText { Ar = "الذكاء الاصطناعي", En = "Artificial Intelligence" },
                     Description = new MultilingualText { Ar = "مقدمة في الذكاء الاصطناعي وتعلم الآلة", En = "Introduction to AI and Machine Learning" },
-                    MajorId = majors[3].Id, // AI Engineering
+                    MajorId = majors[0].Id,
+                    Semester = 3,
+                    IsLabRequired = true,
+                    IsMultipleChoice = false,
+                    IsOpenBook = false,
+                    MidtermGrade = 30,
+                    FinalGrade = 70
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Year = 3,
+                    Name = new MultilingualText { Ar = "تطوير واجهات المستخدم", En = "User Interface Development" },
+                    Description = new MultilingualText { Ar = "تصميم وتطوير واجهات المستخدم", En = "User Interface Design and Development" },
+                    MajorId = majors[0].Id,
+                    Semester = 3,
                     IsLabRequired = true,
                     IsMultipleChoice = false,
                     IsOpenBook = false,
@@ -66,13 +233,15 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     FinalGrade = 70
                 },
 
-                // Computer Engineering Subjects
+                // Year 4 - Software Engineering Subjects
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    Name = new MultilingualText { Ar = "معمارية الحاسوب", En = "Computer Architecture" },
-                    Description = new MultilingualText { Ar = "دراسة بنية وتصميم المعالجات", En = "Study of Processor Design and Architecture" },
-                    MajorId = majors[2].Id, // Computer Engineering
+                    Year = 4,
+                    Name = new MultilingualText { Ar = "تطوير البرمجيات المتنقلة المتقدم", En = "Advanced Mobile Development" },
+                    Description = new MultilingualText { Ar = "تطوير تطبيقات الموبايل المتقدمة", En = "Advanced Mobile Application Development" },
+                    MajorId = majors[0].Id,
+                    Semester = 4,
                     IsLabRequired = true,
                     IsMultipleChoice = false,
                     IsOpenBook = false,
@@ -82,23 +251,11 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    Name = new MultilingualText { Ar = "شبكات الحاسوب", En = "Computer Networks" },
-                    Description = new MultilingualText { Ar = "مبادئ وأساسيات شبكات الحاسوب", En = "Principles and Fundamentals of Computer Networks" },
-                    MajorId = majors[1].Id, // Network Engineering
-                    IsLabRequired = true,
-                    IsMultipleChoice = false,
-                    IsOpenBook = false,
-                    MidtermGrade = 30,
-                    FinalGrade = 70
-                },
-
-                // Electrical Engineering Subjects
-                new()
-                {
-                    Id = Guid.NewGuid(),
-                    Name = new MultilingualText { Ar = "الدوائر الكهربائية", En = "Electric Circuits" },
-                    Description = new MultilingualText { Ar = "تحليل وتصميم الدوائر الكهربائية", En = "Analysis and Design of Electric Circuits" },
-                    MajorId = majors[5].Id, // Electrical Engineering
+                    Year = 4,
+                    Name = new MultilingualText { Ar = "تطوير البرمجيات المضمنة", En = "Embedded Software Development" },
+                    Description = new MultilingualText { Ar = "تطوير البرمجيات للأنظمة المضمنة", En = "Software Development for Embedded Systems" },
+                    MajorId = majors[0].Id,
+                    Semester = 4,
                     IsLabRequired = true,
                     IsMultipleChoice = false,
                     IsOpenBook = false,
@@ -108,23 +265,11 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    Name = new MultilingualText { Ar = "الآلات الكهربائية", En = "Electrical Machines" },
-                    Description = new MultilingualText { Ar = "دراسة المحركات والمولدات الكهربائية", En = "Study of Electric Motors and Generators" },
-                    MajorId = majors[5].Id, // Electrical Engineering
-                    IsLabRequired = true,
-                    IsMultipleChoice = false,
-                    IsOpenBook = false,
-                    MidtermGrade = 30,
-                    FinalGrade = 70
-                },
-
-                // Civil Engineering Subjects
-                new()
-                {
-                    Id = Guid.NewGuid(),
-                    Name = new MultilingualText { Ar = "ميكانيكا التربة", En = "Soil Mechanics" },
-                    Description = new MultilingualText { Ar = "دراسة خصائص وسلوك التربة", En = "Study of Soil Properties and Behavior" },
-                    MajorId = majors[8].Id, // Structural Engineering
+                    Year = 4,
+                    Name = new MultilingualText { Ar = "تطوير البرمجيات السحابية", En = "Cloud Software Development" },
+                    Description = new MultilingualText { Ar = "تطوير تطبيقات الحوسبة السحابية", En = "Cloud Computing Application Development" },
+                    MajorId = majors[0].Id,
+                    Semester = 4,
                     IsLabRequired = true,
                     IsMultipleChoice = false,
                     IsOpenBook = false,
@@ -134,9 +279,25 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    Name = new MultilingualText { Ar = "تصميم المنشآت الخرسانية", En = "Concrete Structure Design" },
-                    Description = new MultilingualText { Ar = "تصميم وتحليل المنشآت الخرسانية", En = "Design and Analysis of Concrete Structures" },
-                    MajorId = majors[8].Id, // Structural Engineering
+                    Year = 4,
+                    Name = new MultilingualText { Ar = "تطوير البرمجيات المالية", En = "Financial Software Development" },
+                    Description = new MultilingualText { Ar = "تطوير تطبيقات البرمجيات المالية", En = "Financial Software Application Development" },
+                    MajorId = majors[0].Id,
+                    Semester = 4,
+                    IsLabRequired = true,
+                    IsMultipleChoice = false,
+                    IsOpenBook = false,
+                    MidtermGrade = 30,
+                    FinalGrade = 70
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Year = 4,
+                    Name = new MultilingualText { Ar = "مشروع التخرج", En = "Graduation Project" },
+                    Description = new MultilingualText { Ar = "مشروع التخرج في هندسة البرمجيات", En = "Software Engineering Graduation Project" },
+                    MajorId = majors[0].Id,
+                    Semester = 4,
                     IsLabRequired = true,
                     IsMultipleChoice = false,
                     IsOpenBook = false,
@@ -144,15 +305,17 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     FinalGrade = 70
                 },
 
-                // Medical Subjects
+                // Year 5 - Software Engineering Subjects (Optional/Elective)
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    Name = new MultilingualText { Ar = "علم التشريح", En = "Anatomy" },
-                    Description = new MultilingualText { Ar = "دراسة تشريح جسم الإنسان", En = "Study of Human Body Anatomy" },
-                    MajorId = majors[13].Id, // Human Medicine
+                    Year = 5,
+                    Name = new MultilingualText { Ar = "تطوير البرمجيات المفتوحة", En = "Open Source Development" },
+                    Description = new MultilingualText { Ar = "تطوير البرمجيات المفتوحة المصدر", En = "Open Source Software Development" },
+                    MajorId = majors[0].Id,
+                    Semester = 5,
                     IsLabRequired = true,
-                    IsMultipleChoice = true,
+                    IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
                     FinalGrade = 70
@@ -160,15 +323,34 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    Name = new MultilingualText { Ar = "علم وظائف الأعضاء", En = "Physiology" },
-                    Description = new MultilingualText { Ar = "دراسة وظائف أعضاء جسم الإنسان", En = "Study of Human Body Physiology" },
-                    MajorId = majors[13].Id, // Human Medicine
+                    Year = 5,
+                    Name = new MultilingualText { Ar = "تطوير البرمجيات للألعاب", En = "Game Development" },
+                    Description = new MultilingualText { Ar = "تطوير برمجيات الألعاب", En = "Game Software Development" },
+                    MajorId = majors[0].Id,
+                    Semester = 5,
                     IsLabRequired = true,
-                    IsMultipleChoice = true,
+                    IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
                     FinalGrade = 70
-                }
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Year = 5,
+                    Name = new MultilingualText { Ar = "تطوير البرمجيات للأجهزة الذكية", En = "Smart Device Development" },
+                    Description = new MultilingualText { Ar = "تطوير برمجيات الأجهزة الذكية", En = "Smart Device Software Development" },
+                    MajorId = majors[0].Id,
+                    Semester = 5,
+                        IsLabRequired = true,
+                    IsMultipleChoice = false,
+                    IsOpenBook = false,
+                    MidtermGrade = 30,
+                    FinalGrade = 70
+                },
+
+                // Keep existing subjects for other majors
+                // ... existing code ...
             };
           
             await Context.Subjects.AddRangeAsync(subjects);

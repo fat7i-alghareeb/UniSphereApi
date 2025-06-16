@@ -6,13 +6,13 @@ namespace UniSphere.Api.Entities;
 
 public class Subject
 {
-    public Guid Id { get; set; }
-    public MultilingualText Name { get; set; } = new();
-    public Guid MajorId { get; set; }
+    public required Guid Id { get; set; }
+    public required MultilingualText Name { get; set; } = new();
+    public required Guid MajorId { get; set; }
     public Guid? LabId { get; set; }
-    public MultilingualText? Description { get; set; }
-    public int Year { get; set; }
-    public int Semester { get; set; }
+    public required MultilingualText Description { get; set; } = new();
+    public required int Year { get; set; }
+    public required int Semester { get; set; }
     public int MidtermGrade { get; set; } = 30;
     public int FinalGrade { get; set; } = 70;
     public bool IsLabRequired { get; set; }

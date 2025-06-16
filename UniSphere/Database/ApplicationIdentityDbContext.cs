@@ -12,7 +12,11 @@ public sealed class ApplicationIdentityDbContext(DbContextOptions<ApplicationIde
     {
         base.OnModelCreating(builder);
         builder.HasDefaultSchema(Schemes.Identity);
-        builder.Entity<ApplicationUser>().ToTable("asp_net_users");
+        builder.Entity<ApplicationUser>(entity =>
+        {
+            entity.ToTable("asp_net_users");
+            entity.HasIndex(e => e.StudentId).IsUnique();
+        });
         builder.Entity<IdentityRole>().ToTable("asp_net_roles");
         builder.Entity<IdentityUserRole<string>>().ToTable("asp_net_user_roles");
         builder.Entity<IdentityRoleClaim<string>>().ToTable("asp_net_role_claims");

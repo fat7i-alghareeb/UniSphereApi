@@ -13,6 +13,17 @@ public class SubjectStudentLinkConfiguration : IEntityTypeConfiguration<SubjectS
         builder.Property(ssl => ssl.AttemptNumber)
             .IsRequired()
             .HasDefaultValue(1);
+        builder.Property(ssl => ssl.AttemptNumber)
+            .IsRequired()
+            .HasDefaultValue(1);
+        builder.Property(ssl => ssl.IsPassed)
+            .IsRequired()
+            .HasDefaultValue(false);
+        builder.Property(ssl => ssl.MidtermGrade)
+            .IsRequired(false);
+            
+        builder.Property(ssl => ssl.FinalGrade)
+            .IsRequired(false);
             
         builder.Property(ssl => ssl.IsCurrentlyEnrolled)
             .IsRequired()
