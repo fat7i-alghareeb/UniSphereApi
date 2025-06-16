@@ -5,21 +5,19 @@ using Microsoft.EntityFrameworkCore;
 using UniSphere.Api.Database;
 using UniSphere.Api.DTOs.Auth;
 using UniSphere.Api.Entities;
+using UniSphere.Api.Extensions;
 
 namespace UniSphere.Api.Controllers;
  
-[Authorize]
 [ApiController]
 [Route("api/[controller]")]
-[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-[ProducesResponseType(StatusCodes.Status403Forbidden)]
 public class StudentController (ApplicationDbContext dbContext) : ControllerBase
 {
     [HttpGet("GetMe")]
      [ProducesResponseType(StatusCodes.Status200OK)]   
     public async Task<ActionResult<BaseStudentDto>> GetMe()
     {
-        string? studentStringId = HttpContext.User.FindFirstValue("studentId");
+        string? studentStringId = HttpContext.User.GetStudentId();
         if (string.IsNullOrWhiteSpace(studentStringId) || !Guid.TryParse(studentStringId, out Guid studentId))
         {
             return Unauthorized();

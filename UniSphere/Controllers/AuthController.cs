@@ -16,8 +16,7 @@ namespace UniSphere.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [AllowAnonymous]
-[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-[ProducesResponseType(StatusCodes.Status403Forbidden)]
+
 [Produces("application/json")]
 public sealed class AuthController(
     ApplicationDbContext applicationDbContext,
@@ -30,8 +29,7 @@ public sealed class AuthController(
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
 
     [HttpGet("Student/CheckOneTimeCode")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+
     public async Task<ActionResult<SimpleStudentDto>> CheckOneTimeCode(string studentNumber, int code, Guid majorId)
     {
         StudentCredential studentCredential = await applicationDbContext.StudentCredentials
@@ -51,16 +49,13 @@ public sealed class AuthController(
     }
 
     [HttpPost("Student/Register")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<FullInfoStudentDto>> Register(RegisterStudentDto registerStudentDto)
     {
         using IDbContextTransaction transaction = await identityDbContext.Database.BeginTransactionAsync();
         applicationDbContext.Database.SetDbConnection(identityDbContext.Database.GetDbConnection());
         await applicationDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
 
-        StudentCredential studentCredential = await applicationDbContext.StudentCredentials
+        StudentCredential? studentCredential = await applicationDbContext.StudentCredentials
             .Include(sc => sc.EnrollmentStatus)
             .Include(sc => sc.Major)
             .FirstOrDefaultAsync(sc => sc.Id == registerStudentDto.StudentId);
@@ -79,48 +74,50 @@ public sealed class AuthController(
             return BadRequest("Password and ConfirmPassword must be the same");
         }
 
-        IdentityResult identityResult = await userManager.CreateAsync(applicationUser, registerStudentDto.Password);
-        if (!identityResult.Succeeded)
+        IdentityResult createStudentResult = await userManager.CreateAsync(applicationUser, registerStudentDto.Password);
+        if (!createStudentResult.Succeeded)
         {
             var extensions = new Dictionary<string, object?>
             {
-                { "errors", identityResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
+                { "errors", createStudentResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
             };
 
             return Problem(
-                detail: "Error creating user",
-                title: "Error creating user",
+                detail: "Error creating Student",
+                title: "Error creating Student",
                 statusCode: StatusCodes.Status400BadRequest,
                 extensions: extensions
             );
         }
+        IdentityResult addRoleResult = await userManager.AddToRoleAsync(applicationUser, Roles.Student);
+        if (!addRoleResult.Succeeded)
+        {
+            var extensions = new Dictionary<string, object?>
+            {
+                { "errors", createStudentResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
+            };
 
-
+            return Problem(
+                detail: "Error creating Student",
+                title: "Error creating Student",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: extensions
+            );
+        }
         studentCredential.IdentityId = applicationUser.Id;
         await applicationDbContext.SaveChangesAsync();
         await transaction.CommitAsync();
         AccessTokensDto accessTokens = tokenProvider.Create(
-            new TokenRequest(registerStudentDto.StudentId)
-        );
-        var refreshToken = new RefreshToken
-        {
-            Id = Guid.CreateVersion7(),
-            UserId = applicationUser.Id,
-            ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays),
-            Token = accessTokens.RefreshToken
-        };
-        await identityDbContext.RefreshTokens.AddAsync(refreshToken);
+            new TokenRequest(registerStudentDto.StudentId, [Roles.Student]
+        ));
         await identityDbContext.SaveChangesAsync();
         return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken));
     }
 
     [HttpPost("Student/Login")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<FullInfoStudentDto>> Login(LoginStudentDto loginStudentDto)
     {
-        StudentCredential studentCredential = await applicationDbContext.StudentCredentials
+        StudentCredential? studentCredential = await applicationDbContext.StudentCredentials
             .Include(sc => sc.EnrollmentStatus)
             .Include(sc => sc.Major)
             .FirstOrDefaultAsync(sc =>
@@ -155,23 +152,33 @@ public sealed class AuthController(
             );
         }
 
+        IList<string> roles = await userManager.GetRolesAsync(applicationUser);
         AccessTokensDto accessTokens = tokenProvider.Create(
-            new TokenRequest(studentCredential.Id)
+            new TokenRequest(studentCredential.Id,roles)
         );
-        var refreshToken = new RefreshToken
+        RefreshToken? refreshToken = await identityDbContext.RefreshTokens
+            .Include(rt => rt.User)
+            .FirstOrDefaultAsync(rt => rt.UserId == studentCredential.IdentityId);
+        if (refreshToken is null)
         {
-            Id = Guid.CreateVersion7(),
-            UserId = applicationUser.Id,
-            ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays),
-            Token = accessTokens.RefreshToken
-        };
-        await identityDbContext.RefreshTokens.AddAsync(refreshToken);
+            var newRefreshToken = new RefreshToken
+            {
+                Id = Guid.CreateVersion7(),
+                UserId = applicationUser.Id,
+                ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays),
+                Token = accessTokens.RefreshToken
+            };
+            await identityDbContext.RefreshTokens.AddAsync(newRefreshToken);
+        }
+        else
+        {
+            refreshToken.Token = accessTokens.RefreshToken;
+            refreshToken.ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
+        }
         await identityDbContext.SaveChangesAsync();
         return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken));
     }
         [HttpPost("RefreshToken")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<AccessTokensDto>> RefreshToken(RefreshTokenDto refreshTokenDto)
         {
             RefreshToken? refreshToken = await identityDbContext.RefreshTokens
@@ -185,9 +192,10 @@ public sealed class AuthController(
             {
                 return Unauthorized();
             }
+            IList<string> roles = await userManager.GetRolesAsync(refreshToken.User);
 
             AccessTokensDto accessTokens = tokenProvider.Create(
-                new TokenRequest(refreshToken.User.StudentId)
+                new TokenRequest(refreshToken.User.StudentId, roles)
             );
             refreshToken.Token = accessTokens.RefreshToken;
             refreshToken.ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
