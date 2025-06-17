@@ -115,7 +115,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
         return Ok(subjectCollectionDto);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public async Task<ActionResult<SubjectDto>> GetSubjectById(Guid id)
     {
         var studentId = HttpContext.User.GetStudentId();
@@ -126,6 +126,10 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
         }
         var subject = await dbContext.Subjects
             .Where(s => s.Id == id)
+            .Include(s => s.Major)
+            .Include(s => s.SubjectLecturers!)
+                .ThenInclude(sl => sl.Professor!)
+            .Include(s => s.SubjectStudentLinks!)
             .Select(SubjectQueries.ProjectToDto(studentId.Value))
             .FirstOrDefaultAsync();
         if (subject is null)
@@ -156,15 +160,15 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
             );
         }
 
-        Subject subject = createSubjectDto.ToEntity();
+        var subject = createSubjectDto.ToEntity();
 
         dbContext.Subjects.Add(subject);
         await dbContext.SaveChangesAsync();
-        SubjectDto subjectDto = subject.ToDto(studentId.Value);
+        var subjectDto = subject.ToDto(studentId.Value);
         return CreatedAtAction(nameof(GetSubjectById), new { id = subject.Id }, subjectDto);
     }
 
-    [HttpPatch("{id}")]
+    [HttpPatch("{id:guid}")]
     public async Task<ActionResult<SubjectDto>> UpdateSubject(Guid id, JsonPatchDocument<SubjectDto> pathDocument)
     {
         var studentId = HttpContext.User.GetStudentId();
@@ -199,7 +203,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
         return Ok(subject.ToDto(studentId.Value));
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     public async Task<ActionResult> DeleteSubject(Guid id)
     {
         Subject? subject = await dbContext.Subjects.FindAsync(id);
