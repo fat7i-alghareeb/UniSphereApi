@@ -9,7 +9,7 @@ public class SubjectProfessorLinkSeedData(ApplicationDbContext context) : SeedDa
     {
         if (!await Context.SubjectProfessorLinks.AnyAsync())
         {
-            List<Subject> subjects = await Context.Subjects.ToListAsync();
+            var subjects = await Context.Subjects.OrderBy(s => s.Year).ToListAsync();
             List<Professor> professors = await Context.Professors.ToListAsync();
             if(subjects.Count == 0 || professors.Count == 0)
             {
@@ -85,7 +85,62 @@ public class SubjectProfessorLinkSeedData(ApplicationDbContext context) : SeedDa
                 { 
                     SubjectId = subjects[11].Id, // Physiology
                     ProfessorId = professors[9].Id // Dr. Mohammed Ali
-                }
+                },
+                new() 
+                { 
+                    SubjectId = subjects[12].Id, // Physiology
+                    ProfessorId = professors[2].Id // Dr. Mohammed Ali
+                },
+                new() 
+                { 
+                    SubjectId = subjects[13].Id, // Physiology
+                    ProfessorId = professors[6].Id // Dr. Mohammed Ali
+                },
+                new() 
+                { 
+                    SubjectId = subjects[14].Id, // Physiology
+                    ProfessorId = professors[2].Id // Dr. Mohammed Ali
+                },
+                new() 
+                { 
+                    SubjectId = subjects[15].Id, // Physiology
+                    ProfessorId = professors[5].Id // Dr. Mohammed Ali
+                },
+                new() 
+                { 
+                    SubjectId = subjects[16].Id, // Physiology
+                    ProfessorId = professors[1].Id // Dr. Mohammed Ali
+                },
+                new() 
+                { 
+                    SubjectId = subjects[17].Id, // Physiology
+                    ProfessorId = professors[7].Id // Dr. Mohammed Ali
+                },
+                new() 
+                { 
+                    SubjectId = subjects[18].Id, // Physiology
+                    ProfessorId = professors[8].Id // Dr. Mohammed Ali
+                },
+                new() 
+                { 
+                    SubjectId = subjects[19].Id, // Physiology
+                    ProfessorId = professors[1].Id // Dr. Mohammed Ali
+                },
+                new() 
+                { 
+                    SubjectId = subjects[20].Id, // Physiology
+                    ProfessorId = professors[0].Id // Dr. Mohammed Ali
+                },
+                new() 
+                { 
+                    SubjectId = subjects[21].Id, // Physiology
+                    ProfessorId = professors[2].Id // Dr. Mohammed Ali
+                },
+                new() 
+                { 
+                    SubjectId = subjects[22].Id, // Physiology
+                    ProfessorId = professors[1].Id // Dr. Mohammed Ali
+                },
             };
 
             await Context.SubjectProfessorLinks.AddRangeAsync(subjectProfessorLinks);

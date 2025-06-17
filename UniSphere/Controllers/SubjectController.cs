@@ -78,8 +78,9 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
                 .ThenInclude(subject => subject.SubjectLecturers!)
                     .ThenInclude(sl => sl.Professor!)
             .Select(link => link.Subject)
-            .OrderBy(subject => subject.Semester)
             .Distinct() // Optional: if multiple links to the same subject exist
+            .OrderBy(subject => subject.Year)
+            .ThenBy(subject => subject.Semester)
             .Select(SubjectQueries.ProjectToDto(studentId.Value))
             .ToListAsync();
 
@@ -103,6 +104,9 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
         {
             Subjects = await dbContext.Subjects
                 .Where(subject => subject.MajorId == majorId && subject.Year == year)
+                .Include(subject => subject.SubjectLecturers!)
+                    .ThenInclude(sl => sl.Professor!)
+                .Include(subject => subject.SubjectStudentLinks!)
                 .Select(SubjectQueries.ProjectToDto(studentId.Value))       
                 .OrderBy(subject => subject.Semester)
                 .ToListAsync()

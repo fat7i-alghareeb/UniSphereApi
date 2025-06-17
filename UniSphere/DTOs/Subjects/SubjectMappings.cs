@@ -10,13 +10,14 @@ internal static class SubjectMappings
         var professor =subject.SubjectLecturers?.FirstOrDefault(spl=>spl.SubjectId == subject.Id )?.Professor;
         var midTermGrade = subject.SubjectStudentLinks?.FirstOrDefault(ss => ss.SubjectId == subject.Id && ss.StudentId == studentId)?.MidtermGrade ;
         var finalGrade = subject.SubjectStudentLinks?.FirstOrDefault(ss => ss.SubjectId == subject.Id && ss.StudentId == studentId)?.FinalGrade ;
+        
         return new SubjectDto
         {
             Id = subject.Id,
             Year = subject.Year,
             Semester = subject.Semester,
             Name = subject.Name.Ar, 
-            ProfessorName = professor?.FirstName.Ar + " " + professor?.LastName.Ar ,
+            ProfessorName = professor is not null ? professor.FirstName.Ar + " " + professor.LastName.Ar : null,
             ImageUrl = subject.Image,
             MidTermGrade = midTermGrade,
             FinalGrade = finalGrade,
