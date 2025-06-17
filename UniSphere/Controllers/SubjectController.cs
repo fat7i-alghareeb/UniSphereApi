@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -18,9 +19,10 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
     [HttpGet("MySubjects")]
     public async Task<ActionResult<SubjectCollectionDto>> GetMySubjects()
     {
-        Guid? studentId = HttpContext.User.GetStudentId();
+        var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
+            
             return Unauthorized();
         }
 
@@ -69,28 +71,58 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
         var subjects = await dbContext.SubjectStudentLinks
             .Where(link => link.StudentId == studentId)
             .Include(link => link.Subject)
-            .ThenInclude(subject => subject.Major)
+                .ThenInclude(subject => subject.Major)
+            .Include(link => link.Subject)
+                .ThenInclude(subject => subject.SubjectStudentLinks!)
+            .Include(link => link.Subject)
+                .ThenInclude(subject => subject.SubjectLecturers!)
+                    .ThenInclude(sl => sl.Professor!)
             .Select(link => link.Subject)
+            .OrderBy(subject => subject.Semester)
             .Distinct() // Optional: if multiple links to the same subject exist
-            .Select(SubjectQueries.ProjectToDto())
+            .Select(SubjectQueries.ProjectToDto(studentId.Value))
             .ToListAsync();
 
         return Ok(new SubjectCollectionDto { Subjects = subjects });
     }
-    [HttpGet]
-    public async Task<ActionResult<SubjectCollectionDto>> GetSubjects()
+    [HttpGet("GetMyMajorSubjects")]             
+    public async Task<ActionResult<SubjectCollectionDto>> GetMyMajorSubjects( [Required] int year)
     {
-        List<SubjectDto> subjects = await dbContext.Subjects.Select(SubjectQueries.ProjectToDto()).ToListAsync();
-        SubjectCollectionDto subjectCollectionDto = new SubjectCollectionDto { Subjects = subjects };
+        var studentId = HttpContext.User.GetStudentId();
+        if (studentId is null)
+        {
+            
+            return Unauthorized();
+        }
+
+        var majorId = await dbContext.StudentCredentials.Where(sd => sd.Id == studentId
+        ).Select(
+            sd => sd.MajorId
+        ).FirstOrDefaultAsync();
+        var subjectCollectionDto = new SubjectCollectionDto
+        {
+            Subjects = await dbContext.Subjects
+                .Where(subject => subject.MajorId == majorId && subject.Year == year)
+                .Select(SubjectQueries.ProjectToDto(studentId.Value))       
+                .OrderBy(subject => subject.Semester)
+                .ToListAsync()
+        };
+
         return Ok(subjectCollectionDto);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<SubjectDto>> GetSubjectById(Guid id)
     {
-        SubjectDto? subject = await dbContext.Subjects
+        var studentId = HttpContext.User.GetStudentId();
+        if (studentId is null)
+        {
+            
+            return Unauthorized();
+        }
+        var subject = await dbContext.Subjects
             .Where(s => s.Id == id)
-            .Select(SubjectQueries.ProjectToDto())
+            .Select(SubjectQueries.ProjectToDto(studentId.Value))
             .FirstOrDefaultAsync();
         if (subject is null)
         {
@@ -105,7 +137,12 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
         IValidator<CreateSubjectDto> validator)
     {
         await validator.ValidateAndThrowAsync(createSubjectDto);
-
+        var studentId = HttpContext.User.GetStudentId();
+        if (studentId is null)
+        {
+            
+            return Unauthorized();
+        }
 
         if (!await dbContext.Majors.AnyAsync(mj => mj.Id == createSubjectDto.MajorId))
         {
@@ -119,20 +156,26 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
 
         dbContext.Subjects.Add(subject);
         await dbContext.SaveChangesAsync();
-        SubjectDto subjectDto = subject.ToDto();
+        SubjectDto subjectDto = subject.ToDto(studentId.Value);
         return CreatedAtAction(nameof(GetSubjectById), new { id = subject.Id }, subjectDto);
     }
 
     [HttpPatch("{id}")]
     public async Task<ActionResult<SubjectDto>> UpdateSubject(Guid id, JsonPatchDocument<SubjectDto> pathDocument)
     {
-        Subject? subject = await dbContext.Subjects.FindAsync(id);
+        var studentId = HttpContext.User.GetStudentId();
+        if (studentId is null)
+        {
+            
+            return Unauthorized();
+        }
+        var subject = await dbContext.Subjects.FindAsync(id);
         if (subject is null)
         {
             return NotFound();
         }
 
-        SubjectDto subjectDto = subject.ToDto();
+        var subjectDto = subject.ToDto(studentId.Value);
         pathDocument.ApplyTo(subjectDto, ModelState);
         if (!TryValidateModel(subjectDto))
         {
@@ -149,7 +192,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
 
         subject = subject.UpdateFromDto(subjectDto);
         await dbContext.SaveChangesAsync();
-        return Ok(subject.ToDto());
+        return Ok(subject.ToDto(studentId.Value));
     }
 
     [HttpDelete("{id}")]
