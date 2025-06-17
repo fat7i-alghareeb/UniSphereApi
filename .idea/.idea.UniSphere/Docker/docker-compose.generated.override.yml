@@ -15,7 +15,7 @@ services:
     - "--mode=server"
     - "--frontend-port=57000"
     - "--backend-port=57200"
-    - "--roslyn-worker-port=57403"
+    - "--roslyn-worker-port=57427"
     - "--timeout=60"
     environment:
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
@@ -23,9 +23,9 @@ services:
       RESHARPER_LOG_CONF: "/etc/opt/JetBrains/RiderDebuggerTools/backend-log.xml"
     image: "unisphereapi:dev"
     ports:
-    - "127.0.0.1:50630:57000"
-    - "127.0.0.1:50631:57200"
-    - "127.0.0.1:57403:57403"
+    - "127.0.0.1:61957:57000"
+    - "127.0.0.1:57227:57200"
+    - "127.0.0.1:57427:57427"
     volumes:
     - "C:\\Users\\Fat7i\\graduationProject\\UniShpereApi\\UniSphere\\UniSphere:/app:rw"
     - "C:\\Users\\Fat7i\\graduationProject\\UniShpereApi\\UniSphere:/src:rw"
@@ -34,5 +34,5 @@ services:
       Linux64:/opt/JetBrains/RiderDebuggerTools"
     - "C:\\Program Files\\JetBrains\\JetBrains Rider 2025.1.2\\bin\\backend-log.xml:/etc/opt/JetBrains/RiderDebuggerTools/backend-log.xml"
     - "C:\\Users\\Fat7i\\AppData\\Local\\JetBrains\\Rider2025.1\\log\\DebuggerWorker\\\
-      JetBrains.Debugger.Worker.2025_6_16_22_20_47:/var/opt/JetBrains/RiderDebuggerTools:rw"
+      JetBrains.Debugger.Worker.2025_6_17_08_19_20:/var/opt/JetBrains/RiderDebuggerTools:rw"
     working_dir: "/app"
