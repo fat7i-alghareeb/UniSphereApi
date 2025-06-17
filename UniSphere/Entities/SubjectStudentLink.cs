@@ -14,6 +14,6 @@ public class SubjectStudentLink
     public required bool IsPassed { get; set; }
     public MultilingualText? Notes { get; set; }
     
-    public Subject? Subject { get; set; }
-    public StudentCredential? StudentCredential { get; set; }
+    public Subject Subject { get; set; }
+    public StudentCredential StudentCredential { get; set; }
 } 

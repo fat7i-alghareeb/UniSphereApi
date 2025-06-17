@@ -6,21 +6,82 @@ using Microsoft.EntityFrameworkCore;
 using UniSphere.Api.Database;
 using UniSphere.Api.DTOs.Subjects;
 using UniSphere.Api.Entities;
+using UniSphere.Api.Extensions;
 
 namespace UniSphere.Api.Controllers;
 
-[Authorize(Roles = Roles.Admin)]
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
-
 public sealed class SubjectController(ApplicationDbContext dbContext) : ControllerBase
 {
+    [HttpGet("MySubjects")]
+    public async Task<ActionResult<SubjectCollectionDto>> GetMySubjects()
+    {
+        Guid? studentId = HttpContext.User.GetStudentId();
+        if (studentId is null)
+        {
+            return Unauthorized();
+        }
 
+        // First get all needed data in one query
+        var studentInfo = await dbContext.StudentCredentials
+            .Where(sc => sc.Id == studentId)
+            .Select(sc => new 
+            {
+                sc.Year,
+                sc.MajorId
+            })
+            .FirstOrDefaultAsync();
+
+        if (studentInfo is null)
+        {
+            return Unauthorized();
+        }
+
+        // Get all relevant subject IDs (executes immediately due to ToListAsync)
+        var subjectIds = await dbContext.Subjects
+            .Where(st => st.MajorId == studentInfo.MajorId &&
+                         st.Year <= studentInfo.Year &&
+                         st.Semester <= 2)
+            .Select(s => s.Id)
+            .ToListAsync();
+
+        // Process enrollments
+        foreach (var subjectId in subjectIds)
+        {
+            if (!await dbContext.SubjectStudentLinks
+                    .AnyAsync(s => s.SubjectId == subjectId))
+            {
+                await dbContext.SubjectStudentLinks.AddAsync(new SubjectStudentLink
+                {
+                    SubjectId = subjectId,
+                    StudentId = studentId.Value,
+                    AttemptNumber = 0,
+                    IsCurrentlyEnrolled = true,
+                    IsPassed = false,
+                });
+            }
+        }
+        await dbContext.SaveChangesAsync();
+
+        // Now get the enrolled subjects
+        var subjects = await dbContext.SubjectStudentLinks
+            .Where(link => link.StudentId == studentId)
+            .Include(link => link.Subject)
+            .ThenInclude(subject => subject.Major)
+            .Select(link => link.Subject)
+            .Distinct() // Optional: if multiple links to the same subject exist
+            .Select(SubjectQueries.ProjectToDto())
+            .ToListAsync();
+
+        return Ok(new SubjectCollectionDto { Subjects = subjects });
+    }
     [HttpGet]
     public async Task<ActionResult<SubjectCollectionDto>> GetSubjects()
     {
         List<SubjectDto> subjects = await dbContext.Subjects.Select(SubjectQueries.ProjectToDto()).ToListAsync();
-        var subjectCollectionDto = new SubjectCollectionDto { Subjects = subjects };
+        SubjectCollectionDto subjectCollectionDto = new SubjectCollectionDto { Subjects = subjects };
         return Ok(subjectCollectionDto);
     }
 
@@ -35,6 +96,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
         {
             return NotFound();
         }
+
         return Ok(subject);
     }
 
@@ -47,12 +109,12 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
 
         if (!await dbContext.Majors.AnyAsync(mj => mj.Id == createSubjectDto.MajorId))
         {
-
             return Problem(
-                    detail: "The specified Major does not exist.",
-                    statusCode: StatusCodes.Status404NotFound
+                detail: "The specified Major does not exist.",
+                statusCode: StatusCodes.Status404NotFound
             );
         }
+
         Subject subject = createSubjectDto.ToEntity();
 
         dbContext.Subjects.Add(subject);
@@ -69,12 +131,14 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
         {
             return NotFound();
         }
+
         SubjectDto subjectDto = subject.ToDto();
         pathDocument.ApplyTo(subjectDto, ModelState);
         if (!TryValidateModel(subjectDto))
         {
             return ValidationProblem(ModelState);
         }
+
         if (!await dbContext.Majors.AnyAsync(mj => mj.Id == subjectDto.MajorId))
         {
             return Problem(
@@ -82,6 +146,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
                 statusCode: StatusCodes.Status404NotFound
             );
         }
+
         subject = subject.UpdateFromDto(subjectDto);
         await dbContext.SaveChangesAsync();
         return Ok(subject.ToDto());

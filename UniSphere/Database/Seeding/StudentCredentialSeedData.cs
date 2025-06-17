@@ -22,7 +22,8 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 // Informatics Engineering Students
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.TryParse("0c577686-efd9-40ab-b454-c5bbac8a4c95", out var guid) ? guid : Guid.NewGuid(),
+                    MajorId = Guid.TryParse("09da2b33-d994-4a4f-9271-5056165a7146", out var guid1) ? guid1 : Guid.NewGuid(),
                     StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
                     OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,
@@ -31,7 +32,6 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                     LastName = new MultilingualText { Ar = "أحمد", En = "Ahmed" },
                     FatherName = new MultilingualText { Ar = "علي", En = "Ali" },
                     Year = 2,
-                    MajorId = majors[0].Id,
                     EnrollmentStatusId = enrollmentStatuses[0].Id,
                     Image = "https://via.placeholder.com/150"
                 },

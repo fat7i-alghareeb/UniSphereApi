@@ -23,6 +23,7 @@ namespace UniSphere.Api.Migrations.Identity
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropIndex(
+                
                 name: "ix_asp_net_users_student_id",
                 schema: "identity",
                 table: "asp_net_users");

@@ -17,10 +17,11 @@ public class StudentController (ApplicationDbContext dbContext) : ControllerBase
      [ProducesResponseType(StatusCodes.Status200OK)]   
     public async Task<ActionResult<BaseStudentDto>> GetMe()
     {
-        string? studentStringId = HttpContext.User.GetStudentId();
-        if (string.IsNullOrWhiteSpace(studentStringId) || !Guid.TryParse(studentStringId, out Guid studentId))
+        Guid? studentId = HttpContext.User.GetStudentId();
+     
+        if (studentId is null)
         {
-            return Unauthorized();
+            return Unauthorized(); 
         }
 
         StudentCredential studentCredential = await dbContext.StudentCredentials

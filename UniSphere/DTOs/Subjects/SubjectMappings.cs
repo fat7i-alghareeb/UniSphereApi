@@ -11,7 +11,10 @@ internal static class SubjectMappings
         {
 
             Id = subject.Id,
-            MajorId = subject.MajorId
+            MajorId = subject.MajorId,
+            Year = subject.Year,
+            Semester = subject.Semester,
+            MajoreName = subject.Major.Name.Ar
 
         };
     }

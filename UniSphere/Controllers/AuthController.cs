@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -58,6 +57,7 @@ public sealed class AuthController(
         StudentCredential? studentCredential = await applicationDbContext.StudentCredentials
             .Include(sc => sc.EnrollmentStatus)
             .Include(sc => sc.Major)
+            
             .FirstOrDefaultAsync(sc => sc.Id == registerStudentDto.StudentId);
         if (studentCredential is null)
         {

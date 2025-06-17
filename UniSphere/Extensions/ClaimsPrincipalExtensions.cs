@@ -1,11 +1,20 @@
-﻿using System.Security.Claims;
+﻿using System;
+using System.Security.Claims;
 
 namespace UniSphere.Api.Extensions;
 
 public static class ClaimsPrincipalExtensions
 {
-    public static string? GetStudentId(this ClaimsPrincipal principal)
+    public static Guid? GetStudentId(this ClaimsPrincipal principal)
     {
-        return principal.FindFirstValue("studentId");
+        string? studentIdString = principal.FindFirstValue("studentId");
+        
+        // Return null if parsing fails
+        if (string.IsNullOrWhiteSpace(studentIdString) || !Guid.TryParse(studentIdString, out Guid studentId))
+        {
+            return null;
+        }
+
+        return studentId;
     }
 }

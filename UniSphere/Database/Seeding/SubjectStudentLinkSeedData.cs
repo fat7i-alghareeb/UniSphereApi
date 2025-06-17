@@ -9,8 +9,11 @@ public class SubjectStudentLinkSeedData(ApplicationDbContext context) : SeedData
     {
         if (!await Context.SubjectStudentLinks.AnyAsync())
         {
-            List<Subject> subjects = await Context.Subjects.ToListAsync();
-            List<StudentCredential> students = await Context.StudentCredentials.ToListAsync();
+            var firstStudentId = Guid.TryParse("0c577686-efd9-40ab-b454-c5bbac8a4c95", out var guid)
+                ? guid
+                : Guid.NewGuid();
+            var subjects = await Context.Subjects.OrderBy(s => s.Year).ToListAsync();
+            var students = await Context.StudentCredentials.ToListAsync();
             if (subjects.Count == 0 || students.Count == 0)
             {
                 return;
@@ -21,7 +24,7 @@ public class SubjectStudentLinkSeedData(ApplicationDbContext context) : SeedData
                 new()
                 {
                     SubjectId = subjects[0].Id, // Web Programming
-                    StudentId = students[0].Id,
+                    StudentId = firstStudentId,
                     AttemptNumber = 2,
                     IsCurrentlyEnrolled = false,
                     IsPassed =true,
@@ -32,7 +35,7 @@ public class SubjectStudentLinkSeedData(ApplicationDbContext context) : SeedData
                 new()
                 {
                     SubjectId = subjects[1].Id, // Web Programming
-                    StudentId = students[0].Id,
+                    StudentId = firstStudentId,
                     AttemptNumber = 1,
                     IsCurrentlyEnrolled = false,
                     IsPassed =true,
@@ -42,8 +45,8 @@ public class SubjectStudentLinkSeedData(ApplicationDbContext context) : SeedData
                 new()
                 {
                     SubjectId = subjects[2].Id, // Web Programming
-                    StudentId = students[0].Id,
-                    AttemptNumber = 1,
+                    StudentId = firstStudentId,
+                    AttemptNumber = 0,
                     IsCurrentlyEnrolled = false,
                     IsPassed =true,
                     MidtermGrade = 30,
@@ -52,7 +55,7 @@ public class SubjectStudentLinkSeedData(ApplicationDbContext context) : SeedData
                 new()
                 {
                         SubjectId = subjects[3].Id, // Web Programming
-                    StudentId = students[0].Id,
+                    StudentId = firstStudentId,
                     AttemptNumber = 1,
                     IsCurrentlyEnrolled = true,
                     IsPassed =false,
@@ -62,7 +65,7 @@ public class SubjectStudentLinkSeedData(ApplicationDbContext context) : SeedData
                 new()
                 {
                          SubjectId = subjects[4].Id, // Web Programming
-                    StudentId = students[0].Id,
+                    StudentId = firstStudentId,
                     AttemptNumber = 1,
                     IsCurrentlyEnrolled = true,
                     IsPassed =false,
@@ -73,7 +76,7 @@ public class SubjectStudentLinkSeedData(ApplicationDbContext context) : SeedData
                 new()
                 {
                     SubjectId = subjects[5].Id, // Web Programming
-                    StudentId = students[0].Id,
+                    StudentId = firstStudentId,
                     AttemptNumber = 1,
                     IsCurrentlyEnrolled = true,
                     IsPassed =false,
@@ -86,14 +89,14 @@ public class SubjectStudentLinkSeedData(ApplicationDbContext context) : SeedData
                 // new()
                 // {
                 //     SubjectId = subjects[2].Id, // Advanced Programming
-                //     StudentId = students[0].Id,
+                //     StudentId = firstStudentId,
                 //     AttemptNumber = 1,
                 //     IsCurrentlyEnrolled = true
                 // },
                 // new()
                 // {
                 //     SubjectId = subjects[3].Id, // AI
-                //     StudentId = students[0].Id,
+                //     StudentId = firstStudentId,
                 //     AttemptNumber = 1,
                 //     IsCurrentlyEnrolled = true
                 // },
