@@ -17,7 +17,7 @@ public class StudentController (ApplicationDbContext dbContext) : ControllerBase
      [ProducesResponseType(StatusCodes.Status200OK)]   
     public async Task<ActionResult<BaseStudentDto>> GetMe()
     {
-        Guid? studentId = HttpContext.User.GetStudentId();
+        var studentId = HttpContext.User.GetStudentId();
      
         if (studentId is null)
         {
