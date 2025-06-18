@@ -19,7 +19,7 @@ public class MajorSeedData(ApplicationDbContext context) : SeedData(context)
                 // Informatics Engineering Majors
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.TryParse("09da2b33-d994-4a4f-9271-5056165a7146", out var guid1) ? guid1 : Guid.NewGuid(),
                     Name = new MultilingualText { Ar = "هندسة البرمجيات", En = "Software Engineering" },
                     FacultyId = faculties[0].Id,
                     NumberOfYears = 4

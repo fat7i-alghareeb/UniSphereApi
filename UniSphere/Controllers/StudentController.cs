@@ -10,6 +10,8 @@ using UniSphere.Api.Extensions;
 namespace UniSphere.Api.Controllers;
  
 [ApiController]
+[Produces("application/json")]
+
 [Route("api/[controller]")]
 public class StudentController (ApplicationDbContext dbContext) : ControllerBase
 {

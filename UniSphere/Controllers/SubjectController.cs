@@ -13,6 +13,8 @@ namespace UniSphere.Api.Controllers;
 
 [Authorize]
 [ApiController]
+[Produces("application/json")]
+
 [Route("api/[controller]")]
 public sealed class SubjectController(ApplicationDbContext dbContext) : ControllerBase
 {

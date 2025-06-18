@@ -10,6 +10,8 @@ namespace UniSphere.Api.Controllers;
 
 [Authorize]
 [ApiController]
+[Produces("application/json")]
+
 [Route("api/[controller]")]
 public sealed class ScheduleController(ApplicationDbContext dbContext) : ControllerBase
 {

@@ -16,4 +16,6 @@ public class SubjectStudentLink
     
     public Subject Subject { get; set; }
     public StudentCredential StudentCredential { get; set; }
+    [NotMapped] // If not stored in DB
+    public int? TotalGrade => FinalGrade + MidtermGrade;
 } 

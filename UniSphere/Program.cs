@@ -22,10 +22,10 @@ if (app.Environment.IsDevelopment())
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "UniSphere API V1");
     });
     await app.ApplyMigrationsAsync();
-    using IServiceScope scope = app.Services.CreateScope();
-    DatabaseSeeder seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
-   // await seeder.ClearIdentityDataAsync();
-    //await seeder.ClearApplicationDataAsync();
+    using var scope = app.Services.CreateScope();
+    var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+    await seeder.ClearIdentityDataAsync();
+    await seeder.ClearApplicationDataAsync();
     await seeder.SeedRolesAsync();
     await seeder.SeedAsync();
 }
