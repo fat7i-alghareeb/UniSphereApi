@@ -20,9 +20,3 @@ services:
       - 5432:5432
     volumes:
       - ./.containers/postgres/data:/var/lib/postgresql/data
-  unisphere.aspire-dashboard:
-    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
-    environment:
-      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: true
-    ports:
-      - 18888:18888
