@@ -16,6 +16,8 @@ public class FacultyConfiguration : IEntityTypeConfiguration<Faculty>
             
         builder.Property(f => f.UniversityId)
             .IsRequired();
+        builder.Property(f => f.DaysToTheFinale)
+            .IsRequired();
             
         builder.HasOne(f => f.University)
             .WithMany(u => u.Faculties)
