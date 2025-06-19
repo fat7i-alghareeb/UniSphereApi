@@ -22,6 +22,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<Professor> Professors { get; set; }
     public DbSet<FacultyAnnouncement> FacultyAnnouncements { get; set; }
     public DbSet<MajorAnnouncement> MajorAnnouncements { get; set; }
+    public DbSet<StudentStatistics> StudentStatistics { get; set; }
 
 
 

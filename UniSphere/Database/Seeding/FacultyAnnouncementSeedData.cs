@@ -21,7 +21,7 @@ public class FacultyAnnouncementSeedData : SeedData
         {
             new()
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
                 Title = new MultilingualText
                 {
                     Ar = "بدء التسجيل للفصل الدراسي الجديد",
@@ -37,7 +37,7 @@ public class FacultyAnnouncementSeedData : SeedData
             },
             new()
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
                 Title = new MultilingualText
                 {
                     Ar = "ورشة عمل في مجال الذكاء الاصطناعي",

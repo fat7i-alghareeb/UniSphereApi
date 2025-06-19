@@ -22,8 +22,8 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 // Informatics Engineering Students
                 new()
                 {
-                    Id = Guid.TryParse("0c577686-efd9-40ab-b454-c5bbac8a4c95", out var guid) ? guid : Guid.NewGuid(),
-                    MajorId = Guid.TryParse("09da2b33-d994-4a4f-9271-5056165a7146", out var guid1) ? guid1 : Guid.NewGuid(),
+                    Id = Guid.Parse("0c577686-efd9-40ab-b454-c5bbac8a4c95"),
+                    MajorId = Guid.Parse("09da2b33-d994-4a4f-9271-5056165a7146"),
                     StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
                     OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,
@@ -37,7 +37,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("77777777-7777-7777-7777-777777777771"),
                     StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
                     OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,
@@ -52,7 +52,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("77777777-7777-7777-7777-777777777772"),
                     StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
                     OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,
@@ -67,8 +67,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
-                            
+                    Id = Guid.Parse("77777777-7777-7777-7777-777777777773"),
                     StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
                     OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,
@@ -85,7 +84,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 // Electrical Engineering Students
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("77777777-7777-7777-7777-777777777774"),
                     StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
                     OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,
@@ -100,7 +99,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("77777777-7777-7777-7777-777777777775"),
                     StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
                     OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,
@@ -117,7 +116,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 // Mechanical Engineering Students
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("77777777-7777-7777-7777-777777777776"),
                     StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
                     OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,
@@ -132,7 +131,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("77777777-7777-7777-7777-777777777777"),
                     StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
                     OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,
@@ -149,7 +148,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 // Civil Engineering Students
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("77777777-7777-7777-7777-777777777778"),
                     StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
                     OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,
@@ -164,7 +163,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("77777777-7777-7777-7777-777777777779"),
                     StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
                     OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,
@@ -181,7 +180,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 // Medical Students
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("77777777-7777-7777-7777-77777777777a"),
                     StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
                     OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,
@@ -196,7 +195,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("77777777-7777-7777-7777-77777777777b"),
                     StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
                     OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,

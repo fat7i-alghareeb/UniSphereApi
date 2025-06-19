@@ -19,21 +19,21 @@ public class ScheduleSeedData(ApplicationDbContext context) : SeedData(context)
                 // Informatics Engineering Schedules
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("88888888-8888-8888-8888-888888888881"),
                     MajorId = majors[0].Id,
                     Year = 2,
                     ScheduleDate = DateTime.UtcNow.Date
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("88888888-8888-8888-8888-888888888882"),
                     MajorId = majors[0].Id,
                     Year = 3,
                     ScheduleDate = DateTime.UtcNow.Date.AddDays(1)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("88888888-8888-8888-8888-888888888883"),
                     MajorId = majors[0].Id,
                     Year = 4,
                     ScheduleDate = DateTime.UtcNow.Date.AddDays(2)
@@ -42,14 +42,14 @@ public class ScheduleSeedData(ApplicationDbContext context) : SeedData(context)
                 // Computer Engineering Schedules
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("88888888-8888-8888-8888-888888888884"),
                     MajorId = majors[1].Id,
                     Year = 2,
                     ScheduleDate = DateTime.UtcNow.Date
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("88888888-8888-8888-8888-888888888885"),
                     MajorId = majors[1].Id,
                     Year = 3,
                     ScheduleDate = DateTime.UtcNow.Date.AddDays(1)
@@ -58,14 +58,14 @@ public class ScheduleSeedData(ApplicationDbContext context) : SeedData(context)
                 // Electrical Engineering Schedules
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("88888888-8888-8888-8888-888888888886"),
                     MajorId = majors[4].Id,
                     Year = 2,
                     ScheduleDate = DateTime.UtcNow.Date
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("88888888-8888-8888-8888-888888888887"),
                     MajorId = majors[4].Id,
                     Year = 3,
                     ScheduleDate = DateTime.UtcNow.Date.AddDays(1)
@@ -74,14 +74,14 @@ public class ScheduleSeedData(ApplicationDbContext context) : SeedData(context)
                 // Civil Engineering Schedules
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("88888888-8888-8888-8888-888888888888"),
                     MajorId = majors[8].Id,
                     Year = 2,
                     ScheduleDate = DateTime.UtcNow.Date
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("88888888-8888-8888-8888-888888888889"),
                     MajorId = majors[8].Id,
                     Year = 3,
                     ScheduleDate = DateTime.UtcNow.Date.AddDays(1)
@@ -90,14 +90,14 @@ public class ScheduleSeedData(ApplicationDbContext context) : SeedData(context)
                 // Medical Schedules
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("88888888-8888-8888-8888-88888888888a"),
                     MajorId = majors[12].Id,
                     Year = 2,
                     ScheduleDate = DateTime.UtcNow.Date
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("88888888-8888-8888-8888-88888888888b"),
                     MajorId = majors[12].Id,
                     Year = 3,
                     ScheduleDate = DateTime.UtcNow.Date.AddDays(1)

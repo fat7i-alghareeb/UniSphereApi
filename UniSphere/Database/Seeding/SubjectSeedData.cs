@@ -9,9 +9,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
     {
         if (!await Context.Subjects.AnyAsync())
         {
-            var firstMajorGuid = Guid.TryParse("09da2b33-d994-4a4f-9271-5056165a7146", out var guid1)
-                ? guid1
-                : Guid.NewGuid();
+            var firstMajorGuid = Guid.Parse("09da2b33-d994-4a4f-9271-5056165a7146");
             var majors = await Context.Majors.ToListAsync();
             if(majors.Count == 0)
             {
@@ -22,7 +20,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 // Year 1 - Software Engineering Subjects
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666661"),
                     Year = 1,
                     Name = new MultilingualText { Ar = "برمجة الويب", En = "Web Programming" },
                     Description = new MultilingualText { Ar = "مقدمة في تطوير تطبيقات الويب", En = "Introduction to Web Application Development" },
@@ -36,7 +34,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666662"),
                     Year = 1,
                     Name = new MultilingualText { Ar = "قواعد البيانات", En = "Databases" },
                     Description = new MultilingualText { Ar = "مقدمة في قواعد البيانات وإدارتها", En = "Introduction to Databases and Management" },
@@ -51,7 +49,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666663"),
                     Year = 1,
                     Name = new MultilingualText { Ar = "برمجة متقدمة", En = "Advanced Programming" },
                     Description = new MultilingualText { Ar = "مفاهيم البرمجة المتقدمة وأنماط التصميم", En = "Advanced Programming Concepts and Design Patterns" },
@@ -65,7 +63,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666664"),
                     Year = 1,
                     Name = new MultilingualText { Ar = "الرياضيات", En = "Mathematics" },
                     Description = new MultilingualText { Ar = "الرياضيات الأساسية للهندسة", En = "Basic Mathematics for Engineering" },
@@ -79,7 +77,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666665"),
                     Year = 1,
                     Name = new MultilingualText { Ar = "الفيزياء", En = "Physics" },
                     Description = new MultilingualText { Ar = "مبادئ الفيزياء الأساسية", En = "Basic Physics Principles" },
@@ -95,7 +93,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 // Year 2 - Software Engineering Subjects
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666666"),
                     Year = 2,
                     Name = new MultilingualText { Ar = "هندسة البرمجيات", En = "Software Engineering" },
                     Description = new MultilingualText { Ar = "مبادئ وأساليب هندسة البرمجيات", En = "Software Engineering Principles and Methods" },
@@ -109,7 +107,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666667"),
                     Year = 2,
                     Name = new MultilingualText { Ar = "تحليل وتصميم الخوارزميات", En = "Algorithm Analysis and Design" },
                     Description = new MultilingualText { Ar = "تحليل وتصميم الخوارزميات المتقدمة", En = "Advanced Algorithm Analysis and Design" },
@@ -123,7 +121,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666668"),
                     Year = 2,
                     Name = new MultilingualText { Ar = "برمجة تطبيقات الموبايل", En = "Mobile Application Development" },
                     Description = new MultilingualText { Ar = "تطوير تطبيقات الهواتف الذكية", En = "Smartphone Application Development" },
@@ -137,7 +135,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666669"),
                     Year = 2,
                     Name = new MultilingualText { Ar = "أمن المعلومات", En = "Information Security" },
                     Description = new MultilingualText { Ar = "مبادئ وأساسيات أمن المعلومات", En = "Information Security Principles and Fundamentals" },
@@ -151,7 +149,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-66666666666a"),
                     Year = 2,
                     Name = new MultilingualText { Ar = "برمجة الشبكات", En = "Network Programming" },
                     Description = new MultilingualText { Ar = "برمجة تطبيقات الشبكات", En = "Network Applications Programming" },
@@ -167,7 +165,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 // Year 3 - Software Engineering Subjects
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-66666666666b"),
                     Year = 3,
                     Name = new MultilingualText { Ar = "تطوير تطبيقات الويب المتقدمة", En = "Advanced Web Development" },
                     Description = new MultilingualText { Ar = "تطوير تطبيقات الويب المتقدمة والأطر البرمجية", En = "Advanced Web Development and Frameworks" },
@@ -181,7 +179,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-66666666666c"),
                     Year = 3,
                     Name = new MultilingualText { Ar = "قواعد البيانات المتقدمة", En = "Advanced Databases" },
                     Description = new MultilingualText { Ar = "إدارة وتصميم قواعد البيانات المتقدمة", En = "Advanced Database Management and Design" },
@@ -195,7 +193,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-66666666666d"),
                     Year = 3,
                     Name = new MultilingualText { Ar = "تطوير البرمجيات الموزعة", En = "Distributed Software Development" },
                     Description = new MultilingualText { Ar = "تصميم وتطوير البرمجيات الموزعة", En = "Design and Development of Distributed Software" },
@@ -209,7 +207,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-66666666666e"),
                     Year = 3,
                     Name = new MultilingualText { Ar = "الذكاء الاصطناعي", En = "Artificial Intelligence" },
                     Description = new MultilingualText { Ar = "مقدمة في الذكاء الاصطناعي وتعلم الآلة", En = "Introduction to AI and Machine Learning" },
@@ -223,7 +221,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-66666666666f"),
                     Year = 3,
                     Name = new MultilingualText { Ar = "تطوير واجهات المستخدم", En = "User Interface Development" },
                     Description = new MultilingualText { Ar = "تصميم وتطوير واجهات المستخدم", En = "User Interface Design and Development" },
@@ -239,7 +237,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 // Year 4 - Software Engineering Subjects
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666670"),
                     Year = 4,
                     Name = new MultilingualText { Ar = "تطوير البرمجيات المتنقلة المتقدم", En = "Advanced Mobile Development" },
                     Description = new MultilingualText { Ar = "تطوير تطبيقات الموبايل المتقدمة", En = "Advanced Mobile Application Development" },
@@ -253,7 +251,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666671"),
                     Year = 4,
                     Name = new MultilingualText { Ar = "تطوير البرمجيات المضمنة", En = "Embedded Software Development" },
                     Description = new MultilingualText { Ar = "تطوير البرمجيات للأنظمة المضمنة", En = "Software Development for Embedded Systems" },
@@ -267,7 +265,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666672"),
                     Year = 4,
                     Name = new MultilingualText { Ar = "تطوير البرمجيات السحابية", En = "Cloud Software Development" },
                     Description = new MultilingualText { Ar = "تطوير تطبيقات الحوسبة السحابية", En = "Cloud Computing Application Development" },
@@ -281,7 +279,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666673"),
                     Year = 4,
                     Name = new MultilingualText { Ar = "تطوير البرمجيات المالية", En = "Financial Software Development" },
                     Description = new MultilingualText { Ar = "تطوير تطبيقات البرمجيات المالية", En = "Financial Software Application Development" },
@@ -295,7 +293,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666674"),
                     Year = 4,
                     Name = new MultilingualText { Ar = "مشروع التخرج", En = "Graduation Project" },
                     Description = new MultilingualText { Ar = "مشروع التخرج في هندسة البرمجيات", En = "Software Engineering Graduation Project" },
@@ -311,7 +309,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 // Year 5 - Software Engineering Subjects (Optional/Elective)
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666675"),
                     Year = 5,
                     Name = new MultilingualText { Ar = "تطوير البرمجيات المفتوحة", En = "Open Source Development" },
                     Description = new MultilingualText { Ar = "تطوير البرمجيات المفتوحة المصدر", En = "Open Source Software Development" },
@@ -325,7 +323,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666676"),
                     Year = 5,
                     Name = new MultilingualText { Ar = "تطوير البرمجيات للألعاب", En = "Game Development" },
                     Description = new MultilingualText { Ar = "تطوير برمجيات الألعاب", En = "Game Software Development" },
@@ -339,7 +337,7 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666677"),
                     Year = 5,
                     Name = new MultilingualText { Ar = "تطوير البرمجيات للأجهزة الذكية", En = "Smart Device Development" },
                     Description = new MultilingualText { Ar = "تطوير برمجيات الأجهزة الذكية", En = "Smart Device Software Development" },

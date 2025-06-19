@@ -53,7 +53,10 @@ public class StudentCredentialConfiguration : IEntityTypeConfiguration<StudentCr
             .WithMany(e => e.StudentCredentials)
             .HasForeignKey(s => s.EnrollmentStatusId)
             .OnDelete(DeleteBehavior.Restrict);
-
+        builder.HasOne(s => s.StudentStatistics)
+            .WithOne(ss => ss.Student)
+            .HasForeignKey<StudentStatistics>(s => s.StudentId)
+            .OnDelete(DeleteBehavior.Restrict);
         builder.HasMany(s => s.SubjectStudentLinks)
             .WithOne(ssl => ssl.StudentCredential)
             .HasForeignKey(ssl => ssl.StudentId)

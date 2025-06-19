@@ -31,7 +31,6 @@ public class SubjectStudentLinkConfiguration : IEntityTypeConfiguration<SubjectS
             
         builder.Property(ssl => ssl.Notes)
             .HasColumnType("jsonb");
-            
         builder.HasOne(ssl => ssl.Subject)
             .WithMany(s => s.SubjectStudentLinks)
             .HasForeignKey(ssl => ssl.SubjectId)

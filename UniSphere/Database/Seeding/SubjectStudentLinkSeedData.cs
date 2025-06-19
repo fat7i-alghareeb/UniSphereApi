@@ -9,9 +9,7 @@ public class SubjectStudentLinkSeedData(ApplicationDbContext context) : SeedData
     {
         if (!await Context.SubjectStudentLinks.AnyAsync())
         {
-            var firstStudentId = Guid.TryParse("0c577686-efd9-40ab-b454-c5bbac8a4c95", out var guid)
-                ? guid
-                : Guid.NewGuid();
+            var firstStudentId = Guid.Parse("0c577686-efd9-40ab-b454-c5bbac8a4c95");
             var subjects = await Context.Subjects.OrderBy(s => s.Year).ToListAsync();
             var students = await Context.StudentCredentials.ToListAsync();
             if (subjects.Count == 0 || students.Count == 0)

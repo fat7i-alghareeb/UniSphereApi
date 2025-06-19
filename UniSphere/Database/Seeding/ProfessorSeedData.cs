@@ -14,19 +14,19 @@ public class ProfessorSeedData(ApplicationDbContext context) : SeedData(context)
                 // Informatics Engineering Professors
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("99999999-9999-9999-9999-999999999991"),
                     FirstName = new MultilingualText { Ar = "أحمد", En = "Ahmed" },
                     LastName = new MultilingualText { Ar = "محمد", En = "Mohammed" }
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("99999999-9999-9999-9999-999999999992"),
                     FirstName = new MultilingualText { Ar = "سارة", En = "Sarah" },
                     LastName = new MultilingualText { Ar = "علي", En = "Ali" }
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("99999999-9999-9999-9999-999999999993"),
                     FirstName = new MultilingualText { Ar = "محمد", En = "Mohammed" },
                     LastName = new MultilingualText { Ar = "خالد", En = "Khaled" }
                 },
@@ -34,13 +34,13 @@ public class ProfessorSeedData(ApplicationDbContext context) : SeedData(context)
                 // Electrical Engineering Professors
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("99999999-9999-9999-9999-999999999994"),
                     FirstName = new MultilingualText { Ar = "علي", En = "Ali" },
                     LastName = new MultilingualText { Ar = "حسين", En = "Hussein" }
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("99999999-9999-9999-9999-999999999995"),
                     FirstName = new MultilingualText { Ar = "فاطمة", En = "Fatima" },
                     LastName = new MultilingualText { Ar = "أحمد", En = "Ahmed" }
                 },
@@ -48,13 +48,13 @@ public class ProfessorSeedData(ApplicationDbContext context) : SeedData(context)
                 // Mechanical Engineering Professors
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("99999999-9999-9999-9999-999999999996"),
                     FirstName = new MultilingualText { Ar = "خالد", En = "Khaled" },
                     LastName = new MultilingualText { Ar = "محمد", En = "Mohammed" }
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("99999999-9999-9999-9999-999999999997"),
                     FirstName = new MultilingualText { Ar = "نور", En = "Nour" },
                     LastName = new MultilingualText { Ar = "علي", En = "Ali" }
                 },
@@ -62,13 +62,13 @@ public class ProfessorSeedData(ApplicationDbContext context) : SeedData(context)
                 // Civil Engineering Professors
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("99999999-9999-9999-9999-999999999998"),
                     FirstName = new MultilingualText { Ar = "عمر", En = "Omar" },
                     LastName = new MultilingualText { Ar = "حسين", En = "Hussein" }
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("99999999-9999-9999-9999-999999999999"),
                     FirstName = new MultilingualText { Ar = "ليلى", En = "Layla" },
                     LastName = new MultilingualText { Ar = "أحمد", En = "Ahmed" }
                 },
@@ -76,13 +76,13 @@ public class ProfessorSeedData(ApplicationDbContext context) : SeedData(context)
                 // Medical Professors
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("99999999-9999-9999-9999-99999999999a"),
                     FirstName = new MultilingualText { Ar = "د. محمد", En = "Dr. Mohammed" },
                     LastName = new MultilingualText { Ar = "علي", En = "Ali" }
                 },
                 new()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("99999999-9999-9999-9999-99999999999b"),
                     FirstName = new MultilingualText { Ar = "د. سارة", En = "Dr. Sarah" },
                     LastName = new MultilingualText { Ar = "خالد", En = "Khaled" }
                 }
