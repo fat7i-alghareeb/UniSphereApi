@@ -122,6 +122,8 @@ public static class DependenciesInjection
         builder.Services.AddScoped<FacultyAnnouncementSeedData>();
         builder.Services.AddScoped<MajorAnnouncementSeedData>();
         builder.Services.AddScoped<DatabaseSeeder>();
+        builder.Services.AddScoped<AdminSeedData>();
+        builder.Services.AddScoped<SuperAdminSeedData>();
 
         return builder;
     }

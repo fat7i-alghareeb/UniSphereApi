@@ -23,6 +23,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<FacultyAnnouncement> FacultyAnnouncements { get; set; }
     public DbSet<MajorAnnouncement> MajorAnnouncements { get; set; }
     public DbSet<StudentStatistics> StudentStatistics { get; set; }
+    public DbSet<Admin> Admins { get; set; }
+    public DbSet<SuperAdmin> SuperAdmins { get; set; }
 
 
 

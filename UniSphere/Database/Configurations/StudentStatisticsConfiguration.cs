@@ -9,7 +9,6 @@ public class StudentStatisticsConfiguration
     public void Configure(EntityTypeBuilder<StudentStatistics> builder)
     {
         builder.HasKey(s => s.Id);
-        builder.Property(s => s.Average).IsRequired();
         builder.Property(s => s.NumberOfAttendanceHours).IsRequired();
         builder.Property(s => s.NumberOfAttendanceLectures).IsRequired();
         builder.HasOne(s => s.Student)

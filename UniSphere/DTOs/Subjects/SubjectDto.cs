@@ -7,8 +7,8 @@ public sealed record SubjectDto
     public required string Name { get; init; }
     public  string? ProfessorName { get; init; }
     public required int Year { get; init; }
-    public  int?  MidTermGrade{ get; init; }
-    public  int?  FinalGrade{ get; init; }
+    public  double?  MidTermGrade{ get; init; }
+    public  double?  FinalGrade{ get; init; }
     public required bool  IsPassed{ get; init; }
     public required bool  CanEnroll{ get; init; }
     public required bool  IsMultipleChoice{ get; init; }
