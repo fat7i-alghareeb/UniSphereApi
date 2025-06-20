@@ -1,10 +1,11 @@
-﻿using UniSphere.Api.Entities;
+﻿using UniSphere.Api.Controllers;
+using UniSphere.Api.Entities;
 
 namespace UniSphere.Api.DTOs.Schedule;
 
 internal static class ScheduleMappings
 {
-    public static MonthScheduleDto ToMonthScheduleDto(this Entities.Schedule schedule, DateOnly month)
+    public static MonthScheduleDto ToMonthScheduleDto(this Entities.Schedule schedule, DateOnly month,Languages lang)
     {
         // Create a list of all days in the month
         var daysInMonth = new List<DayScheduleDto>();
@@ -22,9 +23,9 @@ internal static class ScheduleMappings
                 dayLectures = schedule.Lectures
                     .Select(l => new DayLectureDto
                     {
-                        SubjectName = l.SubjectName.Ar,
-                        LectureName = l.SubjectName.Ar,
-                        LectureHall = l.LectureHall.Ar,
+                        SubjectName = l.SubjectName.GetTranslatedString(lang) ,
+                        LectureName = l.SubjectName.GetTranslatedString(lang) ,
+                        LectureHall = l.LectureHall.GetTranslatedString(lang) ,
                         StartTime = l.StartTime,
                         EndTime = l.EndTime
                     })
@@ -47,7 +48,7 @@ internal static class ScheduleMappings
         };
     }
 
-    public static MonthScheduleDto CombineSchedulesIntoMonth(this List<Entities.Schedule> schedules, DateOnly month)
+    public static MonthScheduleDto CombineSchedulesIntoMonth(this List<Entities.Schedule> schedules, DateOnly month ,Languages lang)
     {
         // Create a list of all days in the month
         var daysInMonth = new List<DayScheduleDto>();
@@ -67,9 +68,9 @@ internal static class ScheduleMappings
                 var scheduleLectures = schedule.Lectures
                     .Select(l => new DayLectureDto
                     {
-                        SubjectName = l.SubjectName.Ar,
-                        LectureName = l.SubjectName.Ar,
-                        LectureHall = l.LectureHall.Ar,
+                        SubjectName = l.SubjectName.GetTranslatedString(lang) ,
+                        LectureName = l.SubjectName.GetTranslatedString(lang) ,
+                        LectureHall = l.LectureHall.GetTranslatedString(lang) ,
                         StartTime = l.StartTime,
                         EndTime = l.EndTime
                     });

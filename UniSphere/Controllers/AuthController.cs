@@ -15,15 +15,13 @@ namespace UniSphere.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [AllowAnonymous]
-
-[Produces("application/json")]
 public sealed class AuthController(
     ApplicationDbContext applicationDbContext,
     UserManager<ApplicationUser> userManager,
     ApplicationIdentityDbContext identityDbContext,
     TokenProvider tokenProvider,
     IOptions<JwtAuthOptions> options
-) : ControllerBase
+) : BaseController
 {
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
 
@@ -31,20 +29,17 @@ public sealed class AuthController(
 
     public async Task<ActionResult<SimpleStudentDto>> CheckOneTimeCode(string studentNumber, int code, Guid majorId)
     {
-        StudentCredential studentCredential = await applicationDbContext.StudentCredentials
+      
+        
+        var studentCredential = await applicationDbContext.StudentCredentials
             .Include(sc => sc.Major)
             .FirstOrDefaultAsync(sc => sc.StudentNumber == studentNumber && sc.MajorId == majorId);
-        if (studentCredential is null)
+        if (studentCredential is null || !IsCodeValid(studentCredential, code))
         {
             return NotFound();
         }
 
-        if (!IsCodeValid(studentCredential, code))
-        {
-            return NotFound();
-        }
-
-        return Ok(studentCredential.ToSimpleStudentDto());
+        return Ok(studentCredential.ToSimpleStudentDto(Lang));
     }
 
     [HttpPost("Student/Register")]
@@ -111,7 +106,7 @@ public sealed class AuthController(
             new TokenRequest(registerStudentDto.StudentId, [Roles.Student]
         ));
         await identityDbContext.SaveChangesAsync();
-        return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken));
+        return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken,Lang));
     }
 
     [HttpPost("Student/Login")]
@@ -176,7 +171,7 @@ public sealed class AuthController(
             refreshToken.ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
         }
         await identityDbContext.SaveChangesAsync();
-        return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken));
+        return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken,Lang));
     }
         [HttpPost("RefreshToken")]
         public async Task<ActionResult<AccessTokensDto>> RefreshToken(RefreshTokenDto refreshTokenDto)

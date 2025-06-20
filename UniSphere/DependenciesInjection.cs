@@ -3,12 +3,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -19,6 +17,7 @@ using UniSphere.Api.Entities;
 using UniSphere.Api.Middleware;
 using UniSphere.Api.Services;
 using UniSphere.Api.Settings;
+using UniSphere.Api.Filters;
 
 namespace UniSphere.Api;
 
@@ -32,6 +31,7 @@ public static class DependenciesInjection
             options.ReturnHttpNotAcceptable = true;
             options.FormatterMappings.SetMediaTypeMappingForFormat("json", "application/json");
             options.Filters.Add(new ProducesAttribute("application/json"));
+            options.Filters.Add(new LangHeaderFilter());
         })
         .AddNewtonsoftJson();
 
@@ -61,6 +61,7 @@ public static class DependenciesInjection
                     Array.Empty<string>()
                 }
             });
+            options.OperationFilter<AddLangHeaderOperationFilter>();
         });
         return builder;
     }
@@ -124,6 +125,7 @@ public static class DependenciesInjection
         builder.Services.AddScoped<DatabaseSeeder>();
         builder.Services.AddScoped<AdminSeedData>();
         builder.Services.AddScoped<SuperAdminSeedData>();
+        builder.Services.AddScoped<StudentStatisticsSeedData>();
 
         return builder;
     }

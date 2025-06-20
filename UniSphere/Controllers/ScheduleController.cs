@@ -13,7 +13,7 @@ namespace UniSphere.Api.Controllers;
 [Produces("application/json")]
 
 [Route("api/[controller]")]
-public sealed class ScheduleController(ApplicationDbContext dbContext) : ControllerBase
+public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseController
 {
     [HttpGet("GetMySchedule")]
     public async Task<ActionResult<MonthScheduleDto>> GetMySchedule()
@@ -55,7 +55,7 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : Control
             return NotFound("No schedule found for the current month");
         }
 
-        var monthSchedule = schedules.CombineSchedulesIntoMonth(currentMonth);
+        var monthSchedule = schedules.CombineSchedulesIntoMonth(currentMonth ,Lang);
         return Ok(monthSchedule);
     }
 
@@ -99,7 +99,7 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : Control
             return NotFound("No schedule found for the target month");
         }
 
-        var monthSchedule = schedules.CombineSchedulesIntoMonth(targetMonth);
+        var monthSchedule = schedules.CombineSchedulesIntoMonth(targetMonth, Lang);
         return Ok(monthSchedule);
     }
 }

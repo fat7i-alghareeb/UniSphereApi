@@ -14,7 +14,7 @@
 //             .IsRequired()
 //             .HasDefaultValue(string.Empty);
             
-//         builder.Property(mt => mt.Ar)
+//         builder.Property(mt => mt.GetTranslatedString(lang))
 //             .IsRequired()
 //             .HasDefaultValue(string.Empty);
 //     }

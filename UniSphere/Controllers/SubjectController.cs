@@ -16,7 +16,7 @@ namespace UniSphere.Api.Controllers;
 [Produces("application/json")]
 
 [Route("api/[controller]")]
-public sealed class SubjectController(ApplicationDbContext dbContext) : ControllerBase
+public sealed class SubjectController(ApplicationDbContext dbContext) : BaseController
 {
     [HttpGet("MySubjects")]
     public async Task<ActionResult<SubjectCollectionDto>> GetMySubjects()
@@ -24,7 +24,6 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
-            
             return Unauthorized();
         }
 
@@ -83,7 +82,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
             .Distinct() // Optional: if multiple links to the same subject exist
             .OrderBy(subject => subject.Year)
             .ThenBy(subject => subject.Semester)
-            .Select(SubjectQueries.ProjectToDto(studentId.Value))
+            .Select(SubjectQueries.ProjectToDto(studentId.Value, Lang))
             .ToListAsync();
 
         return Ok(new SubjectCollectionDto { Subjects = subjects });
@@ -109,7 +108,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
                 .Include(subject => subject.SubjectLecturers!)
                     .ThenInclude(sl => sl.Professor!)
                 .Include(subject => subject.SubjectStudentLinks!)
-                .Select(SubjectQueries.ProjectToDto(studentId.Value))       
+                .Select(SubjectQueries.ProjectToDto(studentId.Value,Lang))       
                 .OrderBy(subject => subject.Semester)
                 .ToListAsync()
         };
@@ -132,7 +131,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
             .Include(s => s.SubjectLecturers!)
                 .ThenInclude(sl => sl.Professor!)
             .Include(s => s.SubjectStudentLinks!)
-            .Select(SubjectQueries.ProjectToDto(studentId.Value))
+            .Select(SubjectQueries.ProjectToDto(studentId.Value,Lang))
             .FirstOrDefaultAsync();
         if (subject is null)
         {
@@ -166,7 +165,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
 
         dbContext.Subjects.Add(subject);
         await dbContext.SaveChangesAsync();
-        var subjectDto = subject.ToDto(studentId.Value);
+        var subjectDto = subject.ToDto(studentId.Value,Lang);
         return CreatedAtAction(nameof(GetSubjectById), new { id = subject.Id }, subjectDto);
     }
 
@@ -185,7 +184,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
             return NotFound();
         }
 
-        var subjectDto = subject.ToDto(studentId.Value);
+        var subjectDto = subject.ToDto(studentId.Value,Lang);
         pathDocument.ApplyTo(subjectDto, ModelState);
         if (!TryValidateModel(subjectDto))
         {
@@ -202,7 +201,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : Controll
 
         subject = subject.UpdateFromDto(subjectDto);
         await dbContext.SaveChangesAsync();
-        return Ok(subject.ToDto(studentId.Value));
+        return Ok(subject.ToDto(studentId.Value,Lang));
     }
 
     [HttpDelete("{id:guid}")]

@@ -12,7 +12,7 @@ namespace UniSphere.Api.Controllers;
 [Route("api/[controller]")]
 [Produces("application/json")]
 
-public class GradesController(ApplicationDbContext dbContext) : ControllerBase
+public class GradesController(ApplicationDbContext dbContext) : BaseController
 {
     [HttpGet("GetMyGrades")]
     public async Task<ActionResult<GradesCollection>> GetMyGrades()
@@ -50,7 +50,7 @@ public class GradesController(ApplicationDbContext dbContext) : ControllerBase
                 && s.FinalGrade != null
             )
             .Include(ss=>ss.Subject)
-            .Select(GradesQueries.ProjectToDto()).ToListAsync();
+            .Select(GradesQueries.ProjectToDto(Lang)).ToListAsync();
 
 
         // .SumAsync(s => s.TotalGrade);

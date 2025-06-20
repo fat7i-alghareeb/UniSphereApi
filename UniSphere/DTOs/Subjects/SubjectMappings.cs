@@ -1,10 +1,11 @@
-﻿using UniSphere.Api.Entities;
+﻿using UniSphere.Api.Controllers;
+using UniSphere.Api.Entities;
 
 namespace UniSphere.Api.DTOs.Subjects;
 
 internal static class SubjectMappings
 {
-    public static SubjectDto ToDto(this Subject subject , Guid studentId )
+    public static SubjectDto ToDto(this Subject subject , Guid studentId,Languages lang )
     {
 
         var professor =subject.SubjectLecturers?.FirstOrDefault(spl=>spl.SubjectId == subject.Id )?.Professor;
@@ -16,8 +17,8 @@ internal static class SubjectMappings
             Id = subject.Id,
             Year = subject.Year,
             Semester = subject.Semester,
-            Name = subject.Name.Ar, 
-            ProfessorName = professor is not null ? professor.FirstName.Ar + " " + professor.LastName.Ar : null,
+            Name = subject.Name.GetTranslatedString(lang), 
+            ProfessorName = professor is not null ? professor.FirstName.GetTranslatedString(lang) + " " + professor.LastName.GetTranslatedString(lang) : null,
             ImageUrl = subject.Image,
             MidTermGrade = midTermGrade,
             FinalGrade = finalGrade,

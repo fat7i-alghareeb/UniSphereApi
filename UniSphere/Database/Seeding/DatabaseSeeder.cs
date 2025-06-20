@@ -24,6 +24,7 @@ public class DatabaseSeeder(
     InstructorLabLinkSeedData instructorLabLinkSeedData,
     ScheduleSeedData scheduleSeedData,
     LectureSeedData lectureSeedData,
+    StudentStatisticsSeedData studentStatisticsSeedData,
     ILogger<DatabaseSeeder> logger,
     RoleManager<IdentityRole> roleManager
     )
@@ -37,6 +38,7 @@ public class DatabaseSeeder(
         await applicationDbContext.Lectures.ExecuteDeleteAsync();
         await applicationDbContext.SubjectStudentLinks.ExecuteDeleteAsync();
         await applicationDbContext.SubjectProfessorLinks.ExecuteDeleteAsync();
+        await applicationDbContext.StudentStatistics.ExecuteDeleteAsync();
         await applicationDbContext.StudentCredentials.ExecuteDeleteAsync();
         await applicationDbContext.Instructors.ExecuteDeleteAsync();
         await applicationDbContext.Labs.ExecuteDeleteAsync();
@@ -89,6 +91,7 @@ public class DatabaseSeeder(
         await labSeedData.SeedAsync();
         await instructorSeedData.SeedAsync();
         await studentCredentialSeedData.SeedAsync();
+        await studentStatisticsSeedData.SeedAsync();
         await subjectProfessorLinkSeedData.SeedAsync();
         await subjectStudentLinkSeedData.SeedAsync();
         await instructorLabLinkSeedData.SeedAsync();
