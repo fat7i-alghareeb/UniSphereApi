@@ -14,7 +14,6 @@ namespace UniSphere.Api.Controllers;
 [Authorize]
 [ApiController]
 [Produces("application/json")]
-
 [Route("api/[controller]")]
 public sealed class SubjectController(ApplicationDbContext dbContext) : BaseController
 {
@@ -30,7 +29,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
         // First get all needed data in one query
         var studentInfo = await dbContext.StudentCredentials
             .Where(sc => sc.Id == studentId)
-            .Select(sc => new 
+            .Select(sc => new
             {
                 sc.Year,
                 sc.MajorId
@@ -66,18 +65,19 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
                 });
             }
         }
+
         await dbContext.SaveChangesAsync();
 
         // Now get the enrolled subjects
         var subjects = await dbContext.SubjectStudentLinks
             .Where(link => link.StudentId == studentId)
             .Include(link => link.Subject)
-                .ThenInclude(subject => subject.Major)
+            .ThenInclude(subject => subject.Major)
             .Include(link => link.Subject)
-                .ThenInclude(subject => subject.SubjectStudentLinks!)
+            .ThenInclude(subject => subject.SubjectStudentLinks!)
             .Include(link => link.Subject)
-                .ThenInclude(subject => subject.SubjectLecturers!)
-                    .ThenInclude(sl => sl.Professor!)
+            .ThenInclude(subject => subject.SubjectLecturers!)
+            .ThenInclude(sl => sl.Professor!)
             .Select(link => link.Subject)
             .Distinct() // Optional: if multiple links to the same subject exist
             .OrderBy(subject => subject.Year)
@@ -87,19 +87,18 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
 
         return Ok(new SubjectCollectionDto { Subjects = subjects });
     }
-    [HttpGet("GetMyMajorSubjects")]             
-    public async Task<ActionResult<SubjectCollectionDto>> GetMyMajorSubjects( [Required] int year)
+
+    [HttpGet("GetMyMajorSubjects")]
+    public async Task<ActionResult<SubjectCollectionDto>> GetMyMajorSubjects([Required] int year)
     {
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
-            
             return Unauthorized();
         }
 
         var majorId = await dbContext.StudentCredentials.Where(sd => sd.Id == studentId
-        ).Select(
-            sd => sd.MajorId
+        ).Select(sd => sd.MajorId
         ).FirstOrDefaultAsync();
         var subjectCollectionDto = new SubjectCollectionDto
         {
@@ -109,10 +108,10 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
                 .ThenInclude(sl => sl.Professor!)
                 .Include(subject => subject.SubjectStudentLinks!)
                 .OrderBy(subject => subject.Semester) // ✅ Move before projection
-                .Select(SubjectQueries.ProjectToDto(studentId.Value, Lang))       
+                .Select(SubjectQueries.ProjectToDto(studentId.Value, Lang))
                 .ToListAsync()
         };
-
+    
         return Ok(subjectCollectionDto);
     }
 
@@ -122,16 +121,16 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
-            
             return Unauthorized();
         }
+
         var subject = await dbContext.Subjects
             .Where(s => s.Id == id)
             .Include(s => s.Major)
             .Include(s => s.SubjectLecturers!)
-                .ThenInclude(sl => sl.Professor!)
+            .ThenInclude(sl => sl.Professor!)
             .Include(s => s.SubjectStudentLinks!)
-            .Select(SubjectQueries.ProjectToDto(studentId.Value,Lang))
+            .Select(SubjectQueries.ProjectToDto(studentId.Value, Lang))
             .FirstOrDefaultAsync();
         if (subject is null)
         {
@@ -149,7 +148,6 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
-            
             return Unauthorized();
         }
 
@@ -165,7 +163,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
 
         dbContext.Subjects.Add(subject);
         await dbContext.SaveChangesAsync();
-        var subjectDto = subject.ToDto(studentId.Value,Lang);
+        var subjectDto = subject.ToDto(studentId.Value, Lang);
         return CreatedAtAction(nameof(GetSubjectById), new { id = subject.Id }, subjectDto);
     }
 
@@ -175,16 +173,16 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
-            
             return Unauthorized();
         }
+
         var subject = await dbContext.Subjects.FindAsync(id);
         if (subject is null)
         {
             return NotFound();
         }
 
-        var subjectDto = subject.ToDto(studentId.Value,Lang);
+        var subjectDto = subject.ToDto(studentId.Value, Lang);
         pathDocument.ApplyTo(subjectDto, ModelState);
         if (!TryValidateModel(subjectDto))
         {
@@ -201,7 +199,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
 
         subject = subject.UpdateFromDto(subjectDto);
         await dbContext.SaveChangesAsync();
-        return Ok(subject.ToDto(studentId.Value,Lang));
+        return Ok(subject.ToDto(studentId.Value, Lang));
     }
 
     [HttpDelete("{id:guid}")]

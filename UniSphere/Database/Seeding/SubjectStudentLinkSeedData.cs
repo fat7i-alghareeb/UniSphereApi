@@ -11,8 +11,7 @@ public class SubjectStudentLinkSeedData(ApplicationDbContext context) : SeedData
         {
             var firstStudentId = Guid.Parse("0c577686-efd9-40ab-b454-c5bbac8a4c95");
             var subjects = await Context.Subjects.OrderBy(s => s.Year).ToListAsync();
-            var students = await Context.StudentCredentials.ToListAsync();
-            if (subjects.Count == 0 || students.Count == 0)
+            if (subjects.Count == 0)
             {
                 return;
             }

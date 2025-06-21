@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UniSphere.Api.DTOs.Announcements;
 
 namespace UniSphere.Api.Entities;
 
@@ -12,4 +13,5 @@ public class FacultyAnnouncement
     public Faculty Faculty { get; set; }
     public Guid FacultyId { get; set; }
     //public List<Image>? Images { get; set; } = new();
+    
 }
