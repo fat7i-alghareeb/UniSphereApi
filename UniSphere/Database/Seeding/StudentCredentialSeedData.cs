@@ -24,7 +24,7 @@ public class StudentCredentialSeedData(ApplicationDbContext context) : SeedData(
                 {
                     Id = Guid.Parse("0c577686-efd9-40ab-b454-c5bbac8a4c95"),
                     MajorId = Guid.Parse("09da2b33-d994-4a4f-9271-5056165a7146"),
-                    StudentNumber = "2024" + Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    StudentNumber = "201085",
                     OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,
                     OneTimeCodeExpirationInMinutes = 10000,

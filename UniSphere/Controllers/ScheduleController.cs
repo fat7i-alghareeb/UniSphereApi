@@ -38,8 +38,8 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
         }
 
         var currentMonth = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
-        var startDate = currentMonth.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
-        var endDate = currentMonth.AddMonths(1).AddDays(-1).ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc);
+        var startDate = currentMonth;
+        var endDate = currentMonth.AddMonths(1).AddDays(-1);
 
         var schedules = await dbContext.Schedules
             .Where(s => s.Year == studentInfo.Year &&
@@ -82,8 +82,8 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
         }
 
         var targetMonth = new DateOnly(year, month, 1);
-        var startDate = targetMonth.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
-        var endDate = targetMonth.AddMonths(1).AddDays(-1).ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc);
+        DateOnly startDate = targetMonth;
+        var endDate = targetMonth.AddMonths(1).AddDays(-1);
 
         var schedules = await dbContext.Schedules
             .Where(s => s.Year == studentInfo.Year &&
@@ -91,6 +91,7 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
                         s.ScheduleDate >= startDate &&
                         s.ScheduleDate <= endDate)
             .Include(s => s.Lectures)
+            
             .ToListAsync();
 
         if (!schedules.Any())
@@ -135,4 +136,20 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
             }
             );
     }
+
+    // [HttpPost("AddLapsToSchedule")]
+    // public async Task<ActionResult<DayLectureDto>> AddLapsToSchedule(AddLabsToScheduleDto addLabsToScheduleDto)
+    // {
+    //     var studentId = HttpContext.User.GetStudentId();
+    //     if (studentId is null)
+    //     {
+    //         return Unauthorized();
+    //     }
+    // }
+}
+
+public sealed record  AddLabsToScheduleDto
+{
+    public required Guid LabId { get; init; }
+    
 }
