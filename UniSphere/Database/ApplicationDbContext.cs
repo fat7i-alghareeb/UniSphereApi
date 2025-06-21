@@ -25,7 +25,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<StudentStatistics> StudentStatistics { get; set; }
     public DbSet<Admin> Admins { get; set; }
     public DbSet<SuperAdmin> SuperAdmins { get; set; }
-
+    public DbSet<ScheduleLabLink> ScheduleLabLinks { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

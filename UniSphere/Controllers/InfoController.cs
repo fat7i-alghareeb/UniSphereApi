@@ -9,7 +9,7 @@ namespace UniSphere.Api.Controllers;
 
 [ApiController]
 [Produces("application/json")]
-[Authorize]
+[AllowAnonymous]
 [Route("api/[controller]")]
 public class InfoController(ApplicationDbContext dbContext) : BaseController
 {

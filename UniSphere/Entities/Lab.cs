@@ -10,4 +10,6 @@ public class Lab
     public string? Image { get; set; }
     public List<InstructorLabLink> InstructorLabLinks { get; set; } = new();
     public List<Subject> Subjects { get; set; } = new();
+    public List<ScheduleLabLink> ScheduleLabLinks { get; set; } = new();
+
 } 

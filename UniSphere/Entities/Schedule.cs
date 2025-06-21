@@ -11,4 +11,5 @@ public class Schedule
     public DateTime ScheduleDate { get; set; }
     public Major Major { get; set; } = null!;
     public List<Lecture> Lectures { get; set; } = new();
+    public List<ScheduleLabLink> ScheduleLabLinks { get; set; } = new();
 } 

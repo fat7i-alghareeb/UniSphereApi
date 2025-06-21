@@ -25,18 +25,27 @@ public sealed class AuthController(
 {
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
 
-    [HttpGet("Student/CheckOneTimeCode")]
+    [HttpPost("Student/CheckOneTimeCode")]
 
-    public async Task<ActionResult<SimpleStudentDto>> CheckOneTimeCode(string studentNumber, int code, Guid majorId)
+    public async Task<ActionResult<SimpleStudentDto>> CheckOneTimeCode(CheckOneTimeCodeDto checkOneTimeCodeDto)
     {
       
         
         var studentCredential = await applicationDbContext.StudentCredentials
             .Include(sc => sc.Major)
-            .FirstOrDefaultAsync(sc => sc.StudentNumber == studentNumber && sc.MajorId == majorId);
-        if (studentCredential is null || !IsCodeValid(studentCredential, code))
+            .FirstOrDefaultAsync(sc => sc.StudentNumber == checkOneTimeCodeDto.StudentNumber && sc.MajorId == checkOneTimeCodeDto.MajorId);
+        if (studentCredential is null )
         {
             return NotFound();
+        }
+
+        if (!IsCodeValid(studentCredential, checkOneTimeCodeDto.Code))
+        {
+            return Problem(
+                detail: "Code is not valid",
+                title: "Code is not valid",
+                statusCode: StatusCodes.Status400BadRequest
+            );
         }
 
         return Ok(studentCredential.ToSimpleStudentDto(Lang));

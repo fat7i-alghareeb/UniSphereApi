@@ -11,7 +11,6 @@ namespace UniSphere.Api.Controllers;
 [Authorize]
 [ApiController]
 [Produces("application/json")]
-
 [Route("api/[controller]")]
 public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseController
 {
@@ -55,7 +54,7 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
             return NotFound("No schedule found for the current month");
         }
 
-        var monthSchedule = schedules.CombineSchedulesIntoMonth(currentMonth ,Lang);
+        var monthSchedule = schedules.CombineSchedulesIntoMonth(currentMonth, Lang);
         return Ok(monthSchedule);
     }
 
@@ -101,5 +100,39 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
 
         var monthSchedule = schedules.CombineSchedulesIntoMonth(targetMonth, Lang);
         return Ok(monthSchedule);
+    }
+
+    [HttpGet("GetAvailableLabs")]
+    public async Task<ActionResult<AvailableLabsCollectionDto>> GetAvailableLabs()
+    {
+        var studentId = HttpContext.User.GetStudentId();
+        if (studentId is null)
+        {
+            return Unauthorized();
+        }
+
+        var majorId = await dbContext.StudentCredentials
+            .Where(sc => sc.Id == studentId)
+            .Select(sc => sc.MajorId)
+            .FirstOrDefaultAsync();
+        var availableLabs = await dbContext.Labs
+            .Include(l => l.Subjects)
+            .Where(l => l.Subjects.Any(s => s.MajorId == majorId))
+            .Select(l => new AvailableLabDto
+            {
+                Id = l.Id,
+                Name = l.Name.GetTranslatedString(Lang)
+            })
+            .ToListAsync();
+        if (availableLabs.Count == 0)
+        {
+            return NoContent();
+        }
+
+        return Ok(new AvailableLabsCollectionDto
+            {
+                Labs = availableLabs
+            }
+            );
     }
 }

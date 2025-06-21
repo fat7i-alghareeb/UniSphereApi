@@ -26,5 +26,10 @@ public class LabConfiguration : IEntityTypeConfiguration<Lab>
             .WithOne(s => s.Lab)
             .HasForeignKey(s => s.LabId)
             .OnDelete(DeleteBehavior.Restrict);
+            
+        builder.HasMany(l => l.ScheduleLabLinks)
+            .WithOne(l => l.Lab)
+            .HasForeignKey(l => l.LabId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 } 
