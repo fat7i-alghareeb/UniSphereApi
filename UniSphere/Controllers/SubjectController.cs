@@ -106,10 +106,10 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
             Subjects = await dbContext.Subjects
                 .Where(subject => subject.MajorId == majorId && subject.Year == year)
                 .Include(subject => subject.SubjectLecturers!)
-                    .ThenInclude(sl => sl.Professor!)
+                .ThenInclude(sl => sl.Professor!)
                 .Include(subject => subject.SubjectStudentLinks!)
-                .Select(SubjectQueries.ProjectToDto(studentId.Value,Lang))       
-                .OrderBy(subject => subject.Semester)
+                .OrderBy(subject => subject.Semester) // ✅ Move before projection
+                .Select(SubjectQueries.ProjectToDto(studentId.Value, Lang))       
                 .ToListAsync()
         };
 

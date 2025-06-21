@@ -31,7 +31,8 @@ internal static class AuthMappings{
             StudentId = studentCredential.Id,
             StudentImageUrl = studentCredential.Image ?? "",
             AccessToken = accessToken,
-            RefreshToken = refreshToken
+            RefreshToken = refreshToken,
+            NumberOfMajorYears = studentCredential.Major.NumberOfYears
         };
     }
 
@@ -49,6 +50,7 @@ internal static class AuthMappings{
             MajorId = studentCredential.MajorId,
             StudentId = studentCredential.Id,
             StudentImageUrl = studentCredential.Image ?? "",
+            NumberOfMajorYears = studentCredential.Major.NumberOfYears
         };
     }
 }
