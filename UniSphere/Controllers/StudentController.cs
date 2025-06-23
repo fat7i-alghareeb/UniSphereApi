@@ -9,21 +9,21 @@ using UniSphere.Api.Entities;
 using UniSphere.Api.Extensions;
 
 namespace UniSphere.Api.Controllers;
- 
+
 [ApiController]
 [Produces("application/json")]
 [Authorize]
 [Route("api/[controller]")]
-public class StudentController (ApplicationDbContext dbContext) : BaseController
+public class StudentController(ApplicationDbContext dbContext) : BaseController
 {
     [HttpGet("GetMe")]
     public async Task<ActionResult<BaseStudentDto>> GetMe()
     {
         var studentId = HttpContext.User.GetStudentId();
-     
+
         if (studentId is null)
         {
-            return Unauthorized(); 
+            return Unauthorized();
         }
 
         StudentCredential studentCredential = await dbContext.StudentCredentials
@@ -54,7 +54,7 @@ public class StudentController (ApplicationDbContext dbContext) : BaseController
 
         var statistics = await dbContext.StudentStatistics
             .Where(ss => ss.StudentId == studentId)
-            .Select(StatisticsQueries.ProjectToDto(average?? 0))
+            .Select(StatisticsQueries.ProjectToDto(average ?? 0))
             .FirstOrDefaultAsync();
         if (statistics is null)
         {
@@ -92,10 +92,10 @@ public class StudentController (ApplicationDbContext dbContext) : BaseController
         }
         catch (Exception e)
         {
-            return BadRequest(new IsSuccessDto { IsSuccess = false , Message = e.Message });
-            
+            return BadRequest(new IsSuccessDto { IsSuccess = false, Message = e.Message });
+
         }
-        return Ok(new IsSuccessDto { IsSuccess = true });        
+        return Ok(new IsSuccessDto { IsSuccess = true });
     }
 
 }

@@ -17,4 +17,31 @@ public static class ClaimsPrincipalExtensions
 
         return studentId;
     }
+    public static Guid? GetAdminId(this ClaimsPrincipal principal)
+    {
+        string? adminIdString = principal.FindFirstValue("adminId");
+        if (string.IsNullOrWhiteSpace(adminIdString) || !Guid.TryParse(adminIdString, out Guid adminId))
+        {
+            return null;
+        }
+        return adminId;
+    }
+    public static Guid? GetSuperAdminId(this ClaimsPrincipal principal)
+    {
+        string? superAdminIdString = principal.FindFirstValue("superAdminId");
+        if (string.IsNullOrWhiteSpace(superAdminIdString) || !Guid.TryParse(superAdminIdString, out Guid superAdminId))
+        {
+            return null;
+        }
+        return superAdminId;
+    }
+    public static Guid? GetProfessorId(this ClaimsPrincipal principal)
+    {
+        string? professorIdString = principal.FindFirstValue("professorId");
+        if (string.IsNullOrWhiteSpace(professorIdString) || !Guid.TryParse(professorIdString, out Guid professorId))
+        {
+            return null;
+        }
+        return professorId;
+    }
 }

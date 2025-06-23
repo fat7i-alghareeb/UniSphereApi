@@ -44,8 +44,8 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
         // Get all relevant subject IDs (executes immediately due to ToListAsync)
         var subjectIds = await dbContext.Subjects
             .Where(st => st.MajorId == studentInfo.MajorId &&
-                         st.Year <= studentInfo.Year &&
-                         st.Semester <= 2)
+                            st.Year <= studentInfo.Year &&
+                            st.Semester <= 2)
             .Select(s => s.Id)
             .ToListAsync();
 
@@ -111,7 +111,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
                 .Select(SubjectQueries.ProjectToDto(studentId.Value, Lang))
                 .ToListAsync()
         };
-    
+
         return Ok(subjectCollectionDto);
     }
 

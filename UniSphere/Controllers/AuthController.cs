@@ -112,8 +112,8 @@ public sealed class AuthController(
         await applicationDbContext.SaveChangesAsync();
         await transaction.CommitAsync();
         AccessTokensDto accessTokens = tokenProvider.Create(
-            new TokenRequest(registerStudentDto.StudentId, [Roles.Student]
-        ));
+            new TokenRequest([Roles.Student], registerStudentDto.StudentId)
+        );
         await identityDbContext.SaveChangesAsync();
         return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken,Lang));
     }
@@ -158,7 +158,7 @@ public sealed class AuthController(
 
         IList<string> roles = await userManager.GetRolesAsync(applicationUser);
         AccessTokensDto accessTokens = tokenProvider.Create(
-            new TokenRequest(studentCredential.Id,roles)
+            new TokenRequest(roles, studentCredential.Id)
         );
         RefreshToken? refreshToken = await identityDbContext.RefreshTokens
             .Include(rt => rt.User)
@@ -199,7 +199,7 @@ public sealed class AuthController(
             IList<string> roles = await userManager.GetRolesAsync(refreshToken.User);
 
             AccessTokensDto accessTokens = tokenProvider.Create(
-                new TokenRequest(refreshToken.User.StudentId, roles)
+                new TokenRequest(roles, refreshToken.User.StudentId)
             );
             refreshToken.Token = accessTokens.RefreshToken;
             refreshToken.ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
