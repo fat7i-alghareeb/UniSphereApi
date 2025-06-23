@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -45,18 +46,22 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
         // Get all major announcements for the student's major and year
         var majorAnnouncements = await dbContext.MajorAnnouncements
             .Where(a => a.MajorId == studentInfo.MajorId && a.Year == studentInfo.Year)
-            .Select(a => a.ToStudentAnnouncementsDto(Lang))
+            .Select(AnnouncementsQueries.ProjectToStudentAnnouncementsDto(Lang))
             .ToListAsync();
 
         // Get announcements for subjects the student is enrolled in from other years
         var subjectAnnouncements = await dbContext.MajorAnnouncements
             .Where(a => studentSubjectsIdsForNotTheCurrentYear.Contains(a.SubjectId))
-            .Select(a => a.ToStudentAnnouncementsDto(Lang))
+            .Select(AnnouncementsQueries.ProjectToStudentAnnouncementsDto(Lang))
             .ToListAsync();
 
         // Combine both lists
         var allAnnouncements = majorAnnouncements.Concat(subjectAnnouncements).ToList();
-        return Ok(allAnnouncements);
+        
+        return Ok(new StudentAnnouncementsCollectionDto
+        {
+            Announcements =   allAnnouncements
+        });
     }
 
     [HttpGet("GetFacultyAnnouncements")]
@@ -86,8 +91,26 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
 
         var announcements = await dbContext.FacultyAnnouncements
             .Where(a => a.FacultyId == studentInfo.FacultyId)
-            .Select(a => a.ToFacultyAnnouncementsDto(Lang))
+            .Select(AnnouncementsQueries.ProjectToFacultyAnnouncementsDto(Lang))
             .ToListAsync();
-        return Ok(announcements);
+        return Ok(new FacultyAnnouncementsCollectionDto
+        {
+            Announcements = announcements,
+        });
     }
+    // [HttpGet("GetFacultyAnnouncementById")]
+    // public async Task<ActionResult<FacultyAnnouncementsDto>> GetFacultyAnnouncementById([Required] Guid announcementId)
+    // {
+    //     var studentId = HttpContext.User.GetStudentId();
+    //     if (studentId is null)
+    //     {
+    //         return Unauthorized();
+    //     }
+
+    //     var announcement = await dbContext.FacultyAnnouncements
+    //         .Where(a => a.Id == announcementId)
+    //         .Select(AnnouncementsQueries.ProjectToFacultyAnnouncementsDto(Lang))
+    //         .FirstOrDefaultAsync();
+    //     return Ok(announcement);
+    // }
 }

@@ -1,49 +1,110 @@
-﻿// using System.ComponentModel.DataAnnotations;
-// using Microsoft.AspNetCore.Authorization;
-// using Microsoft.AspNetCore.Mvc;
-// using Microsoft.EntityFrameworkCore;
-// using UniSphere.Api.Database;
-// using UniSphere.Api.DTOs.Info;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using UniSphere.Api.Database;
+using UniSphere.Api.DTOs.Announcements;
+using UniSphere.Api.DTOs.Info;
+using UniSphere.Api.DTOs.Statistics;
+using UniSphere.Api.Extensions;
 
-// namespace UniSphere.Api.Controllers;
+namespace UniSphere.Api.Controllers;
 
-// [ApiController]
-// [Produces("application/json")]
-// [AllowAnonymous]
-// [Route("api/[controller]")]
-// public class InfoController(ApplicationDbContext dbContext) : BaseController
-// {
-//     [HttpGet("GetFaculties")]
-//     public async Task<ActionResult<FacultiesCollectionDto>> GetFaculties()
-//     {
-//         var faculties = await dbContext.Faculties
-//             .Select(InfoQueries.ProjectToFacultyNameDto(Lang))
-//             .ToListAsync();
+[ApiController]
+[Produces("application/json")]
+[AllowAnonymous]
+[Route("api/[controller]")]
+public class InfoController(ApplicationDbContext dbContext) : BaseController
+{
+    [HttpGet("GetFaculties")]
+    public async Task<ActionResult<FacultiesCollectionDto>> GetFaculties()
+    {
+        var faculties = await dbContext.Faculties
+            .Select(InfoQueries.ProjectToFacultyNameDto(Lang))
+            .ToListAsync();
 
-//         return Ok(new FacultiesCollectionDto
-//             {
-//                 Factories = faculties
-//             }
-//         );
-//     }
+        return Ok(new FacultiesCollectionDto
+        {
+            Factories = faculties
+        }
+        );
+    }
 
-//     [HttpGet("GetMajors")]
-//     public async Task<ActionResult<MajorsCollectionDto>> GetMajors([Required] Guid facultyId)
-//     {
-//         var majors = await dbContext.Majors
-//             .Where(m => m.FacultyId == facultyId)
-//             .Select(InfoQueries.ProjectToMajorNameDto(Lang))
-//             .ToListAsync();
+    [HttpGet("GetMajors")]
+    public async Task<ActionResult<MajorsCollectionDto>> GetMajors([Required] Guid facultyId)
+    {
+        var majors = await dbContext.Majors
+            .Where(m => m.FacultyId == facultyId)
+            .Select(InfoQueries.ProjectToMajorNameDto(Lang))
+            .ToListAsync();
 
-//         return Ok(
-//             new MajorsCollectionDto
-//             {
-//                 Majors = majors
-//             }
-//         );
-//     }
-    
-//     [HttpGet("GetHomePageInfo")]
-    
-// }
+        return Ok(
+            new MajorsCollectionDto
+            {
+                Majors = majors
+            }
+        );
+    }
+
+    [HttpGet("GetHomePageInfo")]
+    public async Task<ActionResult<HomeDto>> GetHomePageInfo()
+    {
+        
+        
+        var studentId = HttpContext.User.GetStudentId();
+        if (studentId is null)
+        {
+            return Unauthorized();
+        }
+        var average = await dbContext.SubjectStudentLinks
+            .Where(s => s.StudentId == studentId
+                        &&
+                        s.MidtermGrade != null &&
+                        s.FinalGrade != null)
+            .AverageAsync(s => s.MidtermGrade + s.FinalGrade);
+
+        var statistics = await dbContext.StudentStatistics
+            .Where(ss => ss.StudentId == studentId)
+            .Select(StatisticsQueries.ProjectToDto(average ?? 0))
+            .FirstOrDefaultAsync();
+        if (statistics is null)
+        {
+            return NotFound();
+        }
+        var studentInfo = await dbContext.StudentCredentials
+     .Where(sc => sc.Id == studentId)
+     .Include(sc => sc.Major)
+     .ThenInclude(m => m.Faculty)
+     .Select(sc => new
+     {
+         sc.Major.FacultyId
+     })
+     .Distinct()
+     .FirstOrDefaultAsync();
+
+        if (studentInfo is null)
+        {
+            return NotFound();
+        }
+
+        var announcements = await dbContext.FacultyAnnouncements
+        .Where(fa => fa.FacultyId == studentInfo.FacultyId)
+        .OrderByDescending(fa => fa.CreatedAt)
+        .Take(10)
+        .Select(AnnouncementsQueries.ProjectToTop10FacultyAnnouncementsDto(Lang))
+        .ToListAsync();
+        var daysToTheFinal = await dbContext.Faculties
+        .Where(f => f.Id == studentInfo.FacultyId)
+        .Select(f => f.DaysToTheFinale)
+        .FirstOrDefaultAsync();
+
+        return Ok(new HomeDto
+        {
+            Announcements = announcements,
+            DaysToTheFinal = daysToTheFinal,
+            Statistics = statistics
+        });
+    }
+
+}
 
