@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UniSphere.Api.Database;
 using UniSphere.Api.DTOs.Announcements;
+using UniSphere.Api.Entities;
 using UniSphere.Api.Extensions;
 
 namespace UniSphere.Api.Controllers;
@@ -113,4 +114,86 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
     //         .FirstOrDefaultAsync();
     //     return Ok(announcement);
     // }
+
+    // Admin Announcement Creation Endpoints
+    [HttpPost("CreateFacultyAnnouncement")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<FacultyAnnouncementsDto>> CreateFacultyAnnouncement(CreateFacultyAnnouncementDto createDto)
+    {
+        var adminId = HttpContext.User.GetAdminId();
+        if (adminId is null)
+        {
+            return Unauthorized();
+        }
+
+        // Verify admin has access to this faculty
+        var admin = await dbContext.Admins
+            .Include(a => a.Major)
+            .ThenInclude(m => m.Faculty)
+            .FirstOrDefaultAsync(a => a.Id == adminId);
+
+        if (admin is null || admin.Major.FacultyId != createDto.FacultyId)
+        {
+            return Forbid();
+        }
+
+        var facultyAnnouncement = new FacultyAnnouncement
+        {
+            Id = Guid.NewGuid(),
+            FacultyId = createDto.FacultyId,
+            Title = new MultilingualText { En = createDto.TitleEn, Ar = createDto.TitleAr },
+            Content = new MultilingualText { En = createDto.ContentEn, Ar = createDto.ContentAr },
+            CreatedAt = DateTime.UtcNow
+        };
+
+        dbContext.FacultyAnnouncements.Add(facultyAnnouncement);
+        await dbContext.SaveChangesAsync();
+
+        return Ok(facultyAnnouncement.ToFacultyAnnouncementsDto(Lang));
+    }
+
+    [HttpPost("CreateMajorAnnouncement")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<StudentAnnouncementsDto>> CreateMajorAnnouncement(CreateMajorAnnouncementDto createDto)
+    {
+        var adminId = HttpContext.User.GetAdminId();
+        if (adminId is null)
+        {
+            return Unauthorized();
+        }
+
+        // Verify admin has access to this major
+        var admin = await dbContext.Admins
+            .FirstOrDefaultAsync(a => a.Id == adminId);
+
+        if (admin is null || admin.MajorId != createDto.MajorId)
+        {
+            return Forbid();
+        }
+
+        // Verify subject belongs to the major
+        var subject = await dbContext.Subjects
+            .FirstOrDefaultAsync(s => s.Id == createDto.SubjectId && s.MajorId == createDto.MajorId);
+
+        if (subject is null)
+        {
+            return BadRequest("Subject does not belong to the specified major");
+        }
+
+        var majorAnnouncement = new MajorAnnouncement
+        {
+            Id = Guid.NewGuid(),
+            MajorId = createDto.MajorId,
+            SubjectId = createDto.SubjectId,
+            Year = createDto.Year,
+            Title = new MultilingualText { En = createDto.TitleEn, Ar = createDto.TitleAr },
+            Content = new MultilingualText { En = createDto.ContentEn, Ar = createDto.ContentAr },
+            CreatedAt = DateTime.UtcNow
+        };
+
+        dbContext.MajorAnnouncements.Add(majorAnnouncement);
+        await dbContext.SaveChangesAsync();
+
+        return Ok(majorAnnouncement.ToStudentAnnouncementsDto(Lang));
+    }
 }

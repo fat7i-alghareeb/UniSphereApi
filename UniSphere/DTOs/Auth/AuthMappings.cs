@@ -53,4 +53,45 @@ internal static class AuthMappings{
             NumberOfMajorYears = studentCredential.Major.NumberOfYears
         };
     }
+
+    // Admin mappings
+    public static SimpleAdminDto ToSimpleAdminDto(this Admin admin, Languages lang)
+    {
+        return new SimpleAdminDto
+        {
+            FullName = admin.FirstName.GetTranslatedString(lang) + " " + admin.LastName.GetTranslatedString(lang),
+            Gmail = admin.Gmail,
+            MajorName = admin.Major.Name.GetTranslatedString(lang),
+            MajorId = admin.MajorId,
+            AdminId = admin.Id
+        };
+    }
+
+    public static FullInfoAdminDto ToFullInfoAdminDto(this Admin admin, string accessToken, string refreshToken, Languages lang)
+    {
+        return new FullInfoAdminDto
+        {
+            FirstName = admin.FirstName.GetTranslatedString(lang),
+            LastName = admin.LastName.GetTranslatedString(lang),
+            Gmail = admin.Gmail,
+            MajorName = admin.Major.Name.GetTranslatedString(lang),
+            MajorId = admin.MajorId,
+            AdminId = admin.Id,
+            AccessToken = accessToken,
+            RefreshToken = refreshToken
+        };
+    }
+
+    public static BaseAdminDto ToBaseAdminDto(this Admin admin, Languages lang)
+    {
+        return new BaseAdminDto()
+        {
+            FirstName = admin.FirstName.GetTranslatedString(lang),
+            LastName = admin.LastName.GetTranslatedString(lang),
+            Gmail = admin.Gmail,
+            MajorName = admin.Major.Name.GetTranslatedString(lang),
+            MajorId = admin.MajorId,
+            AdminId = admin.Id
+        };
+    }
 }
