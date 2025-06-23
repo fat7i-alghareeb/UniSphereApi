@@ -152,30 +152,48 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
     }
 
     [HttpPost("CreateMajorAnnouncement")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public async Task<ActionResult<StudentAnnouncementsDto>> CreateMajorAnnouncement(CreateMajorAnnouncementDto createDto)
     {
         var adminId = HttpContext.User.GetAdminId();
-        if (adminId is null)
+        var superAdminId = HttpContext.User.GetSuperAdminId();
+        Guid majorId;
+
+        if (adminId is not null)
+        {
+            var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
+            if (admin is null)
+            {
+                return Unauthorized();
+            }
+            majorId = admin.MajorId;
+        }
+        else if (superAdminId is not null)
+        {
+            if (createDto.MajorId is null)
+            {
+                return BadRequest("MajorId is required for super admin.");
+            }
+            var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
+            var major = await dbContext.Majors.FirstOrDefaultAsync(m => m.Id == createDto.MajorId);
+            if (superAdmin is null || major is null || superAdmin.FacultyId != major.FacultyId)
+            {
+                return Forbid();
+            }
+            majorId = createDto.MajorId.Value;
+        }
+        else
         {
             return Unauthorized();
         }
 
-        // Get the admin and their major
-        var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
-        if (admin is null)
-        {
-            return Unauthorized();
-        }
-        var majorId = admin.MajorId;
-
-        // Verify subject belongs to the admin's major
+        // Verify subject belongs to the selected major
         var subject = await dbContext.Subjects
             .FirstOrDefaultAsync(s => s.Id == createDto.SubjectId && s.MajorId == majorId);
 
         if (subject is null)
         {
-            return BadRequest("Subject does not belong to the admin's major");
+            return BadRequest("Subject does not belong to the selected major");
         }
 
         var majorAnnouncement = new MajorAnnouncement
