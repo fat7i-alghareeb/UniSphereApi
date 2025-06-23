@@ -1,6 +1,6 @@
 ﻿namespace UniSphere.Api.DTOs.Auth;
 
-public sealed record CheckOneTimeCodeDto
+public sealed record StudentCheckOneTimeCodeDto
 {
     
     public required int Code { get; init; }

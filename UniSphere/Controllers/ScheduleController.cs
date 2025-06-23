@@ -137,19 +137,11 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
             );
     }
 
-    // [HttpPost("AddLapsToSchedule")]
-    // public async Task<ActionResult<DayLectureDto>> AddLapsToSchedule(AddLabsToScheduleDto addLabsToScheduleDto)
-    // {
-    //     var studentId = HttpContext.User.GetStudentId();
-    //     if (studentId is null)
-    //     {
-    //         return Unauthorized();
-    //     }
-    // }
+
 }
 
-public sealed record  AddLabsToScheduleDto
-{
-    public required Guid LabId { get; init; }
+// public sealed record  AddLabsToScheduleDto
+// {
+//     public required Guid LabId { get; init; }
     
-}
+// }

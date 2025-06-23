@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UniSphere.Api.DTOs.Announcements;
-
 namespace UniSphere.Api.Entities;
 
 public class FacultyAnnouncement

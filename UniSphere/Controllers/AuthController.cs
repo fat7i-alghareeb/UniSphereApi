@@ -27,7 +27,7 @@ public sealed class AuthController(
 
     [HttpPost("Student/CheckOneTimeCode")]
 
-    public async Task<ActionResult<SimpleStudentDto>> CheckOneTimeCode(CheckOneTimeCodeDto checkOneTimeCodeDto)
+    public async Task<ActionResult<SimpleStudentDto>> CheckOneTimeCode(StudentCheckOneTimeCodeDto checkOneTimeCodeDto)
     {
       
         
