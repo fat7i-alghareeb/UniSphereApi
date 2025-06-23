@@ -126,21 +126,20 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
             return Unauthorized();
         }
 
-        // Verify admin has access to this faculty
+        // Get the admin and their major (and thus their faculty)
         var admin = await dbContext.Admins
             .Include(a => a.Major)
-            .ThenInclude(m => m.Faculty)
             .FirstOrDefaultAsync(a => a.Id == adminId);
-
-        if (admin is null || admin.Major.FacultyId != createDto.FacultyId)
+        if (admin is null)
         {
-            return Forbid();
+            return Unauthorized();
         }
+        var facultyId = admin.Major.FacultyId;
 
         var facultyAnnouncement = new FacultyAnnouncement
         {
             Id = Guid.NewGuid(),
-            FacultyId = createDto.FacultyId,
+            FacultyId = facultyId,
             Title = new MultilingualText { En = createDto.TitleEn, Ar = createDto.TitleAr },
             Content = new MultilingualText { En = createDto.ContentEn, Ar = createDto.ContentAr },
             CreatedAt = DateTime.UtcNow

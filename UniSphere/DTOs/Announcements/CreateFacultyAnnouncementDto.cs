@@ -4,7 +4,6 @@ namespace UniSphere.Api.DTOs.Announcements;
 
 public sealed record CreateFacultyAnnouncementDto
 {
-    public required Guid FacultyId { get; init; }
     public required string TitleEn { get; init; }
     public required string TitleAr { get; init; }
     public required string ContentEn { get; init; }
