@@ -161,28 +161,27 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
             return Unauthorized();
         }
 
-        // Verify admin has access to this major
-        var admin = await dbContext.Admins
-            .FirstOrDefaultAsync(a => a.Id == adminId);
-
-        if (admin is null || admin.MajorId != createDto.MajorId)
+        // Get the admin and their major
+        var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
+        if (admin is null)
         {
-            return Forbid();
+            return Unauthorized();
         }
+        var majorId = admin.MajorId;
 
-        // Verify subject belongs to the major
+        // Verify subject belongs to the admin's major
         var subject = await dbContext.Subjects
-            .FirstOrDefaultAsync(s => s.Id == createDto.SubjectId && s.MajorId == createDto.MajorId);
+            .FirstOrDefaultAsync(s => s.Id == createDto.SubjectId && s.MajorId == majorId);
 
         if (subject is null)
         {
-            return BadRequest("Subject does not belong to the specified major");
+            return BadRequest("Subject does not belong to the admin's major");
         }
 
         var majorAnnouncement = new MajorAnnouncement
         {
             Id = Guid.NewGuid(),
-            MajorId = createDto.MajorId,
+            MajorId = majorId,
             SubjectId = createDto.SubjectId,
             Year = createDto.Year,
             Title = new MultilingualText { En = createDto.TitleEn, Ar = createDto.TitleAr },
