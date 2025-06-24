@@ -48,7 +48,7 @@ public sealed class AuthController(
             );
         }
 
-        return Ok(studentCredential.ToSimpleStudentDto(Lang));
+        return Ok(studentCredential.ToSimpleStudentDto());
     }
 
     [HttpPost("Student/Register")]
@@ -115,7 +115,7 @@ public sealed class AuthController(
             new TokenRequest([Roles.Student], registerStudentDto.StudentId)
         );
         await identityDbContext.SaveChangesAsync();
-        return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken,Lang));
+        return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken));
     }
 
     [HttpPost("Student/Login")]
@@ -180,7 +180,7 @@ public sealed class AuthController(
             refreshToken.ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
         }
         await identityDbContext.SaveChangesAsync();
-        return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken,Lang));
+        return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken));
     }
 
     // Admin Authentication Endpoints
@@ -204,7 +204,7 @@ public sealed class AuthController(
             );
         }
 
-        return Ok(admin.ToSimpleAdminDto(Lang));
+        return Ok(admin.ToSimpleAdminDto());
     }
 
     [HttpPost("Admin/Register")]
@@ -268,7 +268,7 @@ public sealed class AuthController(
             new TokenRequest([Roles.Admin], null, registerAdminDto.AdminId)
         );
         await identityDbContext.SaveChangesAsync();
-        return Ok(admin.ToFullInfoAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken, Lang));
+        return Ok(admin.ToFullInfoAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken));
     }
 
     [HttpPost("Admin/Login")]
@@ -330,7 +330,7 @@ public sealed class AuthController(
             refreshToken.ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
         }
         await identityDbContext.SaveChangesAsync();
-        return Ok(admin.ToFullInfoAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken, Lang));
+        return Ok(admin.ToFullInfoAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken));
     }
 
     // SuperAdmin Authentication Endpoints
@@ -354,7 +354,7 @@ public sealed class AuthController(
             );
         }
 
-        return Ok(superAdmin.ToSimpleSuperAdminDto(Lang));
+        return Ok(superAdmin.ToSimpleSuperAdminDto());
     }
 
     [HttpPost("SuperAdmin/Register")]
@@ -418,7 +418,7 @@ public sealed class AuthController(
             new TokenRequest([Roles.SuperAdmin], null, null, registerSuperAdminDto.SuperAdminId)
         );
         await identityDbContext.SaveChangesAsync();
-        return Ok(superAdmin.ToFullInfoSuperAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken, Lang));
+        return Ok(superAdmin.ToFullInfoSuperAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken));
     }
 
     [HttpPost("SuperAdmin/Login")]
@@ -480,7 +480,7 @@ public sealed class AuthController(
             refreshToken.ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
         }
         await identityDbContext.SaveChangesAsync();
-        return Ok(superAdmin.ToFullInfoSuperAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken, Lang));
+        return Ok(superAdmin.ToFullInfoSuperAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken));
     }
 
     // Professor Authentication Endpoints
@@ -503,7 +503,7 @@ public sealed class AuthController(
             );
         }
 
-        return Ok(professor.ToSimpleProfessorDto(Lang));
+        return Ok(professor.ToSimpleProfessorDto());
     }
 
     [HttpPost("Professor/Register")]
@@ -566,7 +566,7 @@ public sealed class AuthController(
             new TokenRequest([Roles.Professor], null, null, null, registerProfessorDto.ProfessorId)
         );
         await identityDbContext.SaveChangesAsync();
-        return Ok(professor.ToFullInfoProfessorDto(accessTokens.AccessToken, accessTokens.RefreshToken, Lang));
+        return Ok(professor.ToFullInfoProfessorDto(accessTokens.AccessToken, accessTokens.RefreshToken));
     }
 
     [HttpPost("Professor/Login")]
@@ -627,7 +627,7 @@ public sealed class AuthController(
             refreshToken.ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
         }
         await identityDbContext.SaveChangesAsync();
-        return Ok(professor.ToFullInfoProfessorDto(accessTokens.AccessToken, accessTokens.RefreshToken, Lang));
+        return Ok(professor.ToFullInfoProfessorDto(accessTokens.AccessToken, accessTokens.RefreshToken));
     }
 
     // SystemController Authentication Endpoints

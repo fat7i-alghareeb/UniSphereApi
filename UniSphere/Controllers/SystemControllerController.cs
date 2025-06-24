@@ -67,7 +67,7 @@ public class SystemControllerController(
         applicationDbContext.SuperAdmins.Add(superAdmin);
         await applicationDbContext.SaveChangesAsync();
 
-        return Ok(superAdmin.ToBaseSuperAdminDto(Lang));
+        return Ok(superAdmin.ToBaseSuperAdminDto());
     }
 
     [HttpDelete("SuperAdmin/Remove/{superAdminId:guid}")]

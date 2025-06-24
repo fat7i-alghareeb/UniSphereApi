@@ -31,6 +31,6 @@ public class AdminController(ApplicationDbContext dbContext) : BaseController
         {
             return Unauthorized();
         }
-        return Ok(admin.ToBaseAdminDto(Lang));
+        return Ok(admin.ToBaseAdminDto());
     }
 } 
