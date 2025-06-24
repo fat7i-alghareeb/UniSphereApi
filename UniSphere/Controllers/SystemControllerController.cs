@@ -8,6 +8,7 @@ using UniSphere.Api.Database;
 using UniSphere.Api.DTOs.Auth;
 using UniSphere.Api.Entities;
 using UniSphere.Api.Extensions;
+using UniSphere.Api.Services;
 
 namespace UniSphere.Api.Controllers;
 
@@ -16,7 +17,11 @@ namespace UniSphere.Api.Controllers;
 [Route("api/[controller]")]
 public class SystemControllerController(
     ApplicationDbContext applicationDbContext,
-    UserManager<ApplicationUser> userManager) : BaseController
+    UserManager<ApplicationUser> userManager,
+    ApplicationIdentityDbContext identityDbContext,
+    TokenProvider tokenProvider,
+    IAuthService authService
+) : BaseController
 {
     [HttpGet("GetMe")]
     public async Task<ActionResult<BaseSystemControllerDto>> GetMe()
@@ -211,5 +216,115 @@ public class SystemControllerController(
         await applicationDbContext.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    // Authentication Endpoints
+    [HttpPost("Auth/Login")]
+    [AllowAnonymous]
+    public async Task<ActionResult<FullInfoSystemControllerDto>> Login(LoginSystemControllerDto loginSystemControllerDto)
+    {
+        SystemController? systemController = await applicationDbContext.SystemControllers
+            .FirstOrDefaultAsync(sc => sc.Gmail == loginSystemControllerDto.Gmail);
+        if (systemController is null)
+        {
+            return Problem(
+                detail: "SystemController not found",
+                title: "SystemController not found",
+                statusCode: StatusCodes.Status404NotFound
+            );
+        }
+
+        ApplicationUser? applicationUser =
+            await userManager.Users.FirstOrDefaultAsync(u => u.SystemControllerId == systemController.Id);
+        if (applicationUser is null)
+        {
+            return Problem(
+                detail: "SystemController not Registered",
+                title: "SystemController not Registered",
+                statusCode: StatusCodes.Status401Unauthorized
+            );
+        }
+
+        if (!await userManager.CheckPasswordAsync(applicationUser, loginSystemControllerDto.Password))
+        {
+            return Problem(
+                detail: "Wrong password",
+                title: "Wrong password",
+                statusCode: StatusCodes.Status401Unauthorized
+            );
+        }
+
+        IList<string> roles = await userManager.GetRolesAsync(applicationUser);
+        AccessTokensDto accessTokens = tokenProvider.Create(
+            new TokenRequest(roles, null, null, null, null, systemController.Id)
+        );
+        
+        await authService.CreateOrUpdateRefreshTokenAsync(applicationUser, accessTokens.RefreshToken);
+        
+        return Ok(systemController.ToFullInfoSystemControllerDto(accessTokens.AccessToken, accessTokens.RefreshToken));
+    }
+
+    [HttpPost("Auth/Register")]
+    [AllowAnonymous]
+    public async Task<ActionResult<FullInfoSystemControllerDto>> Register(RegisterSystemControllerDto registerSystemControllerDto)
+    {
+        using IDbContextTransaction transaction = await identityDbContext.Database.BeginTransactionAsync();
+        applicationDbContext.Database.SetDbConnection(identityDbContext.Database.GetDbConnection());
+        await applicationDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
+
+        SystemController? systemController = await applicationDbContext.SystemControllers
+            .FirstOrDefaultAsync(sc => sc.Id == registerSystemControllerDto.SystemControllerId);
+        if (systemController is null)
+        {
+            return NotFound();
+        }
+
+        var applicationUser = new ApplicationUser
+        {
+            UserName = registerSystemControllerDto.SystemControllerId.ToString(),
+            SystemControllerId = registerSystemControllerDto.SystemControllerId,
+        };
+        if (registerSystemControllerDto.Password != registerSystemControllerDto.ConfirmPassword)
+        {
+            return BadRequest("Password and ConfirmPassword must be the same");
+        }
+
+        IdentityResult createSystemControllerResult = await userManager.CreateAsync(applicationUser, registerSystemControllerDto.Password);
+        if (!createSystemControllerResult.Succeeded)
+        {
+            var extensions = new Dictionary<string, object?>
+            {
+                { "errors", createSystemControllerResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
+            };
+
+            return Problem(
+                detail: "Error creating SystemController",
+                title: "Error creating SystemController",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: extensions
+            );
+        }
+        IdentityResult addRoleResult = await userManager.AddToRoleAsync(applicationUser, Roles.SystemController);
+        if (!addRoleResult.Succeeded)
+        {
+            var extensions = new Dictionary<string, object?>
+            {
+                { "errors", createSystemControllerResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
+            };
+
+            return Problem(
+                detail: "Error creating SystemController",
+                title: "Error creating SystemController",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: extensions
+            );
+        }
+        await applicationDbContext.SaveChangesAsync();
+        await transaction.CommitAsync();
+        AccessTokensDto accessTokens = tokenProvider.Create(
+            new TokenRequest([Roles.SystemController], null, null, null, null, registerSystemControllerDto.SystemControllerId)
+        );
+        await identityDbContext.SaveChangesAsync();
+        return Ok(systemController.ToFullInfoSystemControllerDto(accessTokens.AccessToken, accessTokens.RefreshToken));
     }
 } 

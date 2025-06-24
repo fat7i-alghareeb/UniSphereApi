@@ -166,6 +166,7 @@ public static class DependenciesInjection
     {
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
         builder.Services.AddTransient<TokenProvider>();
+        builder.Services.AddScoped<IAuthService, AuthService>();
         
         // Register storage services
         builder.Services.AddScoped<IStorageService, LocalStorageService>();

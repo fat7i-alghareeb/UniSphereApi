@@ -34,7 +34,7 @@ public class StudentController(ApplicationDbContext dbContext) : BaseController
         {
             return Unauthorized();
         }
-        return Ok(studentCredential.ToBaseStudentDto(Lang));
+        return Ok(studentCredential.ToBaseStudentDto());
     }
 
     [HttpGet("GetMyStatistics")]
