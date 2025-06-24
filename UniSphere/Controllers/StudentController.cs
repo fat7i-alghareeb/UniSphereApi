@@ -98,4 +98,76 @@ public class StudentController(ApplicationDbContext dbContext) : BaseController
         return Ok(new IsSuccessDto { IsSuccess = true });
     }
 
+    [HttpPost("AddStudent")]
+    [Authorize(Roles = nameof(Roles.SuperAdmin) + "," + nameof(Roles.Admin))]
+    public async Task<IActionResult> AddStudent([FromBody] CreateStudentDto dto)
+    {
+        var userRole = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+        var superAdminId = HttpContext.User.GetSuperAdminId();
+        var adminId = HttpContext.User.GetAdminId();
+
+        if (userRole == Roles.SuperAdmin)
+        {
+            // SuperAdmin: can add to any major in their faculty
+            if (superAdminId is null)
+            {
+                return Unauthorized();
+            }
+            var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
+            if (superAdmin is null)
+            {
+                return Unauthorized();
+            }
+            var major = await dbContext.Majors.FirstOrDefaultAsync(m => m.Id == dto.MajorId);
+            if (major is null || major.FacultyId != superAdmin.FacultyId)
+            {
+                return Forbid();
+            }
+        }
+        else if (userRole == Roles.Admin)
+        {
+            // Admin: can add only to their assigned major
+            if (adminId is null)
+            {
+                return Unauthorized();
+            }
+            var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
+            if (admin is null || admin.MajorId != dto.MajorId)
+            {
+                return Forbid();
+            }
+        }
+        else
+        {
+            return Forbid();
+        }
+
+        // Check for duplicate student number in the same major
+        var exists = await dbContext.StudentCredentials.AnyAsync(sc => sc.StudentNumber == dto.StudentNumber && sc.MajorId == dto.MajorId);
+        if (exists)
+        {
+            return BadRequest("A student with this number already exists in the major.");
+        }
+
+        // Get a default EnrollmentStatusId (first available)
+        var defaultEnrollmentStatus = await dbContext.EnrollmentStatuses.FirstOrDefaultAsync();
+        if (defaultEnrollmentStatus is null)
+        {
+            return BadRequest("No enrollment status found in the system.");
+        }
+
+        var student = new StudentCredential
+        {
+            Id = Guid.NewGuid(),
+            StudentNumber = dto.StudentNumber,
+            MajorId = dto.MajorId,
+            FirstName = new Entities.MultilingualText { En = dto.FirstNameEn, Ar = dto.FirstNameAr },
+            LastName = new Entities.MultilingualText { En = dto.LastNameEn, Ar = dto.LastNameAr },
+            Year = dto.Year,
+            EnrollmentStatusId = defaultEnrollmentStatus.Id
+        };
+        dbContext.StudentCredentials.Add(student);
+        await dbContext.SaveChangesAsync();
+        return Ok(new { message = "Student added successfully.", studentId = student.Id });
+    }
 }

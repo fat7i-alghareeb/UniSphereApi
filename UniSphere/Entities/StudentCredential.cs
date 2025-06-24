@@ -9,7 +9,7 @@ public class StudentCredential
     public required Guid MajorId { get; set; }
     public int? OneTimeCode { get; set; }
     public DateTime? OneTimeCodeCreatedDate { get; set; }
-    public int? OneTimeCodeExpirationInMinutes { get; init; }
+    public int? OneTimeCodeExpirationInMinutes { get; set; }
 
     public required MultilingualText FirstName { get; set; } = new();
     public required MultilingualText LastName { get; set; } = new();
