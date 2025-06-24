@@ -7,10 +7,11 @@ namespace UniSphere.Api.Services;
 /// <summary>
 /// Local file storage service implementation
 /// </summary>
-public class LocalStorageService : IStorageService
+public class LocalStorageService(IWebHostEnvironment environment, ILogger<LocalStorageService> logger)
+    : IStorageService
 {
-    private readonly IWebHostEnvironment _environment;
-    private readonly ILogger<LocalStorageService> _logger;
+    private readonly IWebHostEnvironment _environment = environment ?? throw new ArgumentNullException(nameof(environment));
+    private readonly ILogger<LocalStorageService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private const string UploadsFolder = "uploads";
     private const long MaxFileSize = 30 * 1024 * 1024; // 30MB
     
@@ -30,12 +31,6 @@ public class LocalStorageService : IStorageService
 
     // Static readonly field for invalid path characters
     private static readonly char[] InvalidPathChars = Path.GetInvalidPathChars().Concat(new[] { '/', '\\' }).ToArray();
-
-    public LocalStorageService(IWebHostEnvironment environment, ILogger<LocalStorageService> logger)
-    {
-        _environment = environment ?? throw new ArgumentNullException(nameof(environment));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
 
     /// <summary>
     /// Saves an uploaded file to a folder determined by its extension
