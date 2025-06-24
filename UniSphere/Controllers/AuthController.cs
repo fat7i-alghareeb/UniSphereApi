@@ -333,6 +333,303 @@ public sealed class AuthController(
         return Ok(admin.ToFullInfoAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken, Lang));
     }
 
+    // SuperAdmin Authentication Endpoints
+    [HttpPost("SuperAdmin/CheckOneTimeCode")]
+    public async Task<ActionResult<SimpleSuperAdminDto>> CheckSuperAdminOneTimeCode(SuperAdminCheckOneTimeCodeDto checkOneTimeCodeDto)
+    {
+        var superAdmin = await applicationDbContext.SuperAdmins
+            .Include(sa => sa.Faculty)
+            .FirstOrDefaultAsync(sa => sa.Gmail == checkOneTimeCodeDto.Gmail && sa.FacultyId == checkOneTimeCodeDto.FacultyId);
+        if (superAdmin is null)
+        {
+            return NotFound();
+        }
+
+        if (!IsSuperAdminCodeValid(superAdmin, checkOneTimeCodeDto.Code))
+        {
+            return Problem(
+                detail: "Code is not valid",
+                title: "Code is not valid",
+                statusCode: StatusCodes.Status400BadRequest
+            );
+        }
+
+        return Ok(superAdmin.ToSimpleSuperAdminDto(Lang));
+    }
+
+    [HttpPost("SuperAdmin/Register")]
+    public async Task<ActionResult<FullInfoSuperAdminDto>> RegisterSuperAdmin(RegisterSuperAdminDto registerSuperAdminDto)
+    {
+        using IDbContextTransaction transaction = await identityDbContext.Database.BeginTransactionAsync();
+        applicationDbContext.Database.SetDbConnection(identityDbContext.Database.GetDbConnection());
+        await applicationDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
+
+        SuperAdmin? superAdmin = await applicationDbContext.SuperAdmins
+            .Include(sa => sa.Faculty)
+            .FirstOrDefaultAsync(sa => sa.Id == registerSuperAdminDto.SuperAdminId);
+        if (superAdmin is null)
+        {
+            return NotFound();
+        }
+
+        var applicationUser = new ApplicationUser
+        {
+            UserName = registerSuperAdminDto.SuperAdminId.ToString(),
+            SuperAdminId = registerSuperAdminDto.SuperAdminId,
+        };
+        if (registerSuperAdminDto.Password != registerSuperAdminDto.ConfirmPassword)
+        {
+            return BadRequest("Password and ConfirmPassword must be the same");
+        }
+
+        IdentityResult createSuperAdminResult = await userManager.CreateAsync(applicationUser, registerSuperAdminDto.Password);
+        if (!createSuperAdminResult.Succeeded)
+        {
+            var extensions = new Dictionary<string, object?>
+            {
+                { "errors", createSuperAdminResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
+            };
+
+            return Problem(
+                detail: "Error creating SuperAdmin",
+                title: "Error creating SuperAdmin",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: extensions
+            );
+        }
+        IdentityResult addRoleResult = await userManager.AddToRoleAsync(applicationUser, Roles.SuperAdmin);
+        if (!addRoleResult.Succeeded)
+        {
+            var extensions = new Dictionary<string, object?>
+            {
+                { "errors", createSuperAdminResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
+            };
+
+            return Problem(
+                detail: "Error creating SuperAdmin",
+                title: "Error creating SuperAdmin",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: extensions
+            );
+        }
+        await applicationDbContext.SaveChangesAsync();
+        await transaction.CommitAsync();
+        AccessTokensDto accessTokens = tokenProvider.Create(
+            new TokenRequest([Roles.SuperAdmin], null, null, registerSuperAdminDto.SuperAdminId)
+        );
+        await identityDbContext.SaveChangesAsync();
+        return Ok(superAdmin.ToFullInfoSuperAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken, Lang));
+    }
+
+    [HttpPost("SuperAdmin/Login")]
+    public async Task<ActionResult<FullInfoSuperAdminDto>> LoginSuperAdmin(LoginSuperAdminDto loginSuperAdminDto)
+    {
+        SuperAdmin? superAdmin = await applicationDbContext.SuperAdmins
+            .Include(sa => sa.Faculty)
+            .FirstOrDefaultAsync(sa => sa.Gmail == loginSuperAdminDto.Gmail && sa.FacultyId == loginSuperAdminDto.FacultyId);
+        if (superAdmin is null)
+        {
+            return Problem(
+                detail: "SuperAdmin not found",
+                title: "SuperAdmin not found",
+                statusCode: StatusCodes.Status404NotFound
+            );
+        }
+
+        ApplicationUser? applicationUser =
+            await userManager.Users.FirstOrDefaultAsync(u => u.SuperAdminId == superAdmin.Id);
+        if (applicationUser is null)
+        {
+            return Problem(
+                detail: "SuperAdmin not Registered",
+                title: "SuperAdmin not Registered",
+                statusCode: StatusCodes.Status401Unauthorized
+            );
+        }
+
+        if (!await userManager.CheckPasswordAsync(applicationUser, loginSuperAdminDto.Password))
+        {
+            return Problem(
+                detail: "Wrong password",
+                title: "Wrong password",
+                statusCode: StatusCodes.Status401Unauthorized
+            );
+        }
+
+        IList<string> roles = await userManager.GetRolesAsync(applicationUser);
+        AccessTokensDto accessTokens = tokenProvider.Create(
+            new TokenRequest(roles, null, null, superAdmin.Id)
+        );
+        RefreshToken? refreshToken = await identityDbContext.RefreshTokens
+            .Include(rt => rt.User)
+            .FirstOrDefaultAsync(rt => rt.UserId == applicationUser.Id);
+        if (refreshToken is null)
+        {
+            var newRefreshToken = new RefreshToken
+            {
+                Id = Guid.CreateVersion7(),
+                UserId = applicationUser.Id,
+                ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays),
+                Token = accessTokens.RefreshToken
+            };
+            await identityDbContext.RefreshTokens.AddAsync(newRefreshToken);
+        }
+        else
+        {
+            refreshToken.Token = accessTokens.RefreshToken;
+            refreshToken.ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
+        }
+        await identityDbContext.SaveChangesAsync();
+        return Ok(superAdmin.ToFullInfoSuperAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken, Lang));
+    }
+
+    // Professor Authentication Endpoints
+    [HttpPost("Professor/CheckOneTimeCode")]
+    public async Task<ActionResult<SimpleProfessorDto>> CheckProfessorOneTimeCode(ProfessorCheckOneTimeCodeDto checkOneTimeCodeDto)
+    {
+        var professor = await applicationDbContext.Professors
+            .FirstOrDefaultAsync(p => p.Gmail == checkOneTimeCodeDto.Gmail);
+        if (professor is null)
+        {
+            return NotFound();
+        }
+
+        if (!IsProfessorCodeValid(professor, checkOneTimeCodeDto.Code))
+        {
+            return Problem(
+                detail: "Code is not valid",
+                title: "Code is not valid",
+                statusCode: StatusCodes.Status400BadRequest
+            );
+        }
+
+        return Ok(professor.ToSimpleProfessorDto(Lang));
+    }
+
+    [HttpPost("Professor/Register")]
+    public async Task<ActionResult<FullInfoProfessorDto>> RegisterProfessor(RegisterProfessorDto registerProfessorDto)
+    {
+        using IDbContextTransaction transaction = await identityDbContext.Database.BeginTransactionAsync();
+        applicationDbContext.Database.SetDbConnection(identityDbContext.Database.GetDbConnection());
+        await applicationDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
+
+        Professor? professor = await applicationDbContext.Professors
+            .FirstOrDefaultAsync(p => p.Id == registerProfessorDto.ProfessorId);
+        if (professor is null)
+        {
+            return NotFound();
+        }
+
+        var applicationUser = new ApplicationUser
+        {
+            UserName = registerProfessorDto.ProfessorId.ToString(),
+            ProfessorId = registerProfessorDto.ProfessorId,
+        };
+        if (registerProfessorDto.Password != registerProfessorDto.ConfirmPassword)
+        {
+            return BadRequest("Password and ConfirmPassword must be the same");
+        }
+
+        IdentityResult createProfessorResult = await userManager.CreateAsync(applicationUser, registerProfessorDto.Password);
+        if (!createProfessorResult.Succeeded)
+        {
+            var extensions = new Dictionary<string, object?>
+            {
+                { "errors", createProfessorResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
+            };
+
+            return Problem(
+                detail: "Error creating Professor",
+                title: "Error creating Professor",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: extensions
+            );
+        }
+        IdentityResult addRoleResult = await userManager.AddToRoleAsync(applicationUser, Roles.Professor);
+        if (!addRoleResult.Succeeded)
+        {
+            var extensions = new Dictionary<string, object?>
+            {
+                { "errors", createProfessorResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
+            };
+
+            return Problem(
+                detail: "Error creating Professor",
+                title: "Error creating Professor",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: extensions
+            );
+        }
+        await applicationDbContext.SaveChangesAsync();
+        await transaction.CommitAsync();
+        AccessTokensDto accessTokens = tokenProvider.Create(
+            new TokenRequest([Roles.Professor], null, null, null, registerProfessorDto.ProfessorId)
+        );
+        await identityDbContext.SaveChangesAsync();
+        return Ok(professor.ToFullInfoProfessorDto(accessTokens.AccessToken, accessTokens.RefreshToken, Lang));
+    }
+
+    [HttpPost("Professor/Login")]
+    public async Task<ActionResult<FullInfoProfessorDto>> LoginProfessor(LoginProfessorDto loginProfessorDto)
+    {
+        Professor? professor = await applicationDbContext.Professors
+            .FirstOrDefaultAsync(p => p.Gmail == loginProfessorDto.Gmail);
+        if (professor is null)
+        {
+            return Problem(
+                detail: "Professor not found",
+                title: "Professor not found",
+                statusCode: StatusCodes.Status404NotFound
+            );
+        }
+
+        ApplicationUser? applicationUser =
+            await userManager.Users.FirstOrDefaultAsync(u => u.ProfessorId == professor.Id);
+        if (applicationUser is null)
+        {
+            return Problem(
+                detail: "Professor not Registered",
+                title: "Professor not Registered",
+                statusCode: StatusCodes.Status401Unauthorized
+            );
+        }
+
+        if (!await userManager.CheckPasswordAsync(applicationUser, loginProfessorDto.Password))
+        {
+            return Problem(
+                detail: "Wrong password",
+                title: "Wrong password",
+                statusCode: StatusCodes.Status401Unauthorized
+            );
+        }
+
+        IList<string> roles = await userManager.GetRolesAsync(applicationUser);
+        AccessTokensDto accessTokens = tokenProvider.Create(
+            new TokenRequest(roles, null, null, null, professor.Id)
+        );
+        RefreshToken? refreshToken = await identityDbContext.RefreshTokens
+            .Include(rt => rt.User)
+            .FirstOrDefaultAsync(rt => rt.UserId == applicationUser.Id);
+        if (refreshToken is null)
+        {
+            var newRefreshToken = new RefreshToken
+            {
+                Id = Guid.CreateVersion7(),
+                UserId = applicationUser.Id,
+                ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays),
+                Token = accessTokens.RefreshToken
+            };
+            await identityDbContext.RefreshTokens.AddAsync(newRefreshToken);
+        }
+        else
+        {
+            refreshToken.Token = accessTokens.RefreshToken;
+            refreshToken.ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
+        }
+        await identityDbContext.SaveChangesAsync();
+        return Ok(professor.ToFullInfoProfessorDto(accessTokens.AccessToken, accessTokens.RefreshToken, Lang));
+    }
+
     [HttpPost("RefreshToken")]
     public async Task<ActionResult<AccessTokensDto>> RefreshToken(RefreshTokenDto refreshTokenDto)
     {
@@ -395,6 +692,50 @@ public sealed class AuthController(
         }
 
         if (admin.OneTimeCodeCreatedDate!.Value.AddMinutes(admin.OneTimeCodeExpirationInMinutes!
+                .Value) < DateTime.UtcNow)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool IsSuperAdminCodeValid(SuperAdmin superAdmin, int code)
+    {
+        if (superAdmin.OneTimeCodeCreatedDate is null ||
+            superAdmin.OneTimeCodeExpirationInMinutes is null || superAdmin.OneTimeCode is null)
+        {
+            return false;
+        }
+
+        if (superAdmin.OneTimeCode != code)
+        {
+            return false;
+        }
+
+        if (superAdmin.OneTimeCodeCreatedDate!.Value.AddMinutes(superAdmin.OneTimeCodeExpirationInMinutes!
+                .Value) < DateTime.UtcNow)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool IsProfessorCodeValid(Professor professor, int code)
+    {
+        if (professor.OneTimeCodeCreatedDate is null ||
+            professor.OneTimeCodeExpirationInMinutes is null || professor.OneTimeCode is null)
+        {
+            return false;
+        }
+
+        if (professor.OneTimeCode != code)
+        {
+            return false;
+        }
+
+        if (professor.OneTimeCodeCreatedDate!.Value.AddMinutes(professor.OneTimeCodeExpirationInMinutes!
                 .Value) < DateTime.UtcNow)
         {
             return false;
