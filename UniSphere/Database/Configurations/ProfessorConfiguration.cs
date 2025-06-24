@@ -29,5 +29,9 @@ public class ProfessorConfiguration : IEntityTypeConfiguration<Professor>
             .HasForeignKey(sl => sl.ProfessorId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(p => p.ProfessorFacultyLinks)
+            .WithOne(pfl => pfl.Professor)
+            .HasForeignKey(pfl => pfl.ProfessorId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

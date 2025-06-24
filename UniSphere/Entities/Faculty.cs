@@ -13,4 +13,5 @@ public class Faculty
     public List<Major> Majors { get; set; } = new();
     public List<Schedule> Schedules { get; set; } = new();
     public List<FacultyAnnouncement>? FacultyAnnouncements { get; set; }
+    public List<ProfessorFacultyLink>? ProfessorFacultyLinks { get; set; }
 } 

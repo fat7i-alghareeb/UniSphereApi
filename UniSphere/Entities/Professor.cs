@@ -1,4 +1,3 @@
-
 namespace UniSphere.Api.Entities;
 
 public class Professor
@@ -13,4 +12,5 @@ public class Professor
     public MultilingualText LastName { get; set; }=new();
     public string? Image { get; set; }
     public List<SubjectProfessorLink>? SubjectProfessorLinks { get; set; }
+    public List<ProfessorFacultyLink>? ProfessorFacultyLinks { get; set; }
 }

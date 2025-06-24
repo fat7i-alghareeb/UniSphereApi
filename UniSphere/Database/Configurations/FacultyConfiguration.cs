@@ -33,5 +33,10 @@ public class FacultyConfiguration : IEntityTypeConfiguration<Faculty>
             .WithOne(fa => fa.Faculty)
             .HasForeignKey(fa => fa.FacultyId)
             .OnDelete(DeleteBehavior.Cascade);
+            
+        builder.HasMany(f => f.ProfessorFacultyLinks)
+            .WithOne(pfl => pfl.Faculty)
+            .HasForeignKey(pfl => pfl.FacultyId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 } 

@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -99,21 +98,7 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
             Announcements = announcements,
         });
     }
-    // [HttpGet("GetFacultyAnnouncementById")]
-    // public async Task<ActionResult<FacultyAnnouncementsDto>> GetFacultyAnnouncementById([Required] Guid announcementId)
-    // {
-    //     var studentId = HttpContext.User.GetStudentId();
-    //     if (studentId is null)
-    //     {
-    //         return Unauthorized();
-    //     }
 
-    //     var announcement = await dbContext.FacultyAnnouncements
-    //         .Where(a => a.Id == announcementId)
-    //         .Select(AnnouncementsQueries.ProjectToFacultyAnnouncementsDto(Lang))
-    //         .FirstOrDefaultAsync();
-    //     return Ok(announcement);
-    // }
 
     // Admin Announcement Creation Endpoints
     [HttpPost("CreateFacultyAnnouncement")]

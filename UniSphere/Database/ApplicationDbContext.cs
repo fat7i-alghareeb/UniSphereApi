@@ -20,6 +20,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<InstructorLabLink> InstructorLabLink { get; set; }
     public DbSet<Instructor> Instructors { get; set; }
     public DbSet<Professor> Professors { get; set; }
+    public DbSet<ProfessorFacultyLink> ProfessorFacultyLinks { get; set; }
     public DbSet<FacultyAnnouncement> FacultyAnnouncements { get; set; }
     public DbSet<MajorAnnouncement> MajorAnnouncements { get; set; }
     public DbSet<StudentStatistics> StudentStatistics { get; set; }
