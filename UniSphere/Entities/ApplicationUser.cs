@@ -8,4 +8,5 @@ public class ApplicationUser : IdentityUser
     public Guid? AdminId { get; set; }
     public Guid? SuperAdminId { get; set; }
     public Guid? ProfessorId { get; set; }
+    public Guid? SystemControllerId { get; set; }
 } 

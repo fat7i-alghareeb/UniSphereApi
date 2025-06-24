@@ -7,7 +7,7 @@ public class SuperAdmin
     public required  string Gmail { get; set; } = string.Empty;
     public int? OneTimeCode { get; set; }
     public DateTime? OneTimeCodeCreatedDate { get; set; }
-    public int? OneTimeCodeExpirationInMinutes { get; init; }
+    public int? OneTimeCodeExpirationInMinutes { get; set; }
     public required  MultilingualText FirstName { get; set; }=new();
     public required  MultilingualText LastName { get; set; }=new();
     public Faculty Faculty { get; set; }=new();

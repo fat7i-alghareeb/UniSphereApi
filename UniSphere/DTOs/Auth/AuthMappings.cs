@@ -174,4 +174,38 @@ internal static class AuthMappings{
             ProfessorId = professor.Id
         };
     }
+
+    // SystemController mappings
+    public static SimpleSystemControllerDto ToSimpleSystemControllerDto(this SystemController systemController)
+    {
+        return new SimpleSystemControllerDto
+        {
+            FullName = systemController.UserName,
+            Gmail = systemController.Gmail,
+            UserName = systemController.UserName,
+            SystemControllerId = systemController.Id
+        };
+    }
+
+    public static FullInfoSystemControllerDto ToFullInfoSystemControllerDto(this SystemController systemController, string accessToken, string refreshToken)
+    {
+        return new FullInfoSystemControllerDto
+        {
+            Gmail = systemController.Gmail,
+            UserName = systemController.UserName,
+            SystemControllerId = systemController.Id,
+            AccessToken = accessToken,
+            RefreshToken = refreshToken
+        };
+    }
+
+    public static BaseSystemControllerDto ToBaseSystemControllerDto(this SystemController systemController)
+    {
+        return new BaseSystemControllerDto()
+        {
+            Gmail = systemController.Gmail,
+            UserName = systemController.UserName,
+            SystemControllerId = systemController.Id
+        };
+    }
 }

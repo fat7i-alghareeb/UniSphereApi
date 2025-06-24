@@ -1,6 +1,4 @@
-﻿
-
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -35,6 +33,7 @@ public sealed class TokenProvider(IOptions<JwtAuthOptions> options)
             new("adminId", tokenRequest.AdminId?.ToString() ?? ""),
             new("superAdminId", tokenRequest.SuperAdminId?.ToString() ?? ""),
             new("professorId", tokenRequest.ProfessorId?.ToString() ?? ""),
+            new("systemControllerId", tokenRequest.SystemControllerId?.ToString() ?? ""),
             ..tokenRequest.Roles.Select(role => new Claim(ClaimTypes.Role, role)),
             //\new(JwtRegisteredClaimNames.Email, tokenRequest.Email),
 

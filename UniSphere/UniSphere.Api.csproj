@@ -38,6 +38,9 @@
 
   <ItemGroup>
     <Folder Include="Migrations\Application\" />
+    <Folder Include="wwwroot\uploads\excel\" />
+    <Folder Include="wwwroot\uploads\images\" />
+    <Folder Include="wwwroot\uploads\pdfs\" />
   </ItemGroup>
 
 </Project>

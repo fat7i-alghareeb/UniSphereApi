@@ -44,4 +44,13 @@ public static class ClaimsPrincipalExtensions
         }
         return professorId;
     }
+    public static Guid? GetSystemControllerId(this ClaimsPrincipal principal)
+    {
+        string? systemControllerIdString = principal.FindFirstValue("systemControllerId");
+        if (string.IsNullOrWhiteSpace(systemControllerIdString) || !Guid.TryParse(systemControllerIdString, out Guid systemControllerId))
+        {
+            return null;
+        }
+        return systemControllerId;
+    }
 }

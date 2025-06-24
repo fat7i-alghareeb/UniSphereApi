@@ -630,6 +630,131 @@ public sealed class AuthController(
         return Ok(professor.ToFullInfoProfessorDto(accessTokens.AccessToken, accessTokens.RefreshToken, Lang));
     }
 
+    // SystemController Authentication Endpoints
+    [HttpPost("SystemController/Login")]
+    public async Task<ActionResult<FullInfoSystemControllerDto>> LoginSystemController(LoginSystemControllerDto loginSystemControllerDto)
+    {
+        SystemController? systemController = await applicationDbContext.SystemControllers
+            .FirstOrDefaultAsync(sc => sc.Gmail == loginSystemControllerDto.Gmail);
+        if (systemController is null)
+        {
+            return Problem(
+                detail: "SystemController not found",
+                title: "SystemController not found",
+                statusCode: StatusCodes.Status404NotFound
+            );
+        }
+
+        ApplicationUser? applicationUser =
+            await userManager.Users.FirstOrDefaultAsync(u => u.SystemControllerId == systemController.Id);
+        if (applicationUser is null)
+        {
+            return Problem(
+                detail: "SystemController not Registered",
+                title: "SystemController not Registered",
+                statusCode: StatusCodes.Status401Unauthorized
+            );
+        }
+
+        if (!await userManager.CheckPasswordAsync(applicationUser, loginSystemControllerDto.Password))
+        {
+            return Problem(
+                detail: "Wrong password",
+                title: "Wrong password",
+                statusCode: StatusCodes.Status401Unauthorized
+            );
+        }
+
+        IList<string> roles = await userManager.GetRolesAsync(applicationUser);
+        AccessTokensDto accessTokens = tokenProvider.Create(
+            new TokenRequest(roles, null, null, null, null, systemController.Id)
+        );
+        RefreshToken? refreshToken = await identityDbContext.RefreshTokens
+            .Include(rt => rt.User)
+            .FirstOrDefaultAsync(rt => rt.UserId == applicationUser.Id);
+        if (refreshToken is null)
+        {
+            var newRefreshToken = new RefreshToken
+            {
+                Id = Guid.CreateVersion7(),
+                UserId = applicationUser.Id,
+                ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays),
+                Token = accessTokens.RefreshToken
+            };
+            await identityDbContext.RefreshTokens.AddAsync(newRefreshToken);
+        }
+        else
+        {
+            refreshToken.Token = accessTokens.RefreshToken;
+            refreshToken.ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
+        }
+        await identityDbContext.SaveChangesAsync();
+        return Ok(systemController.ToFullInfoSystemControllerDto(accessTokens.AccessToken, accessTokens.RefreshToken));
+    }
+
+    [HttpPost("SystemController/Register")]
+    public async Task<ActionResult<FullInfoSystemControllerDto>> RegisterSystemController(RegisterSystemControllerDto registerSystemControllerDto)
+    {
+        using IDbContextTransaction transaction = await identityDbContext.Database.BeginTransactionAsync();
+        applicationDbContext.Database.SetDbConnection(identityDbContext.Database.GetDbConnection());
+        await applicationDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
+
+        SystemController? systemController = await applicationDbContext.SystemControllers
+            .FirstOrDefaultAsync(sc => sc.Id == registerSystemControllerDto.SystemControllerId);
+        if (systemController is null)
+        {
+            return NotFound();
+        }
+
+        var applicationUser = new ApplicationUser
+        {
+            UserName = registerSystemControllerDto.SystemControllerId.ToString(),
+            SystemControllerId = registerSystemControllerDto.SystemControllerId,
+        };
+        if (registerSystemControllerDto.Password != registerSystemControllerDto.ConfirmPassword)
+        {
+            return BadRequest("Password and ConfirmPassword must be the same");
+        }
+
+        IdentityResult createSystemControllerResult = await userManager.CreateAsync(applicationUser, registerSystemControllerDto.Password);
+        if (!createSystemControllerResult.Succeeded)
+        {
+            var extensions = new Dictionary<string, object?>
+            {
+                { "errors", createSystemControllerResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
+            };
+
+            return Problem(
+                detail: "Error creating SystemController",
+                title: "Error creating SystemController",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: extensions
+            );
+        }
+        IdentityResult addRoleResult = await userManager.AddToRoleAsync(applicationUser, Roles.SystemController);
+        if (!addRoleResult.Succeeded)
+        {
+            var extensions = new Dictionary<string, object?>
+            {
+                { "errors", createSystemControllerResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
+            };
+
+            return Problem(
+                detail: "Error creating SystemController",
+                title: "Error creating SystemController",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: extensions
+            );
+        }
+        await applicationDbContext.SaveChangesAsync();
+        await transaction.CommitAsync();
+        AccessTokensDto accessTokens = tokenProvider.Create(
+            new TokenRequest([Roles.SystemController], null, null, null, null, registerSystemControllerDto.SystemControllerId)
+        );
+        await identityDbContext.SaveChangesAsync();
+        return Ok(systemController.ToFullInfoSystemControllerDto(accessTokens.AccessToken, accessTokens.RefreshToken));
+    }
+
     [HttpPost("RefreshToken")]
     public async Task<ActionResult<AccessTokensDto>> RefreshToken(RefreshTokenDto refreshTokenDto)
     {
@@ -647,7 +772,7 @@ public sealed class AuthController(
         IList<string> roles = await userManager.GetRolesAsync(refreshToken.User);
 
         AccessTokensDto accessTokens = tokenProvider.Create(
-            new TokenRequest(roles, refreshToken.User.StudentId, refreshToken.User.AdminId, refreshToken.User.SuperAdminId, refreshToken.User.ProfessorId)
+            new TokenRequest(roles, refreshToken.User.StudentId, refreshToken.User.AdminId, refreshToken.User.SuperAdminId, refreshToken.User.ProfessorId, refreshToken.User.SystemControllerId)
         );
         refreshToken.Token = accessTokens.RefreshToken;
         refreshToken.ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
