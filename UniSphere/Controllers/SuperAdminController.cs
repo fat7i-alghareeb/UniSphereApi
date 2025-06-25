@@ -194,6 +194,7 @@ public class SuperAdminController(
                 extensions: extensions
             );
         }
+        superAdmin.IdentityId = applicationUser.Id;
         await dbContext.SaveChangesAsync();
         await transaction.CommitAsync();
         AccessTokensDto accessTokens = tokenProvider.Create(

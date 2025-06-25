@@ -231,6 +231,7 @@ public class ProfessorsController(
                 extensions: extensions
             );
         }
+        professor.IdentityId = applicationUser.Id;
         await dbContext.SaveChangesAsync();
         await transaction.CommitAsync();
         AccessTokensDto accessTokens = tokenProvider.Create(

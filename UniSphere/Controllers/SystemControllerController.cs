@@ -319,6 +319,7 @@ public class SystemControllerController(
                 extensions: extensions
             );
         }
+        systemController.IdentityId = applicationUser.Id;
         await applicationDbContext.SaveChangesAsync();
         await transaction.CommitAsync();
         AccessTokensDto accessTokens = tokenProvider.Create(

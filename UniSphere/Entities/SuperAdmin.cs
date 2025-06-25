@@ -11,4 +11,5 @@ public class SuperAdmin
     public required  MultilingualText FirstName { get; set; }=new();
     public required  MultilingualText LastName { get; set; }=new();
     public Faculty Faculty { get; set; }=new();
+    public string? IdentityId { get; set; }
 }

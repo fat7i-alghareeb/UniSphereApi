@@ -124,6 +124,7 @@ public class AdminController(
                 extensions: extensions
             );
         }
+        admin.IdentityId = applicationUser.Id;
         await dbContext.SaveChangesAsync();
         await transaction.CommitAsync();
         AccessTokensDto accessTokens = tokenProvider.Create(
