@@ -55,16 +55,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         // Add lectures to the schedule
         foreach (var lectureDto in createDto.Lectures)
         {
-            var lecture = new Lecture
-            {
-                Id = Guid.NewGuid(),
-                ScheduleId = schedule.Id,
-                SubjectName = new MultilingualText { En = lectureDto.SubjectNameEn, Ar = lectureDto.SubjectNameAr },
-                LecturerName = new MultilingualText { En = lectureDto.LecturerNameEn, Ar = lectureDto.LecturerNameAr },
-                StartTime = lectureDto.StartTime,
-                EndTime = lectureDto.EndTime,
-                LectureHall = new MultilingualText { En = lectureDto.LectureHallEn, Ar = lectureDto.LectureHallAr }
-            };
+            var lecture = lectureDto.ToLecture(schedule.Id);
             schedule.Lectures.Add(lecture);
         }
 
@@ -103,16 +94,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
             return Forbid();
         }
 
-        var lecture = new Lecture
-        {
-            Id = Guid.NewGuid(),
-            ScheduleId = addDto.ScheduleId,
-            SubjectName = new MultilingualText { En = addDto.SubjectNameEn, Ar = addDto.SubjectNameAr },
-            LecturerName = new MultilingualText { En = addDto.LecturerNameEn, Ar = addDto.LecturerNameAr },
-            StartTime = addDto.StartTime,
-            EndTime = addDto.EndTime,
-            LectureHall = new MultilingualText { En = addDto.LectureHallEn, Ar = addDto.LectureHallAr }
-        };
+        var lecture = addDto.ToLecture(addDto.ScheduleId);
 
         dbContext.Lectures.Add(lecture);
         await dbContext.SaveChangesAsync();

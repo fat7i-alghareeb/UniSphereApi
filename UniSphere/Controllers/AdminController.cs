@@ -43,6 +43,58 @@ public class AdminController(
         return Ok(admin.ToBaseAdminDto());
     }
 
+    [HttpPost("AssignOneTimeCodeToStudent")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AssignOneTimeCodeToStudent([FromBody] AssignOneTimeCodeRequestDto dto)
+    {
+        var adminId = HttpContext.User.GetAdminId();
+        if (adminId is null)
+        {
+            return Unauthorized();
+        }
+
+        var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
+        if (admin is null)
+        {
+            return Unauthorized();
+        }
+
+        if (dto.TargetRole != AssignOneTimeCodeTargetRole.Student)
+        {
+            return BadRequest("Admin can only assign one-time codes to students.");
+        }
+
+        if (dto.StudentId is null)
+        {
+            return BadRequest("StudentId is required.");
+        }
+
+        var student = await dbContext.StudentCredentials
+            .Include(sc => sc.Major)
+            .FirstOrDefaultAsync(sc => sc.Id == dto.StudentId);
+
+        if (student is null || student.MajorId != admin.MajorId)
+        {
+            return Forbid();
+        }
+
+        int code = Random.Shared.Next(100_000, 1_000_000); // 6-digit code
+        int expiration = dto.ExpirationInMinutes ?? 10;
+        DateTime now = DateTime.UtcNow;
+
+        student.OneTimeCode = code;
+        student.OneTimeCodeCreatedDate = now;
+        student.OneTimeCodeExpirationInMinutes = expiration;
+
+        await dbContext.SaveChangesAsync();
+        return Ok(new
+        {
+            message = "One-time code assigned successfully to student.",
+            code,
+            expiresAt = now.AddMinutes(expiration)
+        });
+    }
+
     // Authentication Endpoints
     [HttpPost("Auth/CheckOneTimeCode")]
     [AllowAnonymous]

@@ -116,6 +116,101 @@ public class ProfessorsController(
         return Ok();
     }
 
+    [HttpPost("AssignProfessorToSubject")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<IActionResult> AssignProfessorToSubject([FromBody] AssignProfessorToSubjectDto dto)
+    {
+        var superAdminId = HttpContext.User.GetSuperAdminId();
+        if (superAdminId is null)
+        {
+            return Unauthorized();
+        }
+        
+        var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
+        if (superAdmin is null)
+        {
+            return Unauthorized();
+        }
+        
+        // Verify professor belongs to the superAdmin's faculty
+        var professorFacultyLink = await dbContext.ProfessorFacultyLinks
+            .FirstOrDefaultAsync(pfl => pfl.ProfessorId == dto.ProfessorId && pfl.FacultyId == superAdmin.FacultyId);
+        
+        if (professorFacultyLink is null)
+        {
+            return Forbid("Professor does not belong to your faculty");
+        }
+        
+        // Verify subject belongs to the superAdmin's faculty
+        var subject = await dbContext.Subjects
+            .Include(s => s.Major)
+            .FirstOrDefaultAsync(s => s.Id == dto.SubjectId);
+        
+        if (subject is null || subject.Major.FacultyId != superAdmin.FacultyId)
+        {
+            return Forbid("Subject does not belong to your faculty");
+        }
+        
+        // Check if professor is already assigned to this subject
+        var existingAssignment = await dbContext.SubjectProfessorLinks
+            .FirstOrDefaultAsync(spl => spl.ProfessorId == dto.ProfessorId && spl.SubjectId == dto.SubjectId);
+        
+        if (existingAssignment != null)
+        {
+            return BadRequest("Professor is already assigned to this subject");
+        }
+        
+        // Create new assignment
+        var subjectProfessorLink = new SubjectProfessorLink
+        {
+            ProfessorId = dto.ProfessorId,
+            SubjectId = dto.SubjectId
+        };
+        
+        dbContext.SubjectProfessorLinks.Add(subjectProfessorLink);
+        await dbContext.SaveChangesAsync();
+        return Ok();
+    }
+
+    [HttpDelete("RemoveProfessorFromSubject")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<IActionResult> RemoveProfessorFromSubject([FromBody] AssignProfessorToSubjectDto dto)
+    {
+        var superAdminId = HttpContext.User.GetSuperAdminId();
+        if (superAdminId is null)
+        {
+            return Unauthorized();
+        }
+        
+        var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
+        if (superAdmin is null)
+        {
+            return Unauthorized();
+        }
+        
+        // Verify subject belongs to the superAdmin's faculty
+        var subject = await dbContext.Subjects
+            .Include(s => s.Major)
+            .FirstOrDefaultAsync(s => s.Id == dto.SubjectId);
+        
+        if (subject is null || subject.Major.FacultyId != superAdmin.FacultyId)
+        {
+            return Forbid("Subject does not belong to your faculty");
+        }
+        
+        var subjectProfessorLink = await dbContext.SubjectProfessorLinks
+            .FirstOrDefaultAsync(spl => spl.ProfessorId == dto.ProfessorId && spl.SubjectId == dto.SubjectId);
+        
+        if (subjectProfessorLink is null)
+        {
+            return NotFound("Professor is not assigned to this subject");
+        }
+        
+        dbContext.SubjectProfessorLinks.Remove(subjectProfessorLink);
+        await dbContext.SaveChangesAsync();
+        return Ok();
+    }
+
     [HttpPatch("EditProfessor/{professorId:guid}")]
     [Authorize(Roles = "SuperAdmin,Professor")]
     public async Task<IActionResult> EditProfessor(Guid professorId, [FromBody] JsonPatchDocument<ProfessorUpdateDto> patchDoc)
@@ -158,7 +253,9 @@ public class ProfessorsController(
             .FirstOrDefaultAsync(p => p.Gmail == checkOneTimeCodeDto.Gmail);
         if (professor is null)
         {
-            return NotFound();
+            return NotFound(
+                    "Professor not found."
+                );
         }
 
         if (!await authService.ValidateOneTimeCodeAsync(professor, checkOneTimeCodeDto.Code))

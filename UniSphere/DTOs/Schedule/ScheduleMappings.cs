@@ -92,4 +92,73 @@ internal static class ScheduleMappings
             Days = daysInMonth
         };
     }
+
+    public static CreateScheduleDto ToCreateScheduleDto(this Entities.Schedule schedule)
+    {
+        return new CreateScheduleDto
+        {
+            MajorId = schedule.MajorId,
+            Year = schedule.Year,
+            ScheduleDate = schedule.ScheduleDate,
+            Lectures = schedule.Lectures.Select(l => new CreateLectureDto
+            {
+                SubjectNameEn = l.SubjectName.En ?? "",
+                SubjectNameAr = l.SubjectName.Ar ?? "",
+                LecturerNameEn = l.LecturerName.En ?? "",
+                LecturerNameAr = l.LecturerName.Ar ?? "",
+                StartTime = l.StartTime,
+                EndTime = l.EndTime,
+                LectureHallEn = l.LectureHall.En ?? "",
+                LectureHallAr = l.LectureHall.Ar ?? ""
+            }).ToList()
+        };
+    }
+
+    public static Entities.Schedule ToSchedule(this CreateScheduleDto dto)
+    {
+        return new Entities.Schedule
+        {
+            Id = Guid.NewGuid(),
+            MajorId = dto.MajorId,
+            Year = dto.Year,
+            ScheduleDate = dto.ScheduleDate,
+            Lectures = dto.Lectures.Select(l => new Lecture
+            {
+                Id = Guid.NewGuid(),
+                SubjectName = new MultilingualText { En = l.SubjectNameEn, Ar = l.SubjectNameAr },
+                LecturerName = new MultilingualText { En = l.LecturerNameEn, Ar = l.LecturerNameAr },
+                StartTime = l.StartTime,
+                EndTime = l.EndTime,
+                LectureHall = new MultilingualText { En = l.LectureHallEn, Ar = l.LectureHallAr }
+            }).ToList()
+        };
+    }
+
+    public static Lecture ToLecture(this CreateLectureDto dto, Guid scheduleId)
+    {
+        return new Lecture
+        {
+            Id = Guid.NewGuid(),
+            ScheduleId = scheduleId,
+            SubjectName = new MultilingualText { En = dto.SubjectNameEn, Ar = dto.SubjectNameAr },
+            LecturerName = new MultilingualText { En = dto.LecturerNameEn, Ar = dto.LecturerNameAr },
+            StartTime = dto.StartTime,
+            EndTime = dto.EndTime,
+            LectureHall = new MultilingualText { En = dto.LectureHallEn, Ar = dto.LectureHallAr }
+        };
+    }
+
+    public static Lecture ToLecture(this AddLectureDto dto, Guid scheduleId)
+    {
+        return new Lecture
+        {
+            Id = Guid.NewGuid(),
+            ScheduleId = scheduleId,
+            SubjectName = new MultilingualText { En = dto.SubjectNameEn, Ar = dto.SubjectNameAr },
+            LecturerName = new MultilingualText { En = dto.LecturerNameEn, Ar = dto.LecturerNameAr },
+            StartTime = dto.StartTime,
+            EndTime = dto.EndTime,
+            LectureHall = new MultilingualText { En = dto.LectureHallEn, Ar = dto.LectureHallAr }
+        };
+    }
 }
