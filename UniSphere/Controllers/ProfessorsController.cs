@@ -120,10 +120,7 @@ public class ProfessorsController(
     [Authorize(Roles = "SuperAdmin,Professor")]
     public async Task<IActionResult> EditProfessor(Guid professorId, [FromBody] JsonPatchDocument<ProfessorUpdateDto> patchDoc)
     {
-        if (patchDoc is null)
-        {
-            return BadRequest();
-        }
+
         
         var superAdminId = HttpContext.User.GetSuperAdminId();
         var currentProfessorId = HttpContext.User.GetProfessorId();
