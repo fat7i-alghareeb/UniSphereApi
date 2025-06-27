@@ -15,6 +15,7 @@ public sealed record SubjectDto
     public required bool  DoesHaveALab{ get; init; }
     public required int Semester { get; init; }
     public required string? ImageUrl { get; init; }
+    public required List<string> MaterialUrls { get; init; }
 }
 
 

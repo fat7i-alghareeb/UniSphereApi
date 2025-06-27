@@ -24,8 +24,8 @@ if (app.Environment.IsDevelopment())
     await app.ApplyMigrationsAsync();
     using var scope = app.Services.CreateScope();
     var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
-await seeder.ClearIdentityDataAsync();
-  await seeder.ClearApplicationDataAsync();
+    //await seeder.ClearIdentityDataAsync();
+    //await seeder.ClearApplicationDataAsync();
     await seeder.SeedRolesAsync();
     await seeder.SeedAsync();
 }

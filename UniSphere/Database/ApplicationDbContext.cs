@@ -28,6 +28,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<SuperAdmin> SuperAdmins { get; set; }
     public DbSet<ScheduleLabLink> ScheduleLabLinks { get; set; }
     public DbSet<SystemController> SystemControllers { get; set; }
+    public DbSet<Material> Materials { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

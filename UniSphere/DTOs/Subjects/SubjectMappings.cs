@@ -26,25 +26,49 @@ internal static class SubjectMappings
             CanEnroll = subject.SubjectStudentLinks?.Any(ss => ss.StudentId == studentId && ss is { IsCurrentlyEnrolled: true, IsPassed: false } ) ?? false,
             IsMultipleChoice = subject.IsMultipleChoice ,
             DoesHaveALab = subject.IsLabRequired ,
-            MajorId = subject.MajorId
+            MajorId = subject.MajorId,
+            MaterialUrls = subject.Materials?.Select(m => m.Url).ToList() ?? new List<string>()
         };
     }
+    
+    public static UnifiedSubjectDto ToUnifiedDto(this Subject subject, Languages lang)
+    {
+        return new UnifiedSubjectDto
+        {
+            Id = subject.Id,
+            Name = subject.Name.GetTranslatedString(lang),
+            Description = subject.Description.GetTranslatedString(lang),
+            MajorId = subject.MajorId,
+            LabId = subject.LabId,
+            Year = subject.Year,
+            Semester = subject.Semester,
+            MidtermGrade = subject.MidtermGrade,
+            FinalGrade = subject.FinalGrade,
+            IsLabRequired = subject.IsLabRequired,
+            IsMultipleChoice = subject.IsMultipleChoice,
+            IsOpenBook = subject.IsOpenBook,
+            Image = subject.Image,
+            MaterialUrls = subject.Materials?.Select(m => m.Url).ToList() ?? new List<string>()
+        };
+    }
+    
     public static Subject ToEntity(this CreateSubjectDto dto)
     {
-
         Subject subject = new()
         {
             Id = Guid.NewGuid(),
-            Name = new MultilingualText { Ar = dto.Name, En = dto.Name },
-            Description = new MultilingualText { Ar = "مقدمة في تطوير تطبيقات الويب", En = "Introduction to Web Application Development" },
+            Name = new MultilingualText { En = dto.NameEn, Ar = dto.NameAr },
+            Description = new MultilingualText { En = dto.DescriptionEn, Ar = dto.DescriptionAr },
             MajorId = dto.MajorId,
-            IsLabRequired = true,
-            IsMultipleChoice = false,
-            IsOpenBook = false,
-            MidtermGrade = 30,
-            FinalGrade = 70,
-            Year =1,
-            Semester = 1,
+            LabId = dto.LabId,
+            Year = dto.Year,
+            Semester = dto.Semester,
+            MidtermGrade = dto.MidtermGrade,
+            FinalGrade = dto.FinalGrade,
+            IsLabRequired = dto.IsLabRequired,
+            IsMultipleChoice = dto.IsMultipleChoice,
+            IsOpenBook = dto.IsOpenBook,
+            Image = dto.Image
         };
         return subject;
     }
@@ -53,6 +77,5 @@ internal static class SubjectMappings
     {
         subject.Id = subjectDto.Id;
         return subject;
-
     }
 }

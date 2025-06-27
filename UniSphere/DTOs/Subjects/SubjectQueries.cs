@@ -11,4 +11,9 @@ internal static class SubjectQueries
     {
         return subject => subject.ToDto(studentId,lang);
     }
+    
+    public static Expression<Func<Subject, UnifiedSubjectDto>> ProjectToUnifiedDto(Languages lang)
+    {
+        return subject => subject.ToUnifiedDto(lang);
+    }
 }

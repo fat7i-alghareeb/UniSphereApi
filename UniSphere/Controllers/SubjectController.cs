@@ -8,6 +8,7 @@ using UniSphere.Api.Database;
 using UniSphere.Api.DTOs.Subjects;
 using UniSphere.Api.Entities;
 using UniSphere.Api.Extensions;
+using UniSphere.Api.Services;
 
 namespace UniSphere.Api.Controllers;
 
@@ -15,9 +16,9 @@ namespace UniSphere.Api.Controllers;
 [ApiController]
 [Produces("application/json")]
 [Route("api/[controller]")]
-public sealed class SubjectController(ApplicationDbContext dbContext) : BaseController
+public sealed class SubjectController(ApplicationDbContext dbContext, IStorageService storageService) : BaseController
 {
-    [HttpGet("MySubjects")]
+    [HttpGet("Student/MySubjects")]
     public async Task<ActionResult<SubjectCollectionDto>> GetMySubjects()
     {
         var studentId = HttpContext.User.GetStudentId();
@@ -78,6 +79,8 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
             .Include(link => link.Subject)
             .ThenInclude(subject => subject.SubjectLecturers!)
             .ThenInclude(sl => sl.Professor!)
+            .Include(link => link.Subject)
+            .ThenInclude(subject => subject.Materials!)
             .Select(link => link.Subject)
             .Distinct() // Optional: if multiple links to the same subject exist
             .OrderBy(subject => subject.Year)
@@ -88,7 +91,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
         return Ok(new SubjectCollectionDto { Subjects = subjects });
     }
 
-    [HttpGet("GetMyMajorSubjects")]
+    [HttpGet("Student/GetMyMajorSubjects")]
     public async Task<ActionResult<SubjectCollectionDto>> GetMyMajorSubjects([Required] int year)
     {
         var studentId = HttpContext.User.GetStudentId();
@@ -107,6 +110,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
                 .Include(subject => subject.SubjectLecturers!)
                 .ThenInclude(sl => sl.Professor!)
                 .Include(subject => subject.SubjectStudentLinks!)
+                .Include(subject => subject.Materials!)
                 .OrderBy(subject => subject.Semester) // ✅ Move before projection
                 .Select(SubjectQueries.ProjectToDto(studentId.Value, Lang))
                 .ToListAsync()
@@ -130,6 +134,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
             .Include(s => s.SubjectLecturers!)
             .ThenInclude(sl => sl.Professor!)
             .Include(s => s.SubjectStudentLinks!)
+            .Include(s => s.Materials!)
             .Select(SubjectQueries.ProjectToDto(studentId.Value, Lang))
             .FirstOrDefaultAsync();
         if (subject is null)
@@ -140,16 +145,204 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
         return Ok(subject);
     }
 
-    [HttpPost]
-    public async Task<ActionResult<SubjectDto>> AddSubject(CreateSubjectDto createSubjectDto,
-        IValidator<CreateSubjectDto> validator)
+    // New endpoints for SuperAdmins and Professors
+
+    [HttpGet("SuperAdmin/Subjects")]
+    [Authorize(Roles = Roles.SuperAdmin)]
+    public async Task<ActionResult<SuperAdminSubjectsResponseDto>> GetSuperAdminSubjects(
+        [Required] int year, 
+        [Required] Guid majorId)
     {
-        await validator.ValidateAndThrowAsync(createSubjectDto);
-        var studentId = HttpContext.User.GetStudentId();
-        if (studentId is null)
+        var superAdminId = HttpContext.User.GetSuperAdminId();
+        if (superAdminId is null)
         {
             return Unauthorized();
         }
+
+        // Get the faculty ID for the super admin
+        var facultyId = await dbContext.SuperAdmins
+            .Where(sa => sa.Id == superAdminId)
+            .Select(sa => sa.FacultyId)
+            .FirstOrDefaultAsync();
+
+        if (facultyId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
+        // Get subjects filtered by faculty, year, and major
+        var subjects = await dbContext.Subjects
+            .Where(s => s.MajorId == majorId && 
+                       s.Year == year &&
+                       s.Major.FacultyId == facultyId)
+            .Include(s => s.Major)
+            .Include(s => s.Materials!)
+            .OrderBy(s => s.Semester)
+            .Select(SubjectQueries.ProjectToUnifiedDto(Lang))
+            .ToListAsync();
+
+        var major = await dbContext.Majors
+            .Where(m => m.Id == majorId)
+            .FirstOrDefaultAsync();
+
+        if (major is null)
+        {
+            return NotFound("Major not found");
+        }
+
+        var response = new SuperAdminSubjectsResponseDto
+        {
+            Majors = new List<MajorSubjectsDto>
+            {
+                new MajorSubjectsDto
+                {
+                    MajorName = major.Name.GetTranslatedString(Lang),
+                    Subjects = subjects
+                }
+            }
+        };
+
+        return Ok(response);
+    }
+
+    [HttpGet("Professor/Subjects")]
+    [Authorize(Roles = Roles.Professor)]
+    public async Task<ActionResult<ProfessorSubjectsResponseDto>> GetProfessorSubjects()
+    {
+        var professorId = HttpContext.User.GetProfessorId();
+        if (professorId is null)
+        {
+            return Unauthorized();
+        }
+
+        // Get all subject IDs associated with the professor
+        var subjectIds = await dbContext.SubjectProfessorLinks
+            .Where(spl => spl.ProfessorId == professorId)
+            .Select(spl => spl.SubjectId)
+            .ToListAsync();
+
+        if (!subjectIds.Any())
+        {
+            return Ok(new ProfessorSubjectsResponseDto
+            {
+                UniversityName = "",
+                Faculties = new List<FacultySubjectsDto>()
+            });
+        }
+
+        // Get all subjects with their related data
+        var professorSubjects = await dbContext.Subjects
+            .Where(s => subjectIds.Contains(s.Id))
+            .Include(s => s.Major)
+            .ThenInclude(m => m.Faculty)
+            .ThenInclude(f => f.University)
+            .Include(s => s.Materials!)
+            .ToListAsync();
+
+        if (!professorSubjects.Any())
+        {
+            return Ok(new ProfessorSubjectsResponseDto
+            {
+                UniversityName = "",
+                Faculties = new List<FacultySubjectsDto>()
+            });
+        }
+
+        // Get university name from the first faculty (all faculties should belong to the same university)
+        var universityName = professorSubjects[0].Major.Faculty.University.Name.GetTranslatedString(Lang);
+
+        var faculties = professorSubjects
+            .GroupBy(s => s.Major.Faculty)
+            .Select(facultyGroup => new FacultySubjectsDto
+            {
+                FacultyName = facultyGroup.Key.Name.GetTranslatedString(Lang),
+                Majors = facultyGroup
+                    .GroupBy(s => s.Major)
+                    .Select(majorGroup => new MajorSubjectsDto
+                    {
+                        MajorName = majorGroup.Key.Name.GetTranslatedString(Lang),
+                        Subjects = majorGroup
+                            .OrderBy(s => s.Year)
+                            .ThenBy(s => s.Semester)
+                            .Select(s => s.ToUnifiedDto(Lang))
+                            .ToList()
+                    })
+                    .ToList()
+            })
+            .ToList();
+
+        var response = new ProfessorSubjectsResponseDto
+        {
+            UniversityName = universityName,
+            Faculties = faculties
+        };
+
+        return Ok(response);
+    }
+
+    [HttpGet("SuperAdmin/{id:guid}")]
+    [Authorize(Roles = Roles.SuperAdmin)]
+    public async Task<ActionResult<UnifiedSubjectDto>> GetSuperAdminSubjectById(Guid id)
+    {
+        var superAdminId = HttpContext.User.GetSuperAdminId();
+        if (superAdminId is null)
+        {
+            return Unauthorized();
+        }
+
+        var subject = await dbContext.Subjects
+            .Where(s => s.Id == id)
+            .Include(s => s.Materials!)
+            .Select(SubjectQueries.ProjectToUnifiedDto(Lang))
+            .FirstOrDefaultAsync();
+
+        if (subject is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(subject);
+    }
+
+    [HttpGet("Professor/{id:guid}")]
+    [Authorize(Roles = Roles.Professor)]
+    public async Task<ActionResult<UnifiedSubjectDto>> GetProfessorSubjectById(Guid id)
+    {
+        var professorId = HttpContext.User.GetProfessorId();
+        if (professorId is null)
+        {
+            return Unauthorized();
+        }
+
+        // Verify the professor has access to this subject
+        var hasAccess = await dbContext.SubjectProfessorLinks
+            .AnyAsync(spl => spl.ProfessorId == professorId && spl.SubjectId == id);
+
+        if (!hasAccess)
+        {
+            return Forbid();
+        }
+
+        var subject = await dbContext.Subjects
+            .Where(s => s.Id == id)
+            .Include(s => s.Materials!)
+            .Select(SubjectQueries.ProjectToUnifiedDto(Lang))
+            .FirstOrDefaultAsync();
+
+        if (subject is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(subject);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = Roles.SuperAdmin)]
+    public async Task<ActionResult<UnifiedSubjectDto>> AddSubject(CreateSubjectDto createSubjectDto,
+        IValidator<CreateSubjectDto> validator)
+    {
+        await validator.ValidateAndThrowAsync(createSubjectDto);
 
         if (!await dbContext.Majors.AnyAsync(mj => mj.Id == createSubjectDto.MajorId))
         {
@@ -159,50 +352,125 @@ public sealed class SubjectController(ApplicationDbContext dbContext) : BaseCont
             );
         }
 
+        if (createSubjectDto.LabId.HasValue && !await dbContext.Labs.AnyAsync(l => l.Id == createSubjectDto.LabId))
+        {
+            return Problem(
+                detail: "The specified Lab does not exist.",
+                statusCode: StatusCodes.Status404NotFound
+            );
+        }
+
         var subject = createSubjectDto.ToEntity();
 
         dbContext.Subjects.Add(subject);
         await dbContext.SaveChangesAsync();
-        var subjectDto = subject.ToDto(studentId.Value, Lang);
-        return CreatedAtAction(nameof(GetSubjectById), new { id = subject.Id }, subjectDto);
+        
+        var subjectDto = subject.ToUnifiedDto(Lang);
+        return CreatedAtAction(nameof(GetSuperAdminSubjectById), new { id = subject.Id }, subjectDto);
     }
 
     [HttpPatch("{id:guid}")]
-    public async Task<ActionResult<SubjectDto>> UpdateSubject(Guid id, JsonPatchDocument<SubjectDto> pathDocument)
+    [Authorize(Roles = Roles.SuperAdmin)]
+    public async Task<ActionResult<UnifiedSubjectDto>> UpdateSubject(Guid id, JsonPatchDocument<UnifiedSubjectDto> patchDocument)
     {
-        var studentId = HttpContext.User.GetStudentId();
-        if (studentId is null)
-        {
-            return Unauthorized();
-        }
-
         var subject = await dbContext.Subjects.FindAsync(id);
         if (subject is null)
         {
             return NotFound();
         }
 
-        var subjectDto = subject.ToDto(studentId.Value, Lang);
-        pathDocument.ApplyTo(subjectDto, ModelState);
+        var subjectDto = subject.ToUnifiedDto(Lang);
+        patchDocument.ApplyTo(subjectDto, ModelState);
         if (!TryValidateModel(subjectDto))
         {
             return ValidationProblem(ModelState);
         }
 
-        if (!await dbContext.Majors.AnyAsync(mj => mj.Id == subjectDto.MajorId))
+        // Update the subject with the patched values
+        subject.Name = new MultilingualText { En = subjectDto.Name, Ar = subjectDto.Name };
+        subject.Description = new MultilingualText { En = subjectDto.Description, Ar = subjectDto.Description };
+        subject.MajorId = subjectDto.MajorId;
+        subject.LabId = subjectDto.LabId;
+        subject.Year = subjectDto.Year;
+        subject.Semester = subjectDto.Semester;
+        subject.MidtermGrade = subjectDto.MidtermGrade;
+        subject.FinalGrade = subjectDto.FinalGrade;
+        subject.IsLabRequired = subjectDto.IsLabRequired;
+        subject.IsMultipleChoice = subjectDto.IsMultipleChoice;
+        subject.IsOpenBook = subjectDto.IsOpenBook;
+        subject.Image = subjectDto.Image;
+
+        await dbContext.SaveChangesAsync();
+        return Ok(subject.ToUnifiedDto(Lang));
+    }
+
+    [HttpPost("{id:guid}/materials")]
+    [Authorize(Roles = Roles.Professor)]
+    public async Task<ActionResult<UploadMaterialResponseDto>> UploadMaterial(Guid id, IFormFile file)
+    {
+        var professorId = HttpContext.User.GetProfessorId();
+        if (professorId is null)
         {
-            return Problem(
-                detail: "The specified Major does not exist.",
-                statusCode: StatusCodes.Status404NotFound
-            );
+            return Unauthorized();
         }
 
-        subject = subject.UpdateFromDto(subjectDto);
-        await dbContext.SaveChangesAsync();
-        return Ok(subject.ToDto(studentId.Value, Lang));
+        // Verify the professor has access to this subject
+        var hasAccess = await dbContext.SubjectProfessorLinks
+            .AnyAsync(spl => spl.ProfessorId == professorId && spl.SubjectId == id);
+
+        if (!hasAccess)
+        {
+            return Forbid();
+        }
+
+        // Verify the subject exists
+        var subject = await dbContext.Subjects.FindAsync(id);
+        if (subject is null)
+        {
+            return NotFound("Subject not found");
+        }
+
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest("No file provided");
+        }
+
+        try
+        {
+            // Save the file using the storage service
+            var fileUrl = await storageService.SaveFileAsync(file, "materials");
+
+            // Create the material record
+            var material = new Material
+            {
+                Id = Guid.NewGuid(),
+                SubjectId = id,
+                Url = fileUrl,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            dbContext.Materials.Add(material);
+            await dbContext.SaveChangesAsync();
+
+            var response = new UploadMaterialResponseDto
+            {
+                Url = fileUrl,
+                CreatedAt = material.CreatedAt
+            };
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return Problem(
+                detail: $"Error uploading file: {ex.Message}",
+                statusCode: StatusCodes.Status500InternalServerError
+            );
+        }
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = Roles.SuperAdmin)]
     public async Task<ActionResult> DeleteSubject(Guid id)
     {
         Subject? subject = await dbContext.Subjects.FindAsync(id);
