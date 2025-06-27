@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using UniSphere.Api.Database;
 using UniSphere.Api.DTOs;
 using UniSphere.Api.DTOs.Auth;
+using UniSphere.Api.DTOs.Info;
 using UniSphere.Api.DTOs.Statistics;
 using UniSphere.Api.Entities;
 using UniSphere.Api.Extensions;
@@ -208,5 +209,24 @@ public class StudentController(ApplicationDbContext dbContext, IStorageService s
         {
             return BadRequest(new { message = ex.Message });
         }
+    }
+
+    [HttpGet("EligibleStudentsForSubject")]
+    public async Task<ActionResult<DTOs.Info.EligibleStudentsCollectionDto>> GetEligibleStudentsForSubject([FromQuery] Guid subjectId)
+    {
+        var students = await dbContext.SubjectStudentLinks
+            .Where(ssl => ssl.SubjectId == subjectId && !ssl.IsPassed && ssl.IsCurrentlyEnrolled)
+            .Include(ssl => ssl.StudentCredential)
+            .Select(ssl => new EligibleStudentDto
+            {
+                Id = ssl.StudentCredential.Id,
+                StudentNumber = ssl.StudentCredential.StudentNumber,
+                FullName = Lang == Controllers.Languages.En
+                    ? (ssl.StudentCredential.FirstName.En ?? "") + " " + (ssl.StudentCredential.LastName.En ?? "")
+                    : (ssl.StudentCredential.FirstName.Ar ?? "") + " " + (ssl.StudentCredential.LastName.Ar ?? "")
+            })
+            .ToListAsync();
+
+        return Ok(new EligibleStudentsCollectionDto { Students = students });
     }
 }
