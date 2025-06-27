@@ -23,6 +23,8 @@ public class AdminConfiguration : IEntityTypeConfiguration<Admin>
         builder.Property(a => a.OneTimeCodeExpirationInMinutes);
         builder.Property(a => a.OneTimeCodeCreatedDate);
         builder.Property(a => a.MajorId).IsRequired();
+        builder.Property(a => a.Image)
+            .HasMaxLength(500);
 
         builder.HasOne(a => a.Major)
             .WithMany()

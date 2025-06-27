@@ -19,29 +19,10 @@ public class SuperAdminController(
     UserManager<ApplicationUser> userManager,
     ApplicationIdentityDbContext identityDbContext,
     TokenProvider tokenProvider,
-    IAuthService authService
+    IAuthService authService,
+    IStorageService storageService
 ) : BaseController
 {
-    [HttpGet("GetMe")]
-    public async Task<ActionResult<BaseSuperAdminDto>> GetMe()
-    {
-        var superAdminId = HttpContext.User.GetSuperAdminId();
-
-        if (superAdminId is null)
-        {
-            return Unauthorized();
-        }
-
-        SuperAdmin superAdmin = await dbContext.SuperAdmins
-            .Include(sa => sa.Faculty)
-            .FirstOrDefaultAsync(sa => sa.Id == superAdminId);
-        if (superAdmin is null)
-        {
-            return Unauthorized();
-        }
-        return Ok(superAdmin.ToBaseSuperAdminDto());
-    }
-
     [HttpPost("AssignOneTimeCode")]
     public async Task<IActionResult> AssignOneTimeCode([FromBody] AssignOneTimeCodeRequestDto dto)
     {
@@ -156,7 +137,9 @@ public class SuperAdminController(
 
         var applicationUser = new ApplicationUser
         {
-            UserName = registerSuperAdminDto.SuperAdminId.ToString(),
+            UserName = superAdmin.Gmail,
+            Email = superAdmin.Gmail,
+            EmailConfirmed = true,
             SuperAdminId = registerSuperAdminDto.SuperAdminId,
         };
         if (registerSuperAdminDto.Password != registerSuperAdminDto.ConfirmPassword)
@@ -201,17 +184,16 @@ public class SuperAdminController(
             new TokenRequest([Roles.SuperAdmin], null, null, registerSuperAdminDto.SuperAdminId)
         );
         await identityDbContext.SaveChangesAsync();
-        return Ok(superAdmin.ToFullInfoSuperAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken));
+        return Ok(superAdmin.ToFullInfoSuperAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken, Roles.SuperAdmin));
     }
 
     [HttpPost("Auth/Login")]
     [AllowAnonymous]
     public async Task<ActionResult<FullInfoSuperAdminDto>> Login(LoginSuperAdminDto loginSuperAdminDto)
     {
-        SuperAdmin? superAdmin = await dbContext.SuperAdmins
-            .Include(sa => sa.Faculty)
-            .FirstOrDefaultAsync(sa => sa.Gmail == loginSuperAdminDto.Gmail && sa.FacultyId == loginSuperAdminDto.FacultyId);
-        if (superAdmin is null)
+        // Find user by email
+        var applicationUser = await userManager.FindByEmailAsync(loginSuperAdminDto.Gmail);
+        if (applicationUser is null)
         {
             return Problem(
                 detail: "SuperAdmin not found",
@@ -220,14 +202,25 @@ public class SuperAdminController(
             );
         }
 
-        ApplicationUser? applicationUser =
-            await userManager.Users.FirstOrDefaultAsync(u => u.SuperAdminId == superAdmin.Id);
-        if (applicationUser is null)
+        // Check if user has SuperAdminId
+        if (applicationUser.SuperAdminId is null)
         {
             return Problem(
-                detail: "SuperAdmin not Registered",
-                title: "SuperAdmin not Registered",
+                detail: "User is not a super admin",
+                title: "User is not a super admin",
                 statusCode: StatusCodes.Status401Unauthorized
+            );
+        }
+
+        SuperAdmin? superAdmin = await dbContext.SuperAdmins
+            .Include(sa => sa.Faculty)
+            .FirstOrDefaultAsync(sa => sa.Id == applicationUser.SuperAdminId);
+        if (superAdmin is null)
+        {
+            return Problem(
+                detail: "SuperAdmin not found",
+                title: "SuperAdmin not found",
+                statusCode: StatusCodes.Status404NotFound
             );
         }
 
@@ -247,6 +240,65 @@ public class SuperAdminController(
         
         await authService.CreateOrUpdateRefreshTokenAsync(applicationUser, accessTokens.RefreshToken);
         
-        return Ok(superAdmin.ToFullInfoSuperAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken));
+        return Ok(superAdmin.ToFullInfoSuperAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken, Roles.SuperAdmin));
+    }
+
+    [HttpPost("UploadProfileImage")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<IActionResult> UploadProfileImage(IFormFile image)
+    {
+        try
+        {
+            var superAdminId = HttpContext.User.GetSuperAdminId();
+            if (superAdminId is null)
+            {
+                return Unauthorized();
+            }
+
+            var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
+            if (superAdmin is null)
+            {
+                return NotFound("SuperAdmin not found");
+            }
+
+            if (image == null || image.Length == 0)
+            {
+                return BadRequest("No image file provided");
+            }
+
+            // Validate image file type
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
+            var fileExtension = Path.GetExtension(image.FileName).ToLowerInvariant();
+            
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                return BadRequest("Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp");
+            }
+
+            // Validate file size (max 5MB for profile images)
+            if (image.Length > 5 * 1024 * 1024)
+            {
+                return BadRequest("Image file size must be less than 5MB");
+            }
+
+            // Save the image using LocalStorageService
+            var imageUrl = await storageService.SaveFileAsync(image, "superadmin-profiles");
+
+            // Update the superAdmin's image URL
+            superAdmin.Image = imageUrl;
+            await dbContext.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Profile image uploaded successfully",
+                imageUrl,
+                fileName = image.FileName,
+                fileSize = image.Length
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 } 

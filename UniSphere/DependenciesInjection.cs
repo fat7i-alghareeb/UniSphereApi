@@ -122,10 +122,10 @@ public static class DependenciesInjection
         builder.Services.AddScoped<LectureSeedData>();
         builder.Services.AddScoped<FacultyAnnouncementSeedData>();
         builder.Services.AddScoped<MajorAnnouncementSeedData>();
-        builder.Services.AddScoped<DatabaseSeeder>();
         builder.Services.AddScoped<AdminSeedData>();
         builder.Services.AddScoped<SuperAdminSeedData>();
         builder.Services.AddScoped<StudentStatisticsSeedData>();
+        builder.Services.AddScoped<DatabaseSeeder>();
 
         return builder;
     }

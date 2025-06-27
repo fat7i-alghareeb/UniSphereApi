@@ -114,7 +114,7 @@ public sealed class StudentAuthController(
         );
         await identityDbContext.SaveChangesAsync();
         
-        return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken));
+        return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken, Roles.Student));
     }
 
     [HttpPost("Login")]
@@ -162,6 +162,6 @@ public sealed class StudentAuthController(
         
         await authService.CreateOrUpdateRefreshTokenAsync(applicationUser, accessTokens.RefreshToken);
         
-        return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken));
+        return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken, Roles.Student));
     }
 } 

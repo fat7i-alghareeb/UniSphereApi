@@ -13,6 +13,7 @@ public record BaseStudentDto
     public required Guid MajorId { get; init; }
     public required Guid StudentId { get; init; }
     public required int NumberOfMajorYears { get; init; }
+    public required string Role { get; init; }
 }
 
 public sealed record FullInfoStudentDto : BaseStudentDto

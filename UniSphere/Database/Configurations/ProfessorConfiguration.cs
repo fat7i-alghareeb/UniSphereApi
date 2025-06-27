@@ -24,6 +24,7 @@ public class ProfessorConfiguration : IEntityTypeConfiguration<Professor>
         builder.Property(s => s.OneTimeCode);
         builder.Property(s => s.OneTimeCodeExpirationInMinutes);
         builder.Property(s => s.OneTimeCodeCreatedDate);
+        builder.Property(s => s.Image).HasMaxLength(500);
         builder.HasMany(p => p.SubjectProfessorLinks)
             .WithOne(sl => sl.Professor)
             .HasForeignKey(sl => sl.ProfessorId)

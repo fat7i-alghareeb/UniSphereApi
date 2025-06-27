@@ -7,6 +7,7 @@ using UniSphere.Api.DTOs.Auth;
 using UniSphere.Api.DTOs.Statistics;
 using UniSphere.Api.Entities;
 using UniSphere.Api.Extensions;
+using UniSphere.Api.Services;
 
 namespace UniSphere.Api.Controllers;
 
@@ -14,29 +15,8 @@ namespace UniSphere.Api.Controllers;
 [Produces("application/json")]
 [Authorize]
 [Route("api/[controller]")]
-public class StudentController(ApplicationDbContext dbContext) : BaseController
+public class StudentController(ApplicationDbContext dbContext, IStorageService storageService) : BaseController
 {
-    [HttpGet("GetMe")]
-    public async Task<ActionResult<BaseStudentDto>> GetMe()
-    {
-        var studentId = HttpContext.User.GetStudentId();
-
-        if (studentId is null)
-        {
-            return Unauthorized();
-        }
-
-        StudentCredential studentCredential = await dbContext.StudentCredentials
-            .Include(sc => sc.EnrollmentStatus)
-            .Include(sc => sc.Major)
-            .FirstOrDefaultAsync(sc => sc.Id == studentId);
-        if (studentCredential is null)
-        {
-            return Unauthorized();
-        }
-        return Ok(studentCredential.ToBaseStudentDto());
-    }
-
     [HttpGet("GetMyStatistics")]
     public async Task<ActionResult<StatisticsDto>> GetMyStatistics()
     {
@@ -169,5 +149,64 @@ public class StudentController(ApplicationDbContext dbContext) : BaseController
         dbContext.StudentCredentials.Add(student);
         await dbContext.SaveChangesAsync();
         return Ok(new { message = "Student added successfully.", studentId = student.Id });
+    }
+
+    [HttpPost("UploadProfileImage")]
+    [Authorize(Roles = "Student")]
+    public async Task<IActionResult> UploadProfileImage(IFormFile image)
+    {
+        try
+        {
+            var studentId = HttpContext.User.GetStudentId();
+            if (studentId is null)
+            {
+                return Unauthorized();
+            }
+
+            var student = await dbContext.StudentCredentials.FirstOrDefaultAsync(sc => sc.Id == studentId);
+            if (student is null)
+            {
+                return NotFound("Student not found");
+            }
+
+            if (image == null || image.Length == 0)
+            {
+                return BadRequest("No image file provided");
+            }
+
+            // Validate image file type
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
+            var fileExtension = Path.GetExtension(image.FileName).ToLowerInvariant();
+            
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                return BadRequest("Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp");
+            }
+
+            // Validate file size (max 5MB for profile images)
+            if (image.Length > 5 * 1024 * 1024)
+            {
+                return BadRequest("Image file size must be less than 5MB");
+            }
+
+            // Save the image using LocalStorageService
+            var imageUrl = await storageService.SaveFileAsync(image, "student-profiles");
+
+            // Update the student's image URL
+            student.Image = imageUrl;
+            await dbContext.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Profile image uploaded successfully",
+                imageUrl,
+                fileName = image.FileName,
+                fileSize = image.Length
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }

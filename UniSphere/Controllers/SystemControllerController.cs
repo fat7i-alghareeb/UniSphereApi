@@ -20,26 +20,67 @@ public class SystemControllerController(
     UserManager<ApplicationUser> userManager,
     ApplicationIdentityDbContext identityDbContext,
     TokenProvider tokenProvider,
-    IAuthService authService
+    IAuthService authService,
+    IStorageService storageService
 ) : BaseController
 {
-    [HttpGet("GetMe")]
-    public async Task<ActionResult<BaseSystemControllerDto>> GetMe()
+    [HttpPost("UploadProfileImage")]
+    [Authorize(Roles = "SystemController")]
+    public async Task<IActionResult> UploadProfileImage(IFormFile image)
     {
-        var systemControllerId = HttpContext.User.GetSystemControllerId();
-
-        if (systemControllerId is null)
+        try
         {
-            return Unauthorized();
-        }
+            var systemControllerId = HttpContext.User.GetSystemControllerId();
+            if (systemControllerId is null)
+            {
+                return Unauthorized();
+            }
 
-        SystemController systemController = await applicationDbContext.SystemControllers
-            .FirstOrDefaultAsync(sc => sc.Id == systemControllerId);
-        if (systemController is null)
-        {
-            return Unauthorized();
+            var systemController = await applicationDbContext.SystemControllers.FirstOrDefaultAsync(sc => sc.Id == systemControllerId);
+            if (systemController is null)
+            {
+                return NotFound("SystemController not found");
+            }
+
+            if (image == null || image.Length == 0)
+            {
+                return BadRequest("No image file provided");
+            }
+
+            // Validate image file type
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
+            var fileExtension = Path.GetExtension(image.FileName).ToLowerInvariant();
+            
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                return BadRequest("Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp");
+            }
+
+            // Validate file size (max 5MB for profile images)
+            if (image.Length > 5 * 1024 * 1024)
+            {
+                return BadRequest("Image file size must be less than 5MB");
+            }
+
+            // Save the image using LocalStorageService
+            var imageUrl = await storageService.SaveFileAsync(image, "systemcontroller-profiles");
+
+            // Update the systemController's image URL
+            systemController.Image = imageUrl;
+            await applicationDbContext.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Profile image uploaded successfully",
+                imageUrl,
+                fileName = image.FileName,
+                fileSize = image.Length
+            });
         }
-        return Ok(systemController.ToBaseSystemControllerDto());
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     // SuperAdmin Management Endpoints
@@ -223,9 +264,9 @@ public class SystemControllerController(
     [AllowAnonymous]
     public async Task<ActionResult<FullInfoSystemControllerDto>> Login(LoginSystemControllerDto loginSystemControllerDto)
     {
-        SystemController? systemController = await applicationDbContext.SystemControllers
-            .FirstOrDefaultAsync(sc => sc.Gmail == loginSystemControllerDto.Gmail);
-        if (systemController is null)
+        // Find user by email
+        var applicationUser = await userManager.FindByEmailAsync(loginSystemControllerDto.Gmail);
+        if (applicationUser is null)
         {
             return Problem(
                 detail: "SystemController not found",
@@ -234,14 +275,24 @@ public class SystemControllerController(
             );
         }
 
-        ApplicationUser? applicationUser =
-            await userManager.Users.FirstOrDefaultAsync(u => u.SystemControllerId == systemController.Id);
-        if (applicationUser is null)
+        // Check if user has SystemControllerId
+        if (applicationUser.SystemControllerId is null)
         {
             return Problem(
-                detail: "SystemController not Registered",
-                title: "SystemController not Registered",
+                detail: "User is not a system controller",
+                title: "User is not a system controller",
                 statusCode: StatusCodes.Status401Unauthorized
+            );
+        }
+
+        SystemController? systemController = await applicationDbContext.SystemControllers
+            .FirstOrDefaultAsync(sc => sc.Id == applicationUser.SystemControllerId);
+        if (systemController is null)
+        {
+            return Problem(
+                detail: "SystemController not found",
+                title: "SystemController not found",
+                statusCode: StatusCodes.Status404NotFound
             );
         }
 
@@ -261,7 +312,7 @@ public class SystemControllerController(
         
         await authService.CreateOrUpdateRefreshTokenAsync(applicationUser, accessTokens.RefreshToken);
         
-        return Ok(systemController.ToFullInfoSystemControllerDto(accessTokens.AccessToken, accessTokens.RefreshToken));
+        return Ok(systemController.ToFullInfoSystemControllerDto(accessTokens.AccessToken, accessTokens.RefreshToken, Roles.SystemController));
     }
 
     [HttpPost("Auth/Register")]
@@ -281,7 +332,9 @@ public class SystemControllerController(
 
         var applicationUser = new ApplicationUser
         {
-            UserName = registerSystemControllerDto.SystemControllerId.ToString(),
+            UserName = systemController.Gmail,
+            Email = systemController.Gmail,
+            EmailConfirmed = true,
             SystemControllerId = registerSystemControllerDto.SystemControllerId,
         };
         if (registerSystemControllerDto.Password != registerSystemControllerDto.ConfirmPassword)
@@ -326,6 +379,6 @@ public class SystemControllerController(
             new TokenRequest([Roles.SystemController], null, null, null, null, registerSystemControllerDto.SystemControllerId)
         );
         await identityDbContext.SaveChangesAsync();
-        return Ok(systemController.ToFullInfoSystemControllerDto(accessTokens.AccessToken, accessTokens.RefreshToken));
+        return Ok(systemController.ToFullInfoSystemControllerDto(accessTokens.AccessToken, accessTokens.RefreshToken, Roles.SystemController));
     }
 } 

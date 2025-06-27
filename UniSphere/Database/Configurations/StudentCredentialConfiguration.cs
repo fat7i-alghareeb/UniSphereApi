@@ -14,8 +14,7 @@ public class StudentCredentialConfiguration : IEntityTypeConfiguration<StudentCr
             .IsRequired()
             .HasMaxLength(100);
         builder.Property(s => s.Image)
-            .IsRequired()
-            .HasMaxLength(100);
+            .HasMaxLength(500);
         
         builder.Property(s => s.FirstName)
             .HasColumnType("jsonb")

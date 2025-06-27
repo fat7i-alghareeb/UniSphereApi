@@ -25,16 +25,19 @@ public class DatabaseSeeder(
     ScheduleSeedData scheduleSeedData,
     LectureSeedData lectureSeedData,
     StudentStatisticsSeedData studentStatisticsSeedData,
+    AdminSeedData adminSeedData,
+    SuperAdminSeedData superAdminSeedData,
     ILogger<DatabaseSeeder> logger,
     RoleManager<IdentityRole> roleManager
-    )
+)
 {
-
     public async Task ClearApplicationDataAsync()
     {
         logger.LogInformation("Starting to delete all data from the database...");
 
         // Delete in reverse dependency order to avoid FK issues
+        await applicationDbContext.SuperAdmins.ExecuteDeleteAsync();
+        await applicationDbContext.Admins.ExecuteDeleteAsync();
         await applicationDbContext.Lectures.ExecuteDeleteAsync();
         await applicationDbContext.SubjectStudentLinks.ExecuteDeleteAsync();
         await applicationDbContext.SubjectProfessorLinks.ExecuteDeleteAsync();
@@ -55,6 +58,7 @@ public class DatabaseSeeder(
         await applicationDbContext.SaveChangesAsync();
         logger.LogInformation("All data deleted from the database.");
     }
+
     public async Task ClearIdentityDataAsync()
     {
         logger.LogInformation("Starting to delete all identity data from the database...");
@@ -68,7 +72,8 @@ public class DatabaseSeeder(
         await applicationIdentityDbContext.UserRoles.ExecuteDeleteAsync();
         await applicationIdentityDbContext.SaveChangesAsync();
         logger.LogInformation("All identity data deleted from the database.");
-    } 
+    }
+
     public async Task SeedAsync()
     {
         logger.LogInformation("Starting database seeding...");
@@ -96,6 +101,8 @@ public class DatabaseSeeder(
         await subjectStudentLinkSeedData.SeedAsync();
         await instructorLabLinkSeedData.SeedAsync();
         await lectureSeedData.SeedAsync();
+        await adminSeedData.SeedAsync();
+        await superAdminSeedData.SeedAsync();
         logger.LogInformation("Database seeding completed.");
     }
 
@@ -117,11 +124,11 @@ public class DatabaseSeeder(
             {
                 await roleManager.CreateAsync(new IdentityRole(Roles.Student));
             }
-               if (!await roleManager.RoleExistsAsync(Roles.SuperAdmin))
+
+            if (!await roleManager.RoleExistsAsync(Roles.SuperAdmin))
             {
                 await roleManager.CreateAsync(new IdentityRole(Roles.SuperAdmin));
             }
-            
         }
         catch (Exception ex)
         {

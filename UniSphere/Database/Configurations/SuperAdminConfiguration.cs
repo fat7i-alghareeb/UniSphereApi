@@ -23,6 +23,8 @@ public class SuperAdminConfiguration : IEntityTypeConfiguration<SuperAdmin>
         builder.Property(sa => sa.OneTimeCodeExpirationInMinutes);
         builder.Property(sa => sa.OneTimeCodeCreatedDate);
         builder.Property(sa => sa.FacultyId).IsRequired();
+        builder.Property(sa => sa.Image)
+            .HasMaxLength(500);
 
         builder.HasOne(sa => sa.Faculty)
             .WithMany()

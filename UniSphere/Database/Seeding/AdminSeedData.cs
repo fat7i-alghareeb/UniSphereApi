@@ -9,7 +9,6 @@ public class AdminSeedData(ApplicationDbContext context) : SeedData(context)
     {
         if (!await Context.Admins.AnyAsync())
         {
-            var majors = await Context.Majors.ToListAsync();
             var admins = new List<Admin>
             {
                 new()
@@ -21,7 +20,7 @@ public class AdminSeedData(ApplicationDbContext context) : SeedData(context)
                     OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,
                     OneTimeCodeExpirationInMinutes = 10000,
-                    MajorId = majors[0].Id
+                    MajorId =Guid.Parse("09da2b33-d994-4a4f-9271-5056165a7146")
                 },
                 new()
                 {
@@ -29,10 +28,10 @@ public class AdminSeedData(ApplicationDbContext context) : SeedData(context)
                     FirstName = new MultilingualText { Ar = "سارة", En = "Sarah" },
                     LastName = new MultilingualText { Ar = "علي", En = "Ali" },
                     Gmail = "sarah.ali@unisphere.com",
-                    OneTimeCode = 5678,
+                    OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,
                     OneTimeCodeExpirationInMinutes = 10000,
-                    MajorId = majors[1].Id
+                    MajorId = Guid.Parse("09da2b33-d994-4a4f-9271-5056165a7146")
                 }
             };
             await Context.Admins.AddRangeAsync(admins);

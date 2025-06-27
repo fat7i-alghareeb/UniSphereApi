@@ -21,27 +21,67 @@ public class ProfessorsController(
     UserManager<ApplicationUser> userManager,
     ApplicationIdentityDbContext identityDbContext,
     TokenProvider tokenProvider,
-    IAuthService authService
+    IAuthService authService,
+    IStorageService storageService
 ) : BaseController
 {
-    [HttpGet("GetMe")]
+    [HttpPost("UploadProfileImage")]
     [Authorize(Roles = "Professor")]
-    public async Task<ActionResult<BaseProfessorDto>> GetMe()
+    public async Task<IActionResult> UploadProfileImage(IFormFile image)
     {
-        var professorId = HttpContext.User.GetProfessorId();
-
-        if (professorId is null)
+        try
         {
-            return Unauthorized();
-        }
+            var professorId = HttpContext.User.GetProfessorId();
+            if (professorId is null)
+            {
+                return Unauthorized();
+            }
 
-        Professor professor = await dbContext.Professors
-            .FirstOrDefaultAsync(p => p.Id == professorId);
-        if (professor is null)
-        {
-            return Unauthorized();
+            var professor = await dbContext.Professors.FirstOrDefaultAsync(p => p.Id == professorId);
+            if (professor is null)
+            {
+                return NotFound("Professor not found");
+            }
+
+            if (image == null || image.Length == 0)
+            {
+                return BadRequest("No image file provided");
+            }
+
+            // Validate image file type
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
+            var fileExtension = Path.GetExtension(image.FileName).ToLowerInvariant();
+            
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                return BadRequest("Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp");
+            }
+
+            // Validate file size (max 5MB for profile images)
+            if (image.Length > 5 * 1024 * 1024)
+            {
+                return BadRequest("Image file size must be less than 5MB");
+            }
+
+            // Save the image using LocalStorageService
+            var imageUrl = await storageService.SaveFileAsync(image, "professor-profiles");
+
+            // Update the professor's image URL
+            professor.Image = imageUrl;
+            await dbContext.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Profile image uploaded successfully",
+                imageUrl,
+                fileName = image.FileName,
+                fileSize = image.Length
+            });
         }
-        return Ok(professor.ToBaseProfessorDto());
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPost("AddProfessorToFaculty")]
@@ -287,7 +327,9 @@ public class ProfessorsController(
 
         var applicationUser = new ApplicationUser
         {
-            UserName = registerProfessorDto.ProfessorId.ToString(),
+            UserName = professor.Gmail,
+            Email = professor.Gmail,
+            EmailConfirmed = true,
             ProfessorId = registerProfessorDto.ProfessorId,
         };
         if (registerProfessorDto.Password != registerProfessorDto.ConfirmPassword)
@@ -332,16 +374,16 @@ public class ProfessorsController(
             new TokenRequest([Roles.Professor], null, null, null, registerProfessorDto.ProfessorId)
         );
         await identityDbContext.SaveChangesAsync();
-        return Ok(professor.ToFullInfoProfessorDto(accessTokens.AccessToken, accessTokens.RefreshToken));
+        return Ok(professor.ToFullInfoProfessorDto(accessTokens.AccessToken, accessTokens.RefreshToken, Roles.Professor));
     }
 
     [HttpPost("Auth/Login")]
     [AllowAnonymous]
     public async Task<ActionResult<FullInfoProfessorDto>> Login(LoginProfessorDto loginProfessorDto)
     {
-        Professor? professor = await dbContext.Professors
-            .FirstOrDefaultAsync(p => p.Gmail == loginProfessorDto.Gmail);
-        if (professor is null)
+        // Find user by email
+        var applicationUser = await userManager.FindByEmailAsync(loginProfessorDto.Gmail);
+        if (applicationUser is null)
         {
             return Problem(
                 detail: "Professor not found",
@@ -350,14 +392,24 @@ public class ProfessorsController(
             );
         }
 
-        ApplicationUser? applicationUser =
-            await userManager.Users.FirstOrDefaultAsync(u => u.ProfessorId == professor.Id);
-        if (applicationUser is null)
+        // Check if user has ProfessorId
+        if (applicationUser.ProfessorId is null)
         {
             return Problem(
-                detail: "Professor not Registered",
-                title: "Professor not Registered",
+                detail: "User is not a professor",
+                title: "User is not a professor",
                 statusCode: StatusCodes.Status401Unauthorized
+            );
+        }
+
+        Professor? professor = await dbContext.Professors
+            .FirstOrDefaultAsync(p => p.Id == applicationUser.ProfessorId);
+        if (professor is null)
+        {
+            return Problem(
+                detail: "Professor not found",
+                title: "Professor not found",
+                statusCode: StatusCodes.Status404NotFound
             );
         }
 
@@ -377,6 +429,6 @@ public class ProfessorsController(
         
         await authService.CreateOrUpdateRefreshTokenAsync(applicationUser, accessTokens.RefreshToken);
         
-        return Ok(professor.ToFullInfoProfessorDto(accessTokens.AccessToken, accessTokens.RefreshToken));
+        return Ok(professor.ToFullInfoProfessorDto(accessTokens.AccessToken, accessTokens.RefreshToken, Roles.Professor));
     }
 } 

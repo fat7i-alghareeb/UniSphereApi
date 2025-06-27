@@ -1,4 +1,3 @@
-using UniSphere.Api.Controllers;
 using UniSphere.Api.Entities;
 
 namespace UniSphere.Api.DTOs.Auth;
@@ -24,7 +23,7 @@ internal static class AuthMappings{
             Year = studentCredential.Year
         };
     }
-    public static FullInfoStudentDto ToFullInfoStudentDto(this StudentCredential studentCredential,string accessToken,string refreshToken)
+    public static FullInfoStudentDto ToFullInfoStudentDto(this StudentCredential studentCredential, string accessToken, string refreshToken, string? role = null)
     {
         return new FullInfoStudentDto
         {
@@ -58,13 +57,14 @@ internal static class AuthMappings{
             MajorId = studentCredential.MajorId,
             StudentId = studentCredential.Id,
             StudentImageUrl = studentCredential.Image ?? "",
+            Role = role ?? "Student",
             AccessToken = accessToken,
             RefreshToken = refreshToken,
             NumberOfMajorYears = studentCredential.Major.NumberOfYears
         };
     }
 
-    public static BaseStudentDto ToBaseStudentDto(this StudentCredential studentCredential)
+    public static BaseStudentDto ToBaseStudentDto(this StudentCredential studentCredential, string? role = null)
     {
         return new BaseStudentDto()
         {
@@ -98,6 +98,7 @@ internal static class AuthMappings{
             MajorId = studentCredential.MajorId,
             StudentId = studentCredential.Id,
             StudentImageUrl = studentCredential.Image ?? "",
+            Role = role ?? "Student",
             NumberOfMajorYears = studentCredential.Major.NumberOfYears
         };
     }
@@ -123,7 +124,7 @@ internal static class AuthMappings{
         };
     }
 
-    public static FullInfoAdminDto ToFullInfoAdminDto(this Admin admin, string accessToken, string refreshToken)
+    public static FullInfoAdminDto ToFullInfoAdminDto(this Admin admin, string accessToken, string refreshToken, string? role = null)
     {
         return new FullInfoAdminDto
         {
@@ -145,12 +146,14 @@ internal static class AuthMappings{
             },
             MajorId = admin.MajorId,
             AdminId = admin.Id,
+            Role = role ?? "Admin",
+            Image = admin.Image,
             AccessToken = accessToken,
             RefreshToken = refreshToken
         };
     }
 
-    public static BaseAdminDto ToBaseAdminDto(this Admin admin)
+    public static BaseAdminDto ToBaseAdminDto(this Admin admin, string? role = null)
     {
         return new BaseAdminDto()
         {
@@ -171,7 +174,9 @@ internal static class AuthMappings{
                 Ar = admin.Major.Name.Ar ?? "" 
             },
             MajorId = admin.MajorId,
-            AdminId = admin.Id
+            AdminId = admin.Id,
+            Role = role ?? "Admin",
+            Image = admin.Image
         };
     }
 
@@ -196,7 +201,7 @@ internal static class AuthMappings{
         };
     }
 
-    public static FullInfoSuperAdminDto ToFullInfoSuperAdminDto(this SuperAdmin superAdmin, string accessToken, string refreshToken)
+    public static FullInfoSuperAdminDto ToFullInfoSuperAdminDto(this SuperAdmin superAdmin, string accessToken, string refreshToken, string? role = null)
     {
         return new FullInfoSuperAdminDto
         {
@@ -218,12 +223,14 @@ internal static class AuthMappings{
             },
             FacultyId = superAdmin.FacultyId,
             SuperAdminId = superAdmin.Id,
+            Role = role ?? "SuperAdmin",
+            Image = superAdmin.Image,
             AccessToken = accessToken,
             RefreshToken = refreshToken
         };
     }
 
-    public static BaseSuperAdminDto ToBaseSuperAdminDto(this SuperAdmin superAdmin)
+    public static BaseSuperAdminDto ToBaseSuperAdminDto(this SuperAdmin superAdmin, string? role = null)
     {
         return new BaseSuperAdminDto()
         {
@@ -244,7 +251,9 @@ internal static class AuthMappings{
                 Ar = superAdmin.Faculty.Name.Ar ?? "" 
             },
             FacultyId = superAdmin.FacultyId,
-            SuperAdminId = superAdmin.Id
+            SuperAdminId = superAdmin.Id,
+            Role = role ?? "SuperAdmin",
+            Image = superAdmin.Image
         };
     }
 
@@ -263,7 +272,7 @@ internal static class AuthMappings{
         };
     }
 
-    public static FullInfoProfessorDto ToFullInfoProfessorDto(this Professor professor, string accessToken, string refreshToken)
+    public static FullInfoProfessorDto ToFullInfoProfessorDto(this Professor professor, string accessToken, string refreshToken, string? role = null)
     {
         return new FullInfoProfessorDto
         {
@@ -285,12 +294,13 @@ internal static class AuthMappings{
             },
             Image = professor.Image ?? "",
             ProfessorId = professor.Id,
+            Role = role ?? "Professor",
             AccessToken = accessToken,
             RefreshToken = refreshToken
         };
     }
 
-    public static BaseProfessorDto ToBaseProfessorDto(this Professor professor)
+    public static BaseProfessorDto ToBaseProfessorDto(this Professor professor, string? role = null)
     {
         return new BaseProfessorDto()
         {
@@ -311,7 +321,8 @@ internal static class AuthMappings{
                 Ar = professor.Bio.Ar ?? "" 
             },
             Image = professor.Image ?? "",
-            ProfessorId = professor.Id
+            ProfessorId = professor.Id,
+            Role = role ?? "Professor"
         };
     }
 
@@ -331,25 +342,29 @@ internal static class AuthMappings{
         };
     }
 
-    public static FullInfoSystemControllerDto ToFullInfoSystemControllerDto(this SystemController systemController, string accessToken, string refreshToken)
+    public static FullInfoSystemControllerDto ToFullInfoSystemControllerDto(this SystemController systemController, string accessToken, string refreshToken, string? role = null)
     {
         return new FullInfoSystemControllerDto
         {
             Gmail = systemController.Gmail,
             UserName = systemController.UserName,
             SystemControllerId = systemController.Id,
+            Role = role ?? "SystemController",
+            Image = systemController.Image,
             AccessToken = accessToken,
             RefreshToken = refreshToken
         };
     }
 
-    public static BaseSystemControllerDto ToBaseSystemControllerDto(this SystemController systemController)
+    public static BaseSystemControllerDto ToBaseSystemControllerDto(this SystemController systemController, string? role = null)
     {
         return new BaseSystemControllerDto()
         {
             Gmail = systemController.Gmail,
             UserName = systemController.UserName,
-            SystemControllerId = systemController.Id
+            SystemControllerId = systemController.Id,
+            Role = role ?? "SystemController",
+            Image = systemController.Image
         };
     }
 }

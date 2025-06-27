@@ -19,30 +19,10 @@ public class AdminController(
     UserManager<ApplicationUser> userManager,
     ApplicationIdentityDbContext identityDbContext,
     TokenProvider tokenProvider,
-    IAuthService authService
+    IAuthService authService,
+    IStorageService storageService
 ) : BaseController
 {
-    [HttpGet("GetMe")]
-    [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<BaseAdminDto>> GetMe()
-    {
-        var adminId = HttpContext.User.GetAdminId();
-
-        if (adminId is null)
-        {
-            return Unauthorized();
-        }
-
-        Admin admin = await dbContext.Admins
-            .Include(a => a.Major)
-            .FirstOrDefaultAsync(a => a.Id == adminId);
-        if (admin is null)
-        {
-            return Unauthorized();
-        }
-        return Ok(admin.ToBaseAdminDto());
-    }
-
     [HttpPost("AssignOneTimeCodeToStudent")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> AssignOneTimeCodeToStudent([FromBody] AssignOneTimeCodeRequestDto dto)
@@ -95,6 +75,65 @@ public class AdminController(
         });
     }
 
+    [HttpPost("UploadProfileImage")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UploadProfileImage(IFormFile image)
+    {
+        try
+        {
+            var adminId = HttpContext.User.GetAdminId();
+            if (adminId is null)
+            {
+                return Unauthorized();
+            }
+
+            var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
+            if (admin is null)
+            {
+                return NotFound("Admin not found");
+            }
+
+            if (image == null || image.Length == 0)
+            {
+                return BadRequest("No image file provided");
+            }
+
+            // Validate image file type
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
+            var fileExtension = Path.GetExtension(image.FileName).ToLowerInvariant();
+            
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                return BadRequest("Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp");
+            }
+
+            // Validate file size (max 5MB for profile images)
+            if (image.Length > 5 * 1024 * 1024)
+            {
+                return BadRequest("Image file size must be less than 5MB");
+            }
+
+            // Save the image using LocalStorageService
+            var imageUrl = await storageService.SaveFileAsync(image, "admin-profiles");
+
+            // Update the admin's image URL
+            admin.Image = imageUrl;
+            await dbContext.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Profile image uploaded successfully",
+                imageUrl,
+                fileName = image.FileName,
+                fileSize = image.Length
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     // Authentication Endpoints
     [HttpPost("Auth/CheckOneTimeCode")]
     [AllowAnonymous]
@@ -138,7 +177,9 @@ public class AdminController(
 
         var applicationUser = new ApplicationUser
         {
-            UserName = registerAdminDto.AdminId.ToString(),
+            UserName = admin.Gmail,
+            Email = admin.Gmail,
+            EmailConfirmed = true,
             AdminId = registerAdminDto.AdminId,
         };
         if (registerAdminDto.Password != registerAdminDto.ConfirmPassword)
@@ -183,17 +224,16 @@ public class AdminController(
             new TokenRequest([Roles.Admin], null, registerAdminDto.AdminId)
         );
         await identityDbContext.SaveChangesAsync();
-        return Ok(admin.ToFullInfoAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken));
+        return Ok(admin.ToFullInfoAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken, Roles.Admin));
     }
 
     [HttpPost("Auth/Login")]
     [AllowAnonymous]
     public async Task<ActionResult<FullInfoAdminDto>> Login(LoginAdminDto loginAdminDto)
     {
-        Admin? admin = await dbContext.Admins
-            .Include(a => a.Major)
-            .FirstOrDefaultAsync(a => a.Gmail == loginAdminDto.Gmail && a.MajorId == loginAdminDto.MajorId);
-        if (admin is null)
+        // Find user by email
+        var applicationUser = await userManager.FindByEmailAsync(loginAdminDto.Gmail);
+        if (applicationUser is null)
         {
             return Problem(
                 detail: "Admin not found",
@@ -202,14 +242,25 @@ public class AdminController(
             );
         }
 
-        ApplicationUser? applicationUser =
-            await userManager.Users.FirstOrDefaultAsync(u => u.AdminId == admin.Id);
-        if (applicationUser is null)
+        // Check if user has AdminId
+        if (applicationUser.AdminId is null)
         {
             return Problem(
-                detail: "Admin not Registered",
-                title: "Admin not Registered",
+                detail: "User is not an admin",
+                title: "User is not an admin",
                 statusCode: StatusCodes.Status401Unauthorized
+            );
+        }
+
+        Admin? admin = await dbContext.Admins
+            .Include(a => a.Major)
+            .FirstOrDefaultAsync(a => a.Id == applicationUser.AdminId);
+        if (admin is null)
+        {
+            return Problem(
+                detail: "Admin not found",
+                title: "Admin not found",
+                statusCode: StatusCodes.Status404NotFound
             );
         }
 
@@ -229,6 +280,6 @@ public class AdminController(
         
         await authService.CreateOrUpdateRefreshTokenAsync(applicationUser, accessTokens.RefreshToken);
         
-        return Ok(admin.ToFullInfoAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken));
+        return Ok(admin.ToFullInfoAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken, Roles.Admin));
     }
 } 

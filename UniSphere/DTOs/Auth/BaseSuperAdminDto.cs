@@ -8,4 +8,6 @@ public record BaseSuperAdminDto
     public required MultilingualNameDto FacultyName { get; init; }
     public required Guid FacultyId { get; init; }
     public required Guid SuperAdminId { get; init; }
+    public required string Role { get; init; } = "SuperAdmin";
+    public string? Image { get; init; }
 } 

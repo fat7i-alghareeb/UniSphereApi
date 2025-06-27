@@ -12,5 +12,6 @@ public class SystemControllerConfiguration : IEntityTypeConfiguration<SystemCont
         builder.Property(e => e.Id).ValueGeneratedOnAdd();
         builder.Property(e => e.Gmail).HasMaxLength(255).IsRequired();
         builder.Property(e => e.UserName).HasMaxLength(255).IsRequired();
+        builder.Property(e => e.Image).HasMaxLength(500);
     }
 }

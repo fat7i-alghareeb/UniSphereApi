@@ -8,4 +8,5 @@ public record BaseProfessorDto
     public required MultilingualTextDto Bio { get; init; }
     public required string Image { get; init; }
     public required Guid ProfessorId { get; init; }
+    public required string Role { get; init; } = "Professor";
 } 

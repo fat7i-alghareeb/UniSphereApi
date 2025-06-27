@@ -8,4 +8,6 @@ public record BaseAdminDto
     public required MultilingualNameDto MajorName { get; init; }
     public required Guid MajorId { get; init; }
     public required Guid AdminId { get; init; }
+    public required string Role { get; init; } = "Admin";
+    public string? Image { get; init; }
 } 
