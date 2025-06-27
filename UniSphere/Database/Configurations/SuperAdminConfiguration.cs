@@ -27,8 +27,8 @@ public class SuperAdminConfiguration : IEntityTypeConfiguration<SuperAdmin>
             .HasMaxLength(500);
 
         builder.HasOne(sa => sa.Faculty)
-            .WithMany()
+            .WithMany(f => f.SuperAdmins)
             .HasForeignKey(sa => sa.FacultyId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
     }
 } 

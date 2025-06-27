@@ -12,6 +12,6 @@ public class Admin
     public required MultilingualText FirstName { get; set; } = new();
     public required MultilingualText LastName { get; set; } = new();
     public string? Image { get; set; }
-    public Major Major { get; set; } = new();
+    public Major Major { get; set; } = null!;
     public string? IdentityId { get; set; }
 }

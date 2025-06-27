@@ -27,8 +27,8 @@ public class AdminConfiguration : IEntityTypeConfiguration<Admin>
             .HasMaxLength(500);
 
         builder.HasOne(a => a.Major)
-            .WithMany()
+            .WithMany(m => m.Admins)
             .HasForeignKey(a => a.MajorId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
     }
 } 

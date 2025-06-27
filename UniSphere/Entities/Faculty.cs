@@ -14,4 +14,5 @@ public class Faculty
     public List<Schedule> Schedules { get; set; } = new();
     public List<FacultyAnnouncement>? FacultyAnnouncements { get; set; }
     public List<ProfessorFacultyLink>? ProfessorFacultyLinks { get; set; }
+    public List<SuperAdmin>? SuperAdmins { get; set; }
 } 

@@ -14,5 +14,5 @@ public class Major
     public List<StudentCredential> StudentCredentials { get; set; } = new();
     public List<Schedule> Schedules { get; set; } = new();
     public List<MajorAnnouncement>? MajorAnnouncements { get; set; }
-
+    public List<Admin>? Admins { get; set; }
 }

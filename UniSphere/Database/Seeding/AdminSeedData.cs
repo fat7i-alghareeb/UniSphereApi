@@ -9,6 +9,16 @@ public class AdminSeedData(ApplicationDbContext context) : SeedData(context)
     {
         if (!await Context.Admins.AnyAsync())
         {
+            // Check if the required major exists
+            var softwareEngineeringMajor = await Context.Majors
+                .FirstOrDefaultAsync(m => m.Id == Guid.Parse("09da2b33-d994-4a4f-9271-5056165a7146"));
+            
+            if (softwareEngineeringMajor == null)
+            {
+                // Major doesn't exist, skip admin seeding
+                return;
+            }
+
             var admins = new List<Admin>
             {
                 new()
@@ -20,7 +30,7 @@ public class AdminSeedData(ApplicationDbContext context) : SeedData(context)
                     OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,
                     OneTimeCodeExpirationInMinutes = 10000,
-                    MajorId =Guid.Parse("09da2b33-d994-4a4f-9271-5056165a7146")
+                    MajorId = softwareEngineeringMajor.Id
                 },
                 new()
                 {
@@ -31,7 +41,7 @@ public class AdminSeedData(ApplicationDbContext context) : SeedData(context)
                     OneTimeCode = 1234,
                     OneTimeCodeCreatedDate = DateTime.UtcNow,
                     OneTimeCodeExpirationInMinutes = 10000,
-                    MajorId = Guid.Parse("09da2b33-d994-4a4f-9271-5056165a7146")
+                    MajorId = softwareEngineeringMajor.Id
                 }
             };
             await Context.Admins.AddRangeAsync(admins);

@@ -21,7 +21,7 @@ public class MajorSeedData(ApplicationDbContext context) : SeedData(context)
                 {
                     Id = Guid.Parse("09da2b33-d994-4a4f-9271-5056165a7146"),
                     Name = new MultilingualText { Ar = "هندسة البرمجيات", En = "Software Engineering" },
-                    FacultyId = faculties[0].Id,
+                    FacultyId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
                     NumberOfYears = 4
                 },
                 new()

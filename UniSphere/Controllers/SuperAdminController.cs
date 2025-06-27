@@ -179,11 +179,14 @@ public class SuperAdminController(
         }
         superAdmin.IdentityId = applicationUser.Id;
         await dbContext.SaveChangesAsync();
-        await transaction.CommitAsync();
         AccessTokensDto accessTokens = tokenProvider.Create(
             new TokenRequest([Roles.SuperAdmin], null, null, registerSuperAdminDto.SuperAdminId)
         );
+        await authService.CreateOrUpdateRefreshTokenAsync(applicationUser, accessTokens.RefreshToken);
+
         await identityDbContext.SaveChangesAsync();
+        
+        await transaction.CommitAsync();
         return Ok(superAdmin.ToFullInfoSuperAdminDto(accessTokens.AccessToken, accessTokens.RefreshToken, Roles.SuperAdmin));
     }
 

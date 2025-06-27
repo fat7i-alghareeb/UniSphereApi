@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using UniSphere.Api.Database;
@@ -12,9 +13,11 @@ using UniSphere.Api.Entities;
 namespace UniSphere.Api.Migrations.Application
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250627104331_idk_changes")]
+    partial class idk_changes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -777,6 +780,10 @@ namespace UniSphere.Api.Migrations.Application
                         .HasColumnType("uuid")
                         .HasColumnName("faculty_id");
 
+                    b.Property<Guid?>("FacultyId1")
+                        .HasColumnType("uuid")
+                        .HasColumnName("faculty_id1");
+
                     b.Property<MultilingualText>("FirstName")
                         .IsRequired()
                         .HasColumnType("jsonb")
@@ -819,6 +826,9 @@ namespace UniSphere.Api.Migrations.Application
 
                     b.HasIndex("FacultyId")
                         .HasDatabaseName("ix_super_admins_faculty_id");
+
+                    b.HasIndex("FacultyId1")
+                        .HasDatabaseName("ix_super_admins_faculty_id1");
 
                     b.ToTable("super_admins", "uni_sphere");
                 });
@@ -1135,11 +1145,16 @@ namespace UniSphere.Api.Migrations.Application
             modelBuilder.Entity("UniSphere.Api.Entities.SuperAdmin", b =>
                 {
                     b.HasOne("UniSphere.Api.Entities.Faculty", "Faculty")
-                        .WithMany("SuperAdmins")
+                        .WithMany()
                         .HasForeignKey("FacultyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_super_admins_faculties_faculty_id");
+
+                    b.HasOne("UniSphere.Api.Entities.Faculty", null)
+                        .WithMany("SuperAdmins")
+                        .HasForeignKey("FacultyId1")
+                        .HasConstraintName("fk_super_admins_faculties_faculty_id1");
 
                     b.Navigation("Faculty");
                 });

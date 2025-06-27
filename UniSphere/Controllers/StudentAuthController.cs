@@ -106,13 +106,16 @@ public sealed class StudentAuthController(
         }
         
         studentCredential.IdentityId = applicationUser.Id;
+        
         await applicationDbContext.SaveChangesAsync();
-        await transaction.CommitAsync();
         
         AccessTokensDto accessTokens = tokenProvider.Create(
             new TokenRequest([Roles.Student], registerStudentDto.StudentId)
         );
+        await authService.CreateOrUpdateRefreshTokenAsync(applicationUser, accessTokens.RefreshToken);
+
         await identityDbContext.SaveChangesAsync();
+        await transaction.CommitAsync();
         
         return Ok(studentCredential.ToFullInfoStudentDto(accessTokens.AccessToken, accessTokens.RefreshToken, Roles.Student));
     }

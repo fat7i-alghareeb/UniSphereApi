@@ -79,12 +79,11 @@ public class DatabaseSeeder(
         logger.LogInformation("Starting database seeding...");
         await applicationDbContext.Database.EnsureCreatedAsync();
 
-        // Uncomment the next line if you want to clear all data before seeding
-        // await ClearApplicationDataAsync();
+        // Clear all data before seeding to avoid conflicts
+        await ClearApplicationDataAsync();
 
         // Seed in the correct order based on dependencies
         await universitySeedData.SeedAsync();
-        await facultySeedData.SeedAsync();
         await facultySeedData.SeedAsync();
         await facultyAnnouncementSeedData.SeedAsync();
         await majorSeedData.SeedAsync();
@@ -101,8 +100,8 @@ public class DatabaseSeeder(
         await subjectStudentLinkSeedData.SeedAsync();
         await instructorLabLinkSeedData.SeedAsync();
         await lectureSeedData.SeedAsync();
-        await adminSeedData.SeedAsync();
         await superAdminSeedData.SeedAsync();
+        await adminSeedData.SeedAsync();
         logger.LogInformation("Database seeding completed.");
     }
 
