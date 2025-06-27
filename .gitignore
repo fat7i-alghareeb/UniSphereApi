@@ -363,3 +363,19 @@ MigrationBackup/
 FodyWeavers.xsd
 .containers
 .containers/
+
+# ASP.NET Core user secrets
+secrets.json
+
+# Local uploads (if you store user files locally)
+wwwroot/uploads/
+wwwroot\\uploads\\
+
+# SQLite database (if used)
+*.db
+
+# Docker volumes/data
+.containers/
+
+# VS Code settings
+.vscode/
