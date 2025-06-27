@@ -20,6 +20,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "UniSphere API V1");
+        options.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
     });
     await app.ApplyMigrationsAsync();
     using var scope = app.Services.CreateScope();

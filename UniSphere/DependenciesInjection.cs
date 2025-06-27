@@ -201,6 +201,17 @@ public static class DependenciesInjection
                 };
             });
         builder.Services.AddAuthorization();
+
+        builder.Services.Configure<IdentityOptions>(options =>
+        {
+            options.Password.RequireDigit = true;
+            options.Password.RequiredLength = 5;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequireUppercase = false;
+            options.Password.RequireLowercase = false;
+            options.Password.RequiredUniqueChars = 0;
+        });
+
         return builder;
     }
 
