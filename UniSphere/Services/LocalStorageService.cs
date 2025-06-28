@@ -1,4 +1,3 @@
-
 namespace UniSphere.Api.Services;
 
 /// <summary>
@@ -177,12 +176,102 @@ public class LocalStorageService(IWebHostEnvironment environment, ILogger<LocalS
     }
 
     /// <summary>
+    /// Validates if a string is a valid URL format
+    /// </summary>
+    /// <param name="url">The URL string to validate</param>
+    /// <returns>True if the URL format is valid, false otherwise</returns>
+    public static bool IsValidUrl(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return false;
+        }
+
+        return Uri.TryCreate(url, UriKind.Absolute, out var uriResult) 
+               && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+    }
+
+    /// <summary>
     /// Infers the material type from a file URL or path
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1055:URI return values should not be strings", Justification = "Returns a type label, not a URI.")]
     public static string GetMaterialTypeFromUrl(string url)
     {
-        if (string.IsNullOrEmpty(url)) { return "unknown"; }
+        if (string.IsNullOrEmpty(url)) { return "link"; }
+        
+        // Check for YouTube links
+        if (url.Contains("youtube.com") || url.Contains("youtu.be"))
+        {
+            return "youtube";
+        }
+        
+        // Check for blog links
+        if (url.Contains("blog") || url.Contains("medium.com") || url.Contains("wordpress.com"))
+        {
+            return "blog";
+        }
+        
+        // Check for document sharing platforms
+        if (url.Contains("drive.google.com") || url.Contains("docs.google.com"))
+        {
+            return "google_docs";
+        }
+        
+        if (url.Contains("onedrive.live.com") || url.Contains("1drv.ms"))
+        {
+            return "onedrive";
+        }
+        
+        if (url.Contains("dropbox.com"))
+        {
+            return "dropbox";
+        }
+        
+        // Check for social media
+        if (url.Contains("facebook.com") || url.Contains("fb.com"))
+        {
+            return "facebook";
+        }
+        
+        if (url.Contains("twitter.com") || url.Contains("x.com"))
+        {
+            return "twitter";
+        }
+        
+        if (url.Contains("linkedin.com"))
+        {
+            return "linkedin";
+        }
+        
+        // Check for video platforms
+        if (url.Contains("vimeo.com"))
+        {
+            return "vimeo";
+        }
+        
+        if (url.Contains("dailymotion.com"))
+        {
+            return "dailymotion";
+        }
+        
+        // Check for presentation platforms
+        if (url.Contains("slideshare.net"))
+        {
+            return "slideshare";
+        }
+        
+        if (url.Contains("prezi.com"))
+        {
+            return "prezi";
+        }
+        
+        // Check for code repositories
+        if (url.Contains("github.com") || url.Contains("gitlab.com") || url.Contains("bitbucket.org"))
+        {
+            return "repository";
+        }
+        
+        // Check for file extensions (existing logic)
         var ext = Path.GetExtension(url).ToLowerInvariant();
         return ext switch
         {
@@ -190,7 +279,11 @@ public class LocalStorageService(IWebHostEnvironment environment, ILogger<LocalS
             ".doc" or ".docx" => "document",
             ".xls" or ".xlsx" or ".csv" => "excel",
             ".jpg" or ".jpeg" or ".png" or ".gif" or ".bmp" or ".webp" or ".svg" => "image",
-            _ => ext.TrimStart('.')
+            ".mp4" or ".avi" or ".mov" or ".wmv" or ".flv" => "video",
+            ".mp3" or ".wav" or ".ogg" => "audio",
+            ".ppt" or ".pptx" => "presentation",
+            ".zip" or ".rar" or ".7z" => "archive",
+            _ => "link"
         };
     }
 } 

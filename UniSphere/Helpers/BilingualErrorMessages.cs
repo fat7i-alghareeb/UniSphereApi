@@ -338,10 +338,40 @@ public static class BilingualErrorMessages
         Languages.Ar => "تمت إزالة حالة التسجيل بنجاح.",
         _ => "Enrollment status removed successfully."
     };
+
     public static string GetLabNotFoundMessage(Languages lang) => lang switch
     {
         Languages.En => "Lab not found.",
         Languages.Ar => "لم يتم العثور على المختبر.",
         _ => "Lab not found."
+    };
+
+    // Material Upload Messages
+    public static string GetMaterialUploadRequiredMessage(Languages lang) => lang switch
+    {
+        Languages.En => "Either a file or a link must be provided.",
+        Languages.Ar => "يجب توفير ملف أو رابط.",
+        _ => "Either a file or a link must be provided."
+    };
+
+    public static string GetMaterialUploadErrorMessage(Languages lang) => lang switch
+    {
+        Languages.En => "Error uploading material.",
+        Languages.Ar => "حدث خطأ أثناء رفع المادة.",
+        _ => "Error uploading material."
+    };
+
+    public static string GetMaterialUploadSuccessMessage(Languages lang) => lang switch
+    {
+        Languages.En => "Material uploaded successfully.",
+        Languages.Ar => "تم رفع المادة بنجاح.",
+        _ => "Material uploaded successfully."
+    };
+
+    public static string GetInvalidLinkFormatMessage(Languages lang) => lang switch
+    {
+        Languages.En => "Invalid link format.",
+        Languages.Ar => "تنسيق الرابط غير صالح.",
+        _ => "Invalid link format."
     };
 } 

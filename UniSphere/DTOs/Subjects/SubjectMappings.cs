@@ -30,7 +30,7 @@ internal static class SubjectMappings
             Materials = subject.Materials?.Select(m => new MaterialInfo
             {
                 Url = m.Url,
-                Type = LocalStorageService.GetMaterialTypeFromUrl(m.Url)
+                Type = m.Type
             }).ToList() ?? new List<MaterialInfo>()
         };
     }
@@ -55,7 +55,7 @@ internal static class SubjectMappings
             Materials = subject.Materials?.Select(m => new MaterialInfo
             {
                 Url = m.Url,
-                Type = LocalStorageService.GetMaterialTypeFromUrl(m.Url)
+                Type = m.Type
             }).ToList() ?? new List<MaterialInfo>()
         };
     }

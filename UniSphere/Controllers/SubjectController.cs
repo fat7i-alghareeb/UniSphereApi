@@ -401,7 +401,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
 
     [HttpPost("{id:guid}/materials")]
     [Authorize(Roles = Roles.Professor)]
-    public async Task<ActionResult<UnifiedSubjectDto>> UploadMaterial(Guid id, IFormFile file)
+    public async Task<ActionResult<UnifiedSubjectDto>> UploadMaterial(Guid id, [FromForm] UploadMaterialDto uploadDto)
     {
         var professorId = HttpContext.User.GetProfessorId();
         if (professorId is null)
@@ -427,22 +427,42 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
             return NotFound(new { message = BilingualErrorMessages.GetSubjectNotFoundMessage(Lang) });
         }
 
-        if (file == null || file.Length == 0)
+        if (!uploadDto.IsValid())
         {
-            return BadRequest(new { message = Lang == Languages.En ? "No file provided" : "لم يتم توفير ملف" });
+            return BadRequest(new { message = BilingualErrorMessages.GetMaterialUploadRequiredMessage(Lang) });
+        }
+
+        // Validate link format if it's a link upload
+        if (uploadDto.IsLinkUpload && !LocalStorageService.IsValidUrl(uploadDto.Link!))
+        {
+            return BadRequest(new { message = BilingualErrorMessages.GetInvalidLinkFormatMessage(Lang) });
         }
 
         try
         {
-            // Save the file using the storage service
-            var fileUrl = await storageService.SaveFileAsync(file, "materials");
+            string materialUrl;
+            string materialType;
+
+            if (uploadDto.IsFileUpload)
+            {
+                // Handle file upload
+                materialUrl = await storageService.SaveFileAsync(uploadDto.File!, "materials");
+                materialType = uploadDto.CustomType ?? LocalStorageService.GetMaterialTypeFromUrl(uploadDto.File!.FileName);
+            }
+            else
+            {
+                // Handle link upload
+                materialUrl = uploadDto.Link!;
+                materialType = uploadDto.CustomType ?? LocalStorageService.GetMaterialTypeFromUrl(uploadDto.Link!);
+            }
 
             // Create the material record
             var material = new Material
             {
                 Id = Guid.NewGuid(),
                 SubjectId = id,
-                Url = fileUrl,
+                Url = materialUrl,
+                Type = materialType,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -466,7 +486,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
         catch (Exception ex)
         {
             return Problem(
-                detail: Lang == Languages.En ? $"Error uploading file: {ex.Message}" : $"حدث خطأ أثناء رفع الملف: {ex.Message}",
+                detail: Lang == Languages.En ? $"Error uploading material: {ex.Message}" : $"حدث خطأ أثناء رفع المادة: {ex.Message}",
                 statusCode: StatusCodes.Status500InternalServerError
             );
         }

@@ -17,6 +17,10 @@ public class MaterialConfiguration : IEntityTypeConfiguration<Material>
             .IsRequired()
             .HasMaxLength(500);
             
+        builder.Property(m => m.Type)
+            .IsRequired()
+            .HasMaxLength(50);
+            
         builder.Property(m => m.CreatedAt)
             .IsRequired();
             
