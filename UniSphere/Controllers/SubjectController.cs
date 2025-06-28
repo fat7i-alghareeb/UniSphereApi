@@ -406,7 +406,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
 
     [HttpPost("{id:guid}/materials")]
     [Authorize(Roles = Roles.Professor)]
-    public async Task<ActionResult<UploadMaterialResponseDto>> UploadMaterial(Guid id, IFormFile file)
+    public async Task<ActionResult<UnifiedSubjectDto>> UploadMaterial(Guid id, IFormFile file)
     {
         var professorId = HttpContext.User.GetProfessorId();
         if (professorId is null)
@@ -424,8 +424,11 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
         }
 
         // Verify the subject exists
-        var subject = await dbContext.Subjects.FindAsync(id);
-        if (subject is null)
+        var subject = await dbContext.Subjects
+            .Include(s => s.Materials)
+            
+            .AnyAsync(s => s.Id == id);
+        if (!subject)
         {
             return NotFound("Subject not found");
         }
@@ -452,13 +455,19 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
             dbContext.Materials.Add(material);
             await dbContext.SaveChangesAsync();
 
-            var response = new UploadMaterialResponseDto
-            {
-                Url = fileUrl,
-                CreatedAt = material.CreatedAt
-            };
+            // Reload the subject with materials
+            var updatedSubject = await dbContext.Subjects
+                .Where(s => s.Id == id)
+                .Include(s => s.Materials)
+                .Select(SubjectQueries.ProjectToUnifiedDto(Lang))
+                .FirstOrDefaultAsync();
 
-            return Ok(response);
+            if (updatedSubject is null)
+            {
+                return NotFound();
+            }
+
+            return Ok(updatedSubject);
         }
         catch (Exception ex)
         {

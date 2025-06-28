@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace UniSphere.Api.Services;
 
@@ -177,5 +174,23 @@ public class LocalStorageService(IWebHostEnvironment environment, ILogger<LocalS
             sanitized = "documents";
         }
         return sanitized.ToLowerInvariant();
+    }
+
+    /// <summary>
+    /// Infers the material type from a file URL or path
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1055:URI return values should not be strings", Justification = "Returns a type label, not a URI.")]
+    public static string GetMaterialTypeFromUrl(string url)
+    {
+        if (string.IsNullOrEmpty(url)) { return "unknown"; }
+        var ext = Path.GetExtension(url).ToLowerInvariant();
+        return ext switch
+        {
+            ".pdf" => "pdf",
+            ".doc" or ".docx" => "document",
+            ".xls" or ".xlsx" or ".csv" => "excel",
+            ".jpg" or ".jpeg" or ".png" or ".gif" or ".bmp" or ".webp" or ".svg" => "image",
+            _ => ext.TrimStart('.')
+        };
     }
 } 

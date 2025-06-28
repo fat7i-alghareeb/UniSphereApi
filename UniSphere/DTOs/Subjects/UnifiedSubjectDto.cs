@@ -15,5 +15,5 @@ public sealed record UnifiedSubjectDto
     public required bool IsMultipleChoice { get; init; }
     public required bool IsOpenBook { get; init; }
     public string? Image { get; init; }
-    public required List<string> MaterialUrls { get; init; }
+    public required List<MaterialInfo> Materials { get; init; }
 } 

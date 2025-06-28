@@ -1,5 +1,6 @@
 ﻿using UniSphere.Api.Controllers;
 using UniSphere.Api.Entities;
+using UniSphere.Api.Services;
 
 namespace UniSphere.Api.DTOs.Subjects;
 
@@ -7,7 +8,6 @@ internal static class SubjectMappings
 {
     public static SubjectDto ToDto(this Subject subject , Guid studentId,Languages lang )
     {
-
         var professor =subject.SubjectLecturers?.FirstOrDefault(spl=>spl.SubjectId == subject.Id )?.Professor;
         var midTermGrade = subject.SubjectStudentLinks?.FirstOrDefault(ss => ss.SubjectId == subject.Id && ss.StudentId == studentId)?.MidtermGrade ;
         var finalGrade = subject.SubjectStudentLinks?.FirstOrDefault(ss => ss.SubjectId == subject.Id && ss.StudentId == studentId)?.FinalGrade ;
@@ -27,7 +27,11 @@ internal static class SubjectMappings
             IsMultipleChoice = subject.IsMultipleChoice ,
             DoesHaveALab = subject.IsLabRequired ,
             MajorId = subject.MajorId,
-            MaterialUrls = subject.Materials?.Select(m => m.Url).ToList() ?? new List<string>()
+            Materials = subject.Materials?.Select(m => new MaterialInfo
+            {
+                Url = m.Url,
+                Type = LocalStorageService.GetMaterialTypeFromUrl(m.Url)
+            }).ToList() ?? new List<MaterialInfo>()
         };
     }
     
@@ -48,7 +52,11 @@ internal static class SubjectMappings
             IsMultipleChoice = subject.IsMultipleChoice,
             IsOpenBook = subject.IsOpenBook,
             Image = subject.Image,
-            MaterialUrls = subject.Materials?.Select(m => m.Url).ToList() ?? new List<string>()
+            Materials = subject.Materials?.Select(m => new MaterialInfo
+            {
+                Url = m.Url,
+                Type = LocalStorageService.GetMaterialTypeFromUrl(m.Url)
+            }).ToList() ?? new List<MaterialInfo>()
         };
     }
     

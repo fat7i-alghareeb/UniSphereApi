@@ -15,7 +15,13 @@ public sealed record SubjectDto
     public required bool  DoesHaveALab{ get; init; }
     public required int Semester { get; init; }
     public required string? ImageUrl { get; init; }
-    public required List<string> MaterialUrls { get; init; }
+    public required List<MaterialInfo> Materials { get; init; }
+}
+
+public sealed record MaterialInfo
+{
+    public required string Url { get; init; }
+    public required string Type { get; init; }
 }
 
 

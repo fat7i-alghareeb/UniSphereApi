@@ -69,7 +69,9 @@ public class GradesController(ApplicationDbContext dbContext) : BaseController
     public async Task<IActionResult> AssignGradesToSubject([FromBody] DTOs.Grades.AssignGradesDto dto)
     {
         if (dto.StudentGrades == null || dto.StudentGrades.Count == 0)
+        {
             return BadRequest("StudentGrades list cannot be empty.");
+        }
 
         var subjectLinks = await dbContext.SubjectStudentLinks
             .Where(link => link.SubjectId == dto.SubjectId && dto.StudentGrades.Select(sg => sg.StudentId).Contains(link.StudentId))
@@ -81,12 +83,17 @@ public class GradesController(ApplicationDbContext dbContext) : BaseController
             .ToList();
 
         if (notFoundStudents.Any())
+        {
             return NotFound($"Some students are not enrolled in the subject: {string.Join(", ", notFoundStudents)}");
+        }
 
         foreach (var sg in dto.StudentGrades)
         {
             var link = subjectLinks.FirstOrDefault(l => l.StudentId == sg.StudentId);
-            if (link == null) continue;
+            if (link == null)
+            {
+                continue;
+            }
 
             link.MidtermGrade = sg.MidTermGrade;
             link.FinalGrade = sg.FinalGrade;
