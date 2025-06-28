@@ -8,6 +8,7 @@ using UniSphere.Api.DTOs.Auth;
 using UniSphere.Api.Entities;
 using UniSphere.Api.Extensions;
 using UniSphere.Api.Services;
+using UniSphere.Api.Helpers;
 
 namespace UniSphere.Api.Controllers;
 
@@ -29,66 +30,105 @@ public class SuperAdminController(
         var superAdminId = HttpContext.User.GetSuperAdminId();
         if (superAdminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
+
         var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
         if (superAdmin is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
-        var facultyId = superAdmin.FacultyId;
-        int code = Random.Shared.Next(100_000, 1_000_000); // 6-digit code
-        int expiration = dto.ExpirationInMinutes ?? 10;
-        DateTime now = DateTime.UtcNow;
+
+        // Determine target entity based on role
         switch (dto.TargetRole)
         {
             case AssignOneTimeCodeTargetRole.Admin:
-                if (dto.AdminId is null){
-                    return BadRequest("AdminId is required.");
+                if (dto.AdminId is null)
+                {
+                    return BadRequest(new { message = BilingualErrorMessages.GetBadRequestMessage(Lang) });
                 }
-                var admin = await dbContext.Admins.Include(a => a.Major).FirstOrDefaultAsync(a => a.Id == dto.AdminId);
-                if (admin is null || admin.Major.FacultyId != facultyId){
-                    return Forbid();
+                var admin = await dbContext.Admins
+                    .Include(a => a.Major)
+                    .FirstOrDefaultAsync(a => a.Id == dto.AdminId);
+                if (admin is null || admin.Major.FacultyId != superAdmin.FacultyId)
+                {
+                    return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
                 }
-                admin.OneTimeCode = code;
-                admin.OneTimeCodeCreatedDate = now;
-                admin.OneTimeCodeExpirationInMinutes = expiration;
                 break;
+
             case AssignOneTimeCodeTargetRole.Professor:
-                if (dto.ProfessorId is null){
-                    return BadRequest("ProfessorId is required.");
+                if (dto.ProfessorId is null)
+                {
+                    return BadRequest(new { message = BilingualErrorMessages.GetBadRequestMessage(Lang) });
                 }
-                var professorLink = await dbContext.ProfessorFacultyLinks.FirstOrDefaultAsync(pfl => pfl.ProfessorId == dto.ProfessorId && pfl.FacultyId == facultyId);
-                if (professorLink is null){
-                    return Forbid();
+                var professorFacultyLink = await dbContext.ProfessorFacultyLinks
+                    .FirstOrDefaultAsync(pfl => pfl.ProfessorId == dto.ProfessorId && pfl.FacultyId == superAdmin.FacultyId);
+                if (professorFacultyLink is null)
+                {
+                    return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
                 }
-                var professor = await dbContext.Professors.FirstOrDefaultAsync(p => p.Id == dto.ProfessorId);
-                if (professor is null){
-                    return NotFound("Professor not found.");
-                }
-                professor.OneTimeCode = code;
-                professor.OneTimeCodeCreatedDate = now;
-                professor.OneTimeCodeExpirationInMinutes = expiration;
                 break;
+
             case AssignOneTimeCodeTargetRole.Student:
-                    if (dto.StudentId is null){
-                    return BadRequest("StudentId is required.");
+                if (dto.StudentId is null)
+                {
+                    return BadRequest(new { message = BilingualErrorMessages.GetBadRequestMessage(Lang) });
                 }
-                var student = await dbContext.StudentCredentials.Include(sc => sc.Major).FirstOrDefaultAsync(sc => sc.Id == dto.StudentId);
-                if (student is null || student.Major.FacultyId != facultyId){
-                    return Forbid();
+                var student = await dbContext.StudentCredentials
+                    .Include(sc => sc.Major)
+                    .FirstOrDefaultAsync(sc => sc.Id == dto.StudentId);
+                if (student is null || student.Major.FacultyId != superAdmin.FacultyId)
+                {
+                    return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
                 }
-                student.OneTimeCode = code;
-                student.OneTimeCodeCreatedDate = now;
-                student.OneTimeCodeExpirationInMinutes = expiration;
                 break;
+
             default:
-                return BadRequest("Invalid target role.");
+                return BadRequest(new { message = BilingualErrorMessages.GetBadRequestMessage(Lang) });
         }
+
+        int code = Random.Shared.Next(100_000, 1_000_000); // 6-digit code
+        int expiration = dto.ExpirationInMinutes ?? 10;
+        DateTime now = DateTime.UtcNow;
+
+        // Assign the code to the appropriate entity
+        switch (dto.TargetRole)
+        {
+            case AssignOneTimeCodeTargetRole.Admin:
+                var adminToUpdate = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == dto.AdminId);
+                if (adminToUpdate is not null)
+                {
+                    adminToUpdate.OneTimeCode = code;
+                    adminToUpdate.OneTimeCodeCreatedDate = now;
+                    adminToUpdate.OneTimeCodeExpirationInMinutes = expiration;
+                }
+                break;
+
+            case AssignOneTimeCodeTargetRole.Professor:
+                var professorToUpdate = await dbContext.Professors.FirstOrDefaultAsync(p => p.Id == dto.ProfessorId);
+                if (professorToUpdate is not null)
+                {
+                    professorToUpdate.OneTimeCode = code;
+                    professorToUpdate.OneTimeCodeCreatedDate = now;
+                    professorToUpdate.OneTimeCodeExpirationInMinutes = expiration;
+                }
+                break;
+
+            case AssignOneTimeCodeTargetRole.Student:
+                var studentToUpdate = await dbContext.StudentCredentials.FirstOrDefaultAsync(sc => sc.Id == dto.StudentId);
+                if (studentToUpdate is not null)
+                {
+                    studentToUpdate.OneTimeCode = code;
+                    studentToUpdate.OneTimeCodeCreatedDate = now;
+                    studentToUpdate.OneTimeCodeExpirationInMinutes = expiration;
+                }
+                break;
+        }
+
         await dbContext.SaveChangesAsync();
         return Ok(new
         {
-            message = "One-time code assigned successfully.",
+            message = Lang == Languages.En ? "One-time code assigned successfully." : "تم تعيين رمز لمرة واحدة بنجاح.",
             code,
             expiresAt = now.AddMinutes(expiration)
         });
@@ -104,16 +144,12 @@ public class SuperAdminController(
             .FirstOrDefaultAsync(sa => sa.Gmail == checkOneTimeCodeDto.Gmail && sa.FacultyId == checkOneTimeCodeDto.FacultyId);
         if (superAdmin is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
 
         if (!await authService.ValidateOneTimeCodeAsync(superAdmin, checkOneTimeCodeDto.Code))
         {
-            return Problem(
-                detail: "Code is not valid",
-                title: "Code is not valid",
-                statusCode: StatusCodes.Status400BadRequest
-            );
+            return BadRequest(new { message = BilingualErrorMessages.GetInvalidCodeMessage(Lang) });
         }
 
         return Ok(superAdmin.ToSimpleSuperAdminDto());
@@ -132,7 +168,7 @@ public class SuperAdminController(
             .FirstOrDefaultAsync(sa => sa.Id == registerSuperAdminDto.SuperAdminId);
         if (superAdmin is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
 
         var applicationUser = new ApplicationUser
@@ -144,7 +180,7 @@ public class SuperAdminController(
         };
         if (registerSuperAdminDto.Password != registerSuperAdminDto.ConfirmPassword)
         {
-            return BadRequest("Password and ConfirmPassword must be the same");
+            return BadRequest(new { message = BilingualErrorMessages.GetPasswordMismatchMessage(Lang) });
         }
 
         IdentityResult createSuperAdminResult = await userManager.CreateAsync(applicationUser, registerSuperAdminDto.Password);
@@ -156,8 +192,8 @@ public class SuperAdminController(
             };
 
             return Problem(
-                detail: "Error creating SuperAdmin",
-                title: "Error creating SuperAdmin",
+                detail: BilingualErrorMessages.GetErrorCreatingSuperAdminMessage(Lang),
+                title: BilingualErrorMessages.GetErrorCreatingSuperAdminMessage(Lang),
                 statusCode: StatusCodes.Status400BadRequest,
                 extensions: extensions
             );
@@ -171,8 +207,8 @@ public class SuperAdminController(
             };
 
             return Problem(
-                detail: "Error creating SuperAdmin",
-                title: "Error creating SuperAdmin",
+                detail: BilingualErrorMessages.GetErrorCreatingSuperAdminMessage(Lang),
+                title: BilingualErrorMessages.GetErrorCreatingSuperAdminMessage(Lang),
                 statusCode: StatusCodes.Status400BadRequest,
                 extensions: extensions
             );
@@ -198,21 +234,13 @@ public class SuperAdminController(
         var applicationUser = await userManager.FindByEmailAsync(loginSuperAdminDto.Gmail);
         if (applicationUser is null)
         {
-            return Problem(
-                detail: "SuperAdmin not found",
-                title: "SuperAdmin not found",
-                statusCode: StatusCodes.Status404NotFound
-            );
+            return NotFound(new { message = BilingualErrorMessages.GetSuperAdminNotFoundMessage(Lang) });
         }
 
         // Check if user has SuperAdminId
         if (applicationUser.SuperAdminId is null)
         {
-            return Problem(
-                detail: "User is not a super admin",
-                title: "User is not a super admin",
-                statusCode: StatusCodes.Status401Unauthorized
-            );
+            return Unauthorized(new { message = BilingualErrorMessages.GetUserNotSuperAdminMessage(Lang) });
         }
 
         SuperAdmin? superAdmin = await dbContext.SuperAdmins
@@ -220,20 +248,12 @@ public class SuperAdminController(
             .FirstOrDefaultAsync(sa => sa.Id == applicationUser.SuperAdminId);
         if (superAdmin is null)
         {
-            return Problem(
-                detail: "SuperAdmin not found",
-                title: "SuperAdmin not found",
-                statusCode: StatusCodes.Status404NotFound
-            );
+            return NotFound(new { message = BilingualErrorMessages.GetSuperAdminNotFoundMessage(Lang) });
         }
 
         if (!await userManager.CheckPasswordAsync(applicationUser, loginSuperAdminDto.Password))
         {
-            return Problem(
-                detail: "Wrong password",
-                title: "Wrong password",
-                statusCode: StatusCodes.Status401Unauthorized
-            );
+            return Unauthorized(new { message = BilingualErrorMessages.GetWrongPasswordMessage(Lang) });
         }
 
         IList<string> roles = await userManager.GetRolesAsync(applicationUser);
@@ -255,18 +275,18 @@ public class SuperAdminController(
             var superAdminId = HttpContext.User.GetSuperAdminId();
             if (superAdminId is null)
             {
-                return Unauthorized();
+                return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
             }
 
             var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
             if (superAdmin is null)
             {
-                return NotFound("SuperAdmin not found");
+                return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
             }
 
             if (image == null || image.Length == 0)
             {
-                return BadRequest("No image file provided");
+                return BadRequest(new { message = BilingualErrorMessages.GetNoImageFileMessage(Lang) });
             }
 
             // Validate image file type
@@ -275,13 +295,13 @@ public class SuperAdminController(
             
             if (!allowedExtensions.Contains(fileExtension))
             {
-                return BadRequest("Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp");
+                return BadRequest(new { message = BilingualErrorMessages.GetInvalidImageFormatMessage(Lang) });
             }
 
             // Validate file size (max 5MB for profile images)
             if (image.Length > 5 * 1024 * 1024)
             {
-                return BadRequest("Image file size must be less than 5MB");
+                return BadRequest(new { message = BilingualErrorMessages.GetImageFileSizeTooLargeMessage(Lang) });
             }
 
             // Save the image using LocalStorageService
@@ -293,15 +313,15 @@ public class SuperAdminController(
 
             return Ok(new
             {
-                message = "Profile image uploaded successfully",
+                message = BilingualErrorMessages.GetProfileImageUploadedMessage(Lang),
                 imageUrl,
                 fileName = image.FileName,
                 fileSize = image.Length
             });
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new { message = BilingualErrorMessages.GetFileUploadErrorMessage(Lang) });
         }
     }
 } 

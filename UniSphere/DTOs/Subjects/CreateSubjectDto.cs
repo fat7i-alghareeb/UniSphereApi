@@ -25,41 +25,41 @@ public class CreateSubjectDtoValidator : AbstractValidator<CreateSubjectDto>
     public CreateSubjectDtoValidator()
     {
         RuleFor(x => x.NameEn)
-            .NotEmpty().WithMessage("English name is required.")
-            .MaximumLength(100).WithMessage("English name cannot exceed 100 characters.");
+            .NotEmpty().WithMessage("English name is required. | الاسم بالإنجليزية مطلوب.")
+            .MaximumLength(100).WithMessage("English name cannot exceed 100 characters. | لا يمكن أن يتجاوز الاسم بالإنجليزية 100 حرف.");
             
         RuleFor(x => x.NameAr)
-            .NotEmpty().WithMessage("Arabic name is required.")
-            .MaximumLength(100).WithMessage("Arabic name cannot exceed 100 characters.");
+            .NotEmpty().WithMessage("Arabic name is required. | الاسم بالعربية مطلوب.")
+            .MaximumLength(100).WithMessage("Arabic name cannot exceed 100 characters. | لا يمكن أن يتجاوز الاسم بالعربية 100 حرف.");
             
         RuleFor(x => x.DescriptionEn)
-            .NotEmpty().WithMessage("English description is required.")
-            .MaximumLength(500).WithMessage("English description cannot exceed 500 characters.");
+            .NotEmpty().WithMessage("English description is required. | الوصف بالإنجليزية مطلوب.")
+            .MaximumLength(500).WithMessage("English description cannot exceed 500 characters. | لا يمكن أن يتجاوز الوصف بالإنجليزية 500 حرف.");
             
         RuleFor(x => x.DescriptionAr)
-            .NotEmpty().WithMessage("Arabic description is required.")
-            .MaximumLength(500).WithMessage("Arabic description cannot exceed 500 characters.");
+            .NotEmpty().WithMessage("Arabic description is required. | الوصف بالعربية مطلوب.")
+            .MaximumLength(500).WithMessage("Arabic description cannot exceed 500 characters. | لا يمكن أن يتجاوز الوصف بالعربية 500 حرف.");
             
         RuleFor(x => x.MajorId) 
-            .NotEmpty().WithMessage("MajorId is required.");
+            .NotEmpty().WithMessage("MajorId is required. | معرف التخصص مطلوب.");
             
         RuleFor(x => x.Year)
-            .GreaterThan(0).WithMessage("Year must be greater than 0.")
-            .LessThanOrEqualTo(10).WithMessage("Year cannot exceed 10.");
+            .GreaterThan(0).WithMessage("Year must be greater than 0. | يجب أن تكون السنة أكبر من 0.")
+            .LessThanOrEqualTo(10).WithMessage("Year cannot exceed 10. | لا يمكن أن تتجاوز السنة 10.");
             
         RuleFor(x => x.Semester)
-            .GreaterThan(0).WithMessage("Semester must be greater than 0.")
-            .LessThanOrEqualTo(4).WithMessage("Semester cannot exceed 4.");
+            .GreaterThan(0).WithMessage("Semester must be greater than 0. | يجب أن يكون الفصل الدراسي أكبر من 0.")
+            .LessThanOrEqualTo(4).WithMessage("Semester cannot exceed 4. | لا يمكن أن يتجاوز الفصل الدراسي 4.");
             
         RuleFor(x => x.MidtermGrade)
-            .GreaterThanOrEqualTo(0).WithMessage("Midterm grade cannot be negative.")
-            .LessThanOrEqualTo(100).WithMessage("Midterm grade cannot exceed 100.");
+            .GreaterThanOrEqualTo(0).WithMessage("Midterm grade cannot be negative. | لا يمكن أن تكون درجة منتصف الفصل سالبة.")
+            .LessThanOrEqualTo(100).WithMessage("Midterm grade cannot exceed 100. | لا يمكن أن تتجاوز درجة منتصف الفصل 100.");
             
         RuleFor(x => x.FinalGrade)
-            .GreaterThanOrEqualTo(0).WithMessage("Final grade cannot be negative.")
-            .LessThanOrEqualTo(100).WithMessage("Final grade cannot exceed 100.");
+            .GreaterThanOrEqualTo(0).WithMessage("Final grade cannot be negative. | لا يمكن أن تكون درجة نهاية الفصل سالبة.")
+            .LessThanOrEqualTo(100).WithMessage("Final grade cannot exceed 100. | لا يمكن أن تتجاوز درجة نهاية الفصل 100.");
             
         RuleFor(x => x.MidtermGrade + x.FinalGrade)
-            .Equal(100).WithMessage("Midterm and final grades must sum to 100.");
+            .Equal(100).WithMessage("Midterm and final grades must sum to 100. | يجب أن يكون مجموع درجات منتصف الفصل ونهاية الفصل 100.");
     }
 }

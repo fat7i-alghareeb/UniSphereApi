@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UniSphere.Api.Services;
+using UniSphere.Api.Helpers;
 
 namespace UniSphere.Api.Controllers;
 
@@ -11,7 +12,7 @@ namespace UniSphere.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 public class FileUploadController(IStorageService storageService, ILogger<FileUploadController> logger)
-    : ControllerBase
+    : BaseController
 {
     private readonly IStorageService _storageService =
         storageService ?? throw new ArgumentNullException(nameof(storageService));
@@ -37,7 +38,7 @@ public class FileUploadController(IStorageService storageService, ILogger<FileUp
 
             return Ok(new
             {
-                message = "File uploaded successfully",
+                message = BilingualErrorMessages.GetSuccessMessage(Lang),
                 fileUrl,
                 fileName = file.FileName,
                 fileSize = file.Length,
@@ -47,7 +48,7 @@ public class FileUploadController(IStorageService storageService, ILogger<FileUp
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error uploading file {FileName}", file?.FileName);
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new { message = BilingualErrorMessages.GetFileUploadErrorMessage(Lang) });
         }
     }
 
@@ -64,7 +65,7 @@ public class FileUploadController(IStorageService storageService, ILogger<FileUp
         {
             if (string.IsNullOrWhiteSpace(folder))
             {
-                return BadRequest("Folder name is required");
+                return BadRequest(new { message = BilingualErrorMessages.GetBadRequestMessage(Lang) });
             }
 
             var fileUrl = await _storageService.SaveFileAsync(file, folder);
@@ -73,7 +74,7 @@ public class FileUploadController(IStorageService storageService, ILogger<FileUp
 
             return Ok(new
             {
-                message = "File uploaded successfully to custom folder",
+                message = BilingualErrorMessages.GetSuccessMessage(Lang),
                 fileUrl,
                 fileName = file.FileName,
                 fileSize = file.Length,
@@ -84,7 +85,7 @@ public class FileUploadController(IStorageService storageService, ILogger<FileUp
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error uploading file {FileName} to custom folder {Folder}", file?.FileName, folder);
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new { message = BilingualErrorMessages.GetFileUploadErrorMessage(Lang) });
         }
     }
 
@@ -126,14 +127,14 @@ public class FileUploadController(IStorageService storageService, ILogger<FileUp
 
             return Ok(new
             {
-                message = "Files processed", 
+                message = BilingualErrorMessages.GetSuccessMessage(Lang), 
                 uploadedFiles
             });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing multiple file uploads");
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new { message = BilingualErrorMessages.GetFileUploadErrorMessage(Lang) });
         }
     }
 
@@ -150,14 +151,14 @@ public class FileUploadController(IStorageService storageService, ILogger<FileUp
             var supportedTypes = LocalStorageService.GetSupportedFileTypes();
             return Ok(new
             {
-                message = "Supported file types retrieved successfully",
+                message = BilingualErrorMessages.GetSuccessMessage(Lang),
                 supportedTypes
             });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving supported file types");
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new { message = BilingualErrorMessages.GetInternalServerErrorMessage(Lang) });
         }
     }
 }

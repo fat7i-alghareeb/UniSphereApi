@@ -21,13 +21,13 @@ public class AssignGradesDtoValidator : AbstractValidator<AssignGradesDto>
     public AssignGradesDtoValidator()
     {
         RuleFor(x => x.SubjectId)
-            .NotNull().WithMessage("SubjectId is required.");
+            .NotNull().WithMessage("SubjectId is required. | معرف المادة مطلوب.");
         RuleFor(x => x.PassGrade)
-            .NotNull().WithMessage("PassGrade is required.")
-            .GreaterThanOrEqualTo(0).WithMessage("PassGrade must be greater than or equal to 0.");
+            .NotNull().WithMessage("PassGrade is required. | درجة النجاح مطلوبة.")
+            .GreaterThanOrEqualTo(0).WithMessage("PassGrade must be greater than or equal to 0. | يجب أن تكون درجة النجاح أكبر من أو تساوي 0.");
         RuleFor(x => x.StudentGrades)
-            .NotNull().WithMessage("StudentGrades list cannot be null.")
-            .Must(list => list.Count > 0).WithMessage("StudentGrades list cannot be empty.");
+            .NotNull().WithMessage("StudentGrades list cannot be null. | قائمة درجات الطلاب لا يمكن أن تكون فارغة.")
+            .Must(list => list.Count > 0).WithMessage("StudentGrades list cannot be empty. | قائمة درجات الطلاب لا يمكن أن تكون فارغة.");
         RuleForEach(x => x.StudentGrades).SetValidator(new StudentGradeDtoValidator());
     }
 }
@@ -36,8 +36,10 @@ public class StudentGradeDtoValidator : AbstractValidator<StudentGradeDto>
 {
     public StudentGradeDtoValidator()
     {
-        RuleFor(x => x.StudentId).NotEmpty();
-        RuleFor(x => x.MidTermGrade).GreaterThanOrEqualTo(0).When(x => x.MidTermGrade.HasValue);
-        RuleFor(x => x.FinalGrade).GreaterThanOrEqualTo(0).When(x => x.FinalGrade.HasValue);
+        RuleFor(x => x.StudentId).NotEmpty().WithMessage("StudentId is required. | معرف الطالب مطلوب.");
+        RuleFor(x => x.MidTermGrade).GreaterThanOrEqualTo(0).When(x => x.MidTermGrade.HasValue)
+            .WithMessage("MidTermGrade must be greater than or equal to 0. | يجب أن تكون درجة منتصف الفصل أكبر من أو تساوي 0.");
+        RuleFor(x => x.FinalGrade).GreaterThanOrEqualTo(0).When(x => x.FinalGrade.HasValue)
+            .WithMessage("FinalGrade must be greater than or equal to 0. | يجب أن تكون درجة نهاية الفصل أكبر من أو تساوي 0.");
     }
 } 

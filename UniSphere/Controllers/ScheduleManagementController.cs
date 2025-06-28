@@ -6,6 +6,7 @@ using UniSphere.Api.Database;
 using UniSphere.Api.DTOs.Schedule;
 using UniSphere.Api.Entities;
 using UniSphere.Api.Extensions;
+using UniSphere.Api.Helpers;
 
 namespace UniSphere.Api.Controllers;
 
@@ -20,7 +21,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         var adminId = HttpContext.User.GetAdminId();
         if (adminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         // Verify admin has access to this major
@@ -29,7 +30,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
 
         if (admin is null || admin.MajorId != createDto.MajorId)
         {
-            return Forbid();
+            return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
         }
 
         // Check if schedule already exists for this date, major, and year
@@ -40,7 +41,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
 
         if (existingSchedule != null)
         {
-            return BadRequest("A schedule already exists for this date, major, and year");
+            return BadRequest(new { message = BilingualErrorMessages.GetScheduleAlreadyExistsMessage(Lang) });
         }
 
         var schedule = new Schedule
@@ -73,7 +74,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         var adminId = HttpContext.User.GetAdminId();
         if (adminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         // Verify admin has access to this schedule
@@ -83,7 +84,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
 
         if (schedule is null)
         {
-            return NotFound("Schedule not found");
+            return NotFound(new { message = BilingualErrorMessages.GetScheduleNotFoundMessage(Lang) });
         }
 
         var admin = await dbContext.Admins
@@ -91,7 +92,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
 
         if (admin is null || admin.MajorId != schedule.MajorId)
         {
-            return Forbid();
+            return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
         }
 
         var lecture = addDto.ToLecture(scheduleId);
@@ -106,7 +107,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
 
         if (updatedSchedule is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetScheduleNotFoundMessage(Lang) });
         }
 
         var dayLectures = updatedSchedule.Lectures
@@ -134,7 +135,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         var adminId = HttpContext.User.GetAdminId();
         if (adminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var lecture = await dbContext.Lectures
@@ -144,7 +145,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
 
         if (lecture is null)
         {
-            return NotFound("Lecture not found");
+            return NotFound(new { message = BilingualErrorMessages.GetLectureNotFoundMessage(Lang) });
         }
 
         var admin = await dbContext.Admins
@@ -152,13 +153,13 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
 
         if (admin is null || admin.MajorId != lecture.Schedule.MajorId)
         {
-            return Forbid();
+            return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
         }
 
         dbContext.Lectures.Remove(lecture);
         await dbContext.SaveChangesAsync();
 
-        return NoContent();
+        return Ok(new { message = Lang == Languages.En ? "Lecture deleted successfully" : "تم حذف المحاضرة بنجاح" });
     }
 
     [HttpGet("GetSchedule/{scheduleId:guid}")]
@@ -167,7 +168,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         var adminId = HttpContext.User.GetAdminId();
         if (adminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var schedule = await dbContext.Schedules
@@ -176,7 +177,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
 
         if (schedule is null)
         {
-            return NotFound("Schedule not found");
+            return NotFound(new { message = BilingualErrorMessages.GetScheduleNotFoundMessage(Lang) });
         }
 
         var admin = await dbContext.Admins
@@ -184,7 +185,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
 
         if (admin is null || admin.MajorId != schedule.MajorId)
         {
-            return Forbid();
+            return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
         }
 
         var dayLectures = schedule.Lectures

@@ -7,6 +7,7 @@ using UniSphere.Api.Database;
 using UniSphere.Api.DTOs.Schedule;
 using UniSphere.Api.Entities;
 using UniSphere.Api.Extensions;
+using UniSphere.Api.Helpers;
 
 namespace UniSphere.Api.Controllers;
 
@@ -23,7 +24,7 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var studentInfo = await dbContext.StudentCredentials
@@ -37,7 +38,7 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
 
         if (studentInfo is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var currentMonth = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
@@ -54,7 +55,7 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
 
         if (!schedules.Any())
         {
-            return NotFound("No schedule found for the current month");
+            return NotFound(new { message = Lang == Languages.En ? "No schedule found for the current month" : "لم يتم العثور على جدول دراسي للشهر الحالي" });
         }
 
         var monthSchedule = schedules.CombineSchedulesIntoMonth(currentMonth, Lang);
@@ -67,7 +68,7 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var studentInfo = await dbContext.StudentCredentials
@@ -81,7 +82,7 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
 
         if (studentInfo is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var targetMonth = new DateOnly(year, month, 1);
@@ -99,7 +100,7 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
 
         if (!schedules.Any())
         {
-            return NotFound("No schedule found for the target month");
+            return NotFound(new { message = Lang == Languages.En ? "No schedule found for the target month" : "لم يتم العثور على جدول دراسي للشهر المحدد" });
         }
 
         var monthSchedule = schedules.CombineSchedulesIntoMonth(targetMonth, Lang);
@@ -112,7 +113,7 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var majorId = await dbContext.StudentCredentials
@@ -148,7 +149,7 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
         var adminId = HttpContext.User.GetAdminId();
         if (adminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var admin = await dbContext.Admins
@@ -156,7 +157,7 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
             .FirstOrDefaultAsync(a => a.Id == adminId);
         if (admin is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var currentMonth = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
@@ -179,7 +180,7 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
 
         if (!schedules.Any())
         {
-            return NotFound("No schedule found for the current month");
+            return NotFound(new { message = Lang == Languages.En ? "No schedule found for the current month" : "لم يتم العثور على جدول دراسي للشهر الحالي" });
         }
 
         var monthSchedule = schedules.CombineSchedulesIntoMonth(currentMonth, Lang);
@@ -193,13 +194,13 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
         var adminId = HttpContext.User.GetAdminId();
         if (adminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
         if (admin is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var schedule = await dbContext.Schedules
@@ -207,7 +208,7 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
             .FirstOrDefaultAsync(s => s.Id == id && s.MajorId == admin.MajorId);
         if (schedule is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetScheduleNotFoundMessage(Lang) });
         }
 
         var scheduleDto = schedule.ToCreateScheduleDto();
@@ -245,25 +246,25 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
         var adminId = HttpContext.User.GetAdminId();
         if (adminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
         if (admin is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var schedule = await dbContext.Schedules
             .FirstOrDefaultAsync(s => s.Id == id && s.MajorId == admin.MajorId);
         if (schedule is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetScheduleNotFoundMessage(Lang) });
         }
 
         dbContext.Schedules.Remove(schedule);
         await dbContext.SaveChangesAsync();
-        return NoContent();
+        return Ok(new { message = Lang == Languages.En ? "Schedule deleted successfully" : "تم حذف الجدول الدراسي بنجاح" });
     }
 }
 

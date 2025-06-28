@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using UniSphere.Api.DTOs.Auth;
 using UniSphere.Api.Entities;
 using UniSphere.Api.Services;
+using UniSphere.Api.Helpers;
 
 namespace UniSphere.Api.Controllers;
 
@@ -22,11 +23,11 @@ public sealed class AuthController(
         RefreshToken? refreshToken = await authService.GetRefreshTokenAsync(refreshTokenDto.RefreshToken);
         if (refreshToken is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
         if (refreshToken.ExpiresAtUtc < DateTime.UtcNow)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetTokenExpiredMessage(Lang) });
         }
         IList<string> roles = await userManager.GetRolesAsync(refreshToken.User);
 

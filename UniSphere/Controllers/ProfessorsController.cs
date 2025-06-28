@@ -10,6 +10,7 @@ using UniSphere.Api.DTOs.Professors;
 using UniSphere.Api.Entities;
 using UniSphere.Api.Extensions;
 using UniSphere.Api.Services;
+using UniSphere.Api.Helpers;
 
 namespace UniSphere.Api.Controllers;
 
@@ -34,18 +35,18 @@ public class ProfessorsController(
             var professorId = HttpContext.User.GetProfessorId();
             if (professorId is null)
             {
-                return Unauthorized();
+                return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
             }
 
             var professor = await dbContext.Professors.FirstOrDefaultAsync(p => p.Id == professorId);
             if (professor is null)
             {
-                return NotFound("Professor not found");
+                return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
             }
 
             if (image == null || image.Length == 0)
             {
-                return BadRequest("No image file provided");
+                return BadRequest(new { message = Lang == Languages.En ? "No image file provided" : "لم يتم توفير ملف صورة" });
             }
 
             // Validate image file type
@@ -54,13 +55,13 @@ public class ProfessorsController(
             
             if (!allowedExtensions.Contains(fileExtension))
             {
-                return BadRequest("Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp");
+                return BadRequest(new { message = Lang == Languages.En ? "Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp" : "تنسيق الصورة غير صالح. التنسيقات المسموح بها: jpg, jpeg, png, gif, bmp, webp" });
             }
 
             // Validate file size (max 5MB for profile images)
             if (image.Length > 5 * 1024 * 1024)
             {
-                return BadRequest("Image file size must be less than 5MB");
+                return BadRequest(new { message = Lang == Languages.En ? "Image file size must be less than 5MB" : "يجب أن يكون حجم ملف الصورة أقل من 5 ميجابايت" });
             }
 
             // Save the image using LocalStorageService
@@ -72,7 +73,7 @@ public class ProfessorsController(
 
             return Ok(new
             {
-                message = "Profile image uploaded successfully",
+                message = Lang == Languages.En ? "Profile image uploaded successfully" : "تم رفع صورة الملف الشخصي بنجاح",
                 imageUrl,
                 fileName = image.FileName,
                 fileSize = image.Length
@@ -91,19 +92,19 @@ public class ProfessorsController(
         var superAdminId = HttpContext.User.GetSuperAdminId();
         if (superAdminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
         
         var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
         if (superAdmin is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
         
         var professor = await dbContext.Professors.FirstOrDefaultAsync(p => p.Id == dto.ProfessorId);
         if (professor is null)
         {
-            return NotFound("Professor not found");
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
         
         // Check if professor is already linked to this faculty
@@ -112,7 +113,7 @@ public class ProfessorsController(
         
         if (existingLink != null)
         {
-            return BadRequest("Professor is already linked to this faculty");
+            return BadRequest(new { message = Lang == Languages.En ? "Professor is already linked to this faculty" : "الأستاذ مرتبط بالفعل بهذه الكلية" });
         }
         
         // Create new link
@@ -124,7 +125,7 @@ public class ProfessorsController(
         
         dbContext.ProfessorFacultyLinks.Add(professorFacultyLink);
         await dbContext.SaveChangesAsync();
-        return Ok();
+        return Ok(new { message = Lang == Languages.En ? "Professor added to faculty successfully" : "تمت إضافة الأستاذ إلى الكلية بنجاح" });
     }
 
     [HttpDelete("RemoveProfessorFromFaculty")]
@@ -134,13 +135,13 @@ public class ProfessorsController(
         var superAdminId = HttpContext.User.GetSuperAdminId();
         if (superAdminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
         
         var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
         if (superAdmin is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
         
         var professorFacultyLink = await dbContext.ProfessorFacultyLinks
@@ -148,12 +149,12 @@ public class ProfessorsController(
         
         if (professorFacultyLink is null)
         {
-            return NotFound("Professor not found in your faculty");
+            return NotFound(new { message = Lang == Languages.En ? "Professor not found in your faculty" : "الأستاذ غير موجود في كليتك" });
         }
         
         dbContext.ProfessorFacultyLinks.Remove(professorFacultyLink);
         await dbContext.SaveChangesAsync();
-        return Ok();
+        return Ok(new { message = Lang == Languages.En ? "Professor removed from faculty successfully" : "تمت إزالة الأستاذ من الكلية بنجاح" });
     }
 
     [HttpPost("AssignProfessorToSubject")]
@@ -163,13 +164,13 @@ public class ProfessorsController(
         var superAdminId = HttpContext.User.GetSuperAdminId();
         if (superAdminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
         
         var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
         if (superAdmin is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
         
         // Verify professor belongs to the superAdmin's faculty
@@ -178,7 +179,7 @@ public class ProfessorsController(
         
         if (professorFacultyLink is null)
         {
-            return Forbid("Professor does not belong to your faculty");
+            return Forbid(BilingualErrorMessages.GetNoAccessToSubjectMessage(Lang));
         }
         
         // Verify subject belongs to the superAdmin's faculty
@@ -188,7 +189,7 @@ public class ProfessorsController(
         
         if (subject is null || subject.Major.FacultyId != superAdmin.FacultyId)
         {
-            return Forbid("Subject does not belong to your faculty");
+            return Forbid(BilingualErrorMessages.GetNoAccessToSubjectMessage(Lang));
         }
         
         // Check if professor is already assigned to this subject
@@ -197,7 +198,7 @@ public class ProfessorsController(
         
         if (existingAssignment != null)
         {
-            return BadRequest("Professor is already assigned to this subject");
+            return BadRequest(new { message = Lang == Languages.En ? "Professor is already assigned to this subject" : "الأستاذ معين بالفعل لهذه المادة" });
         }
         
         // Create new assignment
@@ -209,7 +210,7 @@ public class ProfessorsController(
         
         dbContext.SubjectProfessorLinks.Add(subjectProfessorLink);
         await dbContext.SaveChangesAsync();
-        return Ok();
+        return Ok(new { message = Lang == Languages.En ? "Professor assigned to subject successfully" : "تم تعيين الأستاذ للمادة بنجاح" });
     }
 
     [HttpDelete("RemoveProfessorFromSubject")]
@@ -219,13 +220,13 @@ public class ProfessorsController(
         var superAdminId = HttpContext.User.GetSuperAdminId();
         if (superAdminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
         
         var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
         if (superAdmin is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
         
         // Verify subject belongs to the superAdmin's faculty
@@ -235,7 +236,7 @@ public class ProfessorsController(
         
         if (subject is null || subject.Major.FacultyId != superAdmin.FacultyId)
         {
-            return Forbid("Subject does not belong to your faculty");
+            return Forbid(BilingualErrorMessages.GetNoAccessToSubjectMessage(Lang));
         }
         
         var subjectProfessorLink = await dbContext.SubjectProfessorLinks
@@ -243,34 +244,29 @@ public class ProfessorsController(
         
         if (subjectProfessorLink is null)
         {
-            return NotFound("Professor is not assigned to this subject");
+            return NotFound(new { message = Lang == Languages.En ? "Professor is not assigned to this subject" : "الأستاذ غير معين لهذه المادة" });
         }
         
         dbContext.SubjectProfessorLinks.Remove(subjectProfessorLink);
         await dbContext.SaveChangesAsync();
-        return Ok();
+        return Ok(new { message = Lang == Languages.En ? "Professor removed from subject successfully" : "تمت إزالة الأستاذ من المادة بنجاح" });
     }
 
     [HttpPatch("EditProfessor/{professorId:guid}")]
     [Authorize(Roles = "SuperAdmin,Professor")]
     public async Task<IActionResult> EditProfessor(Guid professorId, [FromBody] JsonPatchDocument<ProfessorUpdateDto> patchDoc)
     {
-
-        
         var superAdminId = HttpContext.User.GetSuperAdminId();
         var currentProfessorId = HttpContext.User.GetProfessorId();
-        
         if (superAdminId is null && (currentProfessorId is null || currentProfessorId != professorId))
         {
-            return Forbid();
+            return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
         }
-        
         var professor = await dbContext.Professors.FirstOrDefaultAsync(p => p.Id == professorId);
         if (professor is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
-        
         // Use mappings
         var updateDto = professor.ToUpdateDto();
         patchDoc.ApplyTo(updateDto, ModelState);
@@ -278,10 +274,9 @@ public class ProfessorsController(
         {
             return ValidationProblem(ModelState);
         }
-        
         professor.PatchFromDto(updateDto);
         await dbContext.SaveChangesAsync();
-        return Ok();
+        return Ok(new { message = Lang == Languages.En ? "Professor updated successfully" : "تم تحديث بيانات الأستاذ بنجاح" });
     }
 
     // Authentication Endpoints
@@ -293,16 +288,14 @@ public class ProfessorsController(
             .FirstOrDefaultAsync(p => p.Gmail == checkOneTimeCodeDto.Gmail);
         if (professor is null)
         {
-            return NotFound(
-                    "Professor not found."
-                );
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
 
         if (!await authService.ValidateOneTimeCodeAsync(professor, checkOneTimeCodeDto.Code))
         {
             return Problem(
-                detail: "Code is not valid",
-                title: "Code is not valid",
+                detail: Lang == Languages.En ? "Code is not valid" : "الرمز غير صالح",
+                title: Lang == Languages.En ? "Code is not valid" : "الرمز غير صالح",
                 statusCode: StatusCodes.Status400BadRequest
             );
         }
@@ -322,7 +315,7 @@ public class ProfessorsController(
             .FirstOrDefaultAsync(p => p.Id == registerProfessorDto.ProfessorId);
         if (professor is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
 
         var applicationUser = new ApplicationUser
@@ -334,7 +327,7 @@ public class ProfessorsController(
         };
         if (registerProfessorDto.Password != registerProfessorDto.ConfirmPassword)
         {
-            return BadRequest("Password and ConfirmPassword must be the same");
+            return BadRequest(new { message = Lang == Languages.En ? "Password and ConfirmPassword must be the same" : "يجب أن تكون كلمة المرور وتأكيد كلمة المرور متطابقتين" });
         }
 
         IdentityResult createProfessorResult = await userManager.CreateAsync(applicationUser, registerProfessorDto.Password);
@@ -346,8 +339,8 @@ public class ProfessorsController(
             };
 
             return Problem(
-                detail: "Error creating Professor",
-                title: "Error creating Professor",
+                detail: Lang == Languages.En ? "Error creating Professor" : "حدث خطأ أثناء إنشاء الأستاذ",
+                title: Lang == Languages.En ? "Error creating Professor" : "حدث خطأ أثناء إنشاء الأستاذ",
                 statusCode: StatusCodes.Status400BadRequest,
                 extensions: extensions
             );
@@ -361,8 +354,8 @@ public class ProfessorsController(
             };
 
             return Problem(
-                detail: "Error creating Professor",
-                title: "Error creating Professor",
+                detail: Lang == Languages.En ? "Error creating Professor" : "حدث خطأ أثناء إنشاء الأستاذ",
+                title: Lang == Languages.En ? "Error creating Professor" : "حدث خطأ أثناء إنشاء الأستاذ",
                 statusCode: StatusCodes.Status400BadRequest,
                 extensions: extensions
             );
@@ -386,8 +379,8 @@ public class ProfessorsController(
         if (applicationUser is null)
         {
             return Problem(
-                detail: "Professor not found",
-                title: "Professor not found",
+                detail: Lang == Languages.En ? "Professor not found" : "لم يتم العثور على الأستاذ",
+                title: Lang == Languages.En ? "Professor not found" : "لم يتم العثور على الأستاذ",
                 statusCode: StatusCodes.Status404NotFound
             );
         }
@@ -396,8 +389,8 @@ public class ProfessorsController(
         if (applicationUser.ProfessorId is null)
         {
             return Problem(
-                detail: "User is not a professor",
-                title: "User is not a professor",
+                detail: Lang == Languages.En ? "User is not a professor" : "المستخدم ليس أستاذاً",
+                title: Lang == Languages.En ? "User is not a professor" : "المستخدم ليس أستاذاً",
                 statusCode: StatusCodes.Status401Unauthorized
             );
         }
@@ -407,8 +400,8 @@ public class ProfessorsController(
         if (professor is null)
         {
             return Problem(
-                detail: "Professor not found",
-                title: "Professor not found",
+                detail: Lang == Languages.En ? "Professor not found" : "لم يتم العثور على الأستاذ",
+                title: Lang == Languages.En ? "Professor not found" : "لم يتم العثور على الأستاذ",
                 statusCode: StatusCodes.Status404NotFound
             );
         }
@@ -416,8 +409,8 @@ public class ProfessorsController(
         if (!await userManager.CheckPasswordAsync(applicationUser, loginProfessorDto.Password))
         {
             return Problem(
-                detail: "Wrong password",
-                title: "Wrong password",
+                detail: Lang == Languages.En ? "Wrong password" : "كلمة المرور غير صحيحة",
+                title: Lang == Languages.En ? "Wrong password" : "كلمة المرور غير صحيحة",
                 statusCode: StatusCodes.Status401Unauthorized
             );
         }

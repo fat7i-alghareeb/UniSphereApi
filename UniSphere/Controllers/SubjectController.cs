@@ -9,6 +9,7 @@ using UniSphere.Api.DTOs.Subjects;
 using UniSphere.Api.Entities;
 using UniSphere.Api.Extensions;
 using UniSphere.Api.Services;
+using UniSphere.Api.Helpers;
 
 namespace UniSphere.Api.Controllers;
 
@@ -24,7 +25,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         // First get all needed data in one query
@@ -39,7 +40,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
 
         if (studentInfo is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         // Get all relevant subject IDs (executes immediately due to ToListAsync)
@@ -97,7 +98,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var majorId = await dbContext.StudentCredentials.Where(sd => sd.Id == studentId
@@ -125,7 +126,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var subject = await dbContext.Subjects
@@ -139,7 +140,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
             .FirstOrDefaultAsync();
         if (subject is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetSubjectNotFoundMessage(Lang) });
         }
 
         return Ok(subject);
@@ -156,7 +157,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
         var superAdminId = HttpContext.User.GetSuperAdminId();
         if (superAdminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         // Get the faculty ID for the super admin
@@ -167,7 +168,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
 
         if (facultyId == Guid.Empty)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         // Get subjects filtered by faculty, year, and major
@@ -187,7 +188,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
 
         if (major is null)
         {
-            return NotFound("Major not found");
+            return NotFound(new { message = BilingualErrorMessages.GetMajorNotFoundMessage(Lang) });
         }
 
         var response = new SuperAdminSubjectsResponseDto
@@ -212,7 +213,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
         var professorId = HttpContext.User.GetProfessorId();
         if (professorId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         // Get all subject IDs associated with the professor
@@ -287,7 +288,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
         var superAdminId = HttpContext.User.GetSuperAdminId();
         if (superAdminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var subject = await dbContext.Subjects
@@ -298,7 +299,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
 
         if (subject is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetSubjectNotFoundMessage(Lang) });
         }
 
         return Ok(subject);
@@ -311,7 +312,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
         var professorId = HttpContext.User.GetProfessorId();
         if (professorId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         // Verify the professor has access to this subject
@@ -320,7 +321,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
 
         if (!hasAccess)
         {
-            return Forbid();
+            return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
         }
 
         var subject = await dbContext.Subjects
@@ -331,7 +332,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
 
         if (subject is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetSubjectNotFoundMessage(Lang) });
         }
 
         return Ok(subject);
@@ -346,18 +347,12 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
 
         if (!await dbContext.Majors.AnyAsync(mj => mj.Id == createSubjectDto.MajorId))
         {
-            return Problem(
-                detail: "The specified Major does not exist.",
-                statusCode: StatusCodes.Status404NotFound
-            );
+            return BadRequest(new { message = BilingualErrorMessages.GetMajorNotFoundMessage(Lang) });
         }
 
         if (createSubjectDto.LabId.HasValue && !await dbContext.Labs.AnyAsync(l => l.Id == createSubjectDto.LabId))
         {
-            return Problem(
-                detail: "The specified Lab does not exist.",
-                statusCode: StatusCodes.Status404NotFound
-            );
+            return BadRequest(new { message = BilingualErrorMessages.GetLabNotFoundMessage(Lang) });
         }
 
         var subject = createSubjectDto.ToEntity();
@@ -376,7 +371,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
         var subject = await dbContext.Subjects.FindAsync(id);
         if (subject is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetSubjectNotFoundMessage(Lang) });
         }
 
         var subjectDto = subject.ToUnifiedDto(Lang);
@@ -411,7 +406,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
         var professorId = HttpContext.User.GetProfessorId();
         if (professorId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         // Verify the professor has access to this subject
@@ -420,22 +415,21 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
 
         if (!hasAccess)
         {
-            return Forbid();
+            return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
         }
 
         // Verify the subject exists
-        var subject = await dbContext.Subjects
+        var subjectExists = await dbContext.Subjects
             .Include(s => s.Materials)
-            
             .AnyAsync(s => s.Id == id);
-        if (!subject)
+        if (!subjectExists)
         {
-            return NotFound("Subject not found");
+            return NotFound(new { message = BilingualErrorMessages.GetSubjectNotFoundMessage(Lang) });
         }
 
         if (file == null || file.Length == 0)
         {
-            return BadRequest("No file provided");
+            return BadRequest(new { message = Lang == Languages.En ? "No file provided" : "لم يتم توفير ملف" });
         }
 
         try
@@ -464,7 +458,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
 
             if (updatedSubject is null)
             {
-                return NotFound();
+                return NotFound(new { message = BilingualErrorMessages.GetSubjectNotFoundMessage(Lang) });
             }
 
             return Ok(updatedSubject);
@@ -472,7 +466,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
         catch (Exception ex)
         {
             return Problem(
-                detail: $"Error uploading file: {ex.Message}",
+                detail: Lang == Languages.En ? $"Error uploading file: {ex.Message}" : $"حدث خطأ أثناء رفع الملف: {ex.Message}",
                 statusCode: StatusCodes.Status500InternalServerError
             );
         }
@@ -485,11 +479,11 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
         Subject? subject = await dbContext.Subjects.FindAsync(id);
         if (subject is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetSubjectNotFoundMessage(Lang) });
         }
 
         dbContext.Subjects.Remove(subject);
         await dbContext.SaveChangesAsync();
-        return NoContent();
+        return Ok(new { message = Lang == Languages.En ? "Subject deleted successfully" : "تم حذف المادة بنجاح" });
     }
 }

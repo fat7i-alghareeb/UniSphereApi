@@ -9,6 +9,7 @@ using UniSphere.Api.DTOs.Statistics;
 using UniSphere.Api.Entities;
 using UniSphere.Api.Extensions;
 using UniSphere.Api.Services;
+using UniSphere.Api.Helpers;
 
 namespace UniSphere.Api.Controllers;
 
@@ -24,7 +25,7 @@ public class StudentController(ApplicationDbContext dbContext, IStorageService s
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
         var average = await dbContext.SubjectStudentLinks
             .Where(s => s.StudentId == studentId
@@ -39,31 +40,25 @@ public class StudentController(ApplicationDbContext dbContext, IStorageService s
             .FirstOrDefaultAsync();
         if (statistics is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
         return Ok(statistics);
     }
 
     [HttpPatch("AddAttendance")]
-
     public async Task<ActionResult<IsSuccessDto>> AddAttendance(double hours, int lectures)
     {
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
         var studentStatistics = await dbContext.StudentStatistics
             .Where(ss => ss.StudentId == studentId)
             .FirstOrDefaultAsync();
         if (studentStatistics is null)
         {
-            return NotFound(new IsSuccessDto
-            {
-                IsSuccess = false,
-                Message = "Statistics not found"
-            }
-);
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
         try
         {
@@ -74,9 +69,12 @@ public class StudentController(ApplicationDbContext dbContext, IStorageService s
         catch (Exception e)
         {
             return BadRequest(new IsSuccessDto { IsSuccess = false, Message = e.Message });
-
         }
-        return Ok(new IsSuccessDto { IsSuccess = true });
+        return Ok(new IsSuccessDto
+        {
+            IsSuccess = true,
+            Message = Lang == Languages.En ? "Attendance added successfully" : "تمت إضافة الحضور بنجاح"
+        });
     }
 
     [HttpPost("AddStudent")]
@@ -92,17 +90,17 @@ public class StudentController(ApplicationDbContext dbContext, IStorageService s
             // SuperAdmin: can add to any major in their faculty
             if (superAdminId is null)
             {
-                return Unauthorized();
+                return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
             }
             var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
             if (superAdmin is null)
             {
-                return Unauthorized();
+                return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
             }
             var major = await dbContext.Majors.FirstOrDefaultAsync(m => m.Id == dto.MajorId);
             if (major is null || major.FacultyId != superAdmin.FacultyId)
             {
-                return Forbid();
+                return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
             }
         }
         else if (userRole == Roles.Admin)
@@ -110,31 +108,31 @@ public class StudentController(ApplicationDbContext dbContext, IStorageService s
             // Admin: can add only to their assigned major
             if (adminId is null)
             {
-                return Unauthorized();
+                return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
             }
             var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
             if (admin is null || admin.MajorId != dto.MajorId)
             {
-                return Forbid();
+                return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
             }
         }
         else
         {
-            return Forbid();
+            return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
         }
 
         // Check for duplicate student number in the same major
         var exists = await dbContext.StudentCredentials.AnyAsync(sc => sc.StudentNumber == dto.StudentNumber && sc.MajorId == dto.MajorId);
         if (exists)
         {
-            return BadRequest("A student with this number already exists in the major.");
+            return BadRequest(new { message = Lang == Languages.En ? "A student with this number already exists in the major." : "يوجد طالب بهذا الرقم بالفعل في التخصص" });
         }
 
         // Get a default EnrollmentStatusId (first available)
         var defaultEnrollmentStatus = await dbContext.EnrollmentStatuses.FirstOrDefaultAsync();
         if (defaultEnrollmentStatus is null)
         {
-            return BadRequest("No enrollment status found in the system.");
+            return BadRequest(new { message = Lang == Languages.En ? "No enrollment status found in the system." : "لم يتم العثور على حالة التسجيل في النظام" });
         }
 
         var student = new StudentCredential
@@ -149,7 +147,7 @@ public class StudentController(ApplicationDbContext dbContext, IStorageService s
         };
         dbContext.StudentCredentials.Add(student);
         await dbContext.SaveChangesAsync();
-        return Ok(new { message = "Student added successfully.", studentId = student.Id });
+        return Ok(new { message = Lang == Languages.En ? "Student added successfully." : "تمت إضافة الطالب بنجاح", studentId = student.Id });
     }
 
     [HttpPost("UploadProfileImage")]
@@ -161,18 +159,18 @@ public class StudentController(ApplicationDbContext dbContext, IStorageService s
             var studentId = HttpContext.User.GetStudentId();
             if (studentId is null)
             {
-                return Unauthorized();
+                return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
             }
 
             var student = await dbContext.StudentCredentials.FirstOrDefaultAsync(sc => sc.Id == studentId);
             if (student is null)
             {
-                return NotFound("Student not found");
+                return NotFound(new { message = BilingualErrorMessages.GetStudentNotFoundMessage(Lang) });
             }
 
             if (image == null || image.Length == 0)
             {
-                return BadRequest("No image file provided");
+                return BadRequest(new { message = Lang == Languages.En ? "No image file provided" : "لم يتم توفير ملف صورة" });
             }
 
             // Validate image file type
@@ -181,13 +179,13 @@ public class StudentController(ApplicationDbContext dbContext, IStorageService s
             
             if (!allowedExtensions.Contains(fileExtension))
             {
-                return BadRequest("Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp");
+                return BadRequest(new { message = Lang == Languages.En ? "Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp" : "تنسيق الصورة غير صالح. التنسيقات المسموح بها: jpg, jpeg, png, gif, bmp, webp" });
             }
 
             // Validate file size (max 5MB for profile images)
             if (image.Length > 5 * 1024 * 1024)
             {
-                return BadRequest("Image file size must be less than 5MB");
+                return BadRequest(new { message = Lang == Languages.En ? "Image file size must be less than 5MB" : "يجب أن يكون حجم ملف الصورة أقل من 5 ميجابايت" });
             }
 
             // Save the image using LocalStorageService
@@ -199,7 +197,7 @@ public class StudentController(ApplicationDbContext dbContext, IStorageService s
 
             return Ok(new
             {
-                message = "Profile image uploaded successfully",
+                message = Lang == Languages.En ? "Profile image uploaded successfully" : "تم رفع صورة الملف الشخصي بنجاح",
                 imageUrl,
                 fileName = image.FileName,
                 fileSize = image.Length
@@ -214,19 +212,67 @@ public class StudentController(ApplicationDbContext dbContext, IStorageService s
     [HttpGet("EligibleStudentsForSubject")]
     public async Task<ActionResult<DTOs.Info.EligibleStudentsCollectionDto>> GetEligibleStudentsForSubject([FromQuery] Guid subjectId)
     {
-        var students = await dbContext.SubjectStudentLinks
-            .Where(ssl => ssl.SubjectId == subjectId && !ssl.IsPassed && ssl.IsCurrentlyEnrolled)
-            .Include(ssl => ssl.StudentCredential)
-            .Select(ssl => new EligibleStudentDto
+        var adminId = HttpContext.User.GetAdminId();
+        var superAdminId = HttpContext.User.GetSuperAdminId();
+
+        if (adminId is null && superAdminId is null)
+        {
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+        }
+
+        // Verify subject exists
+        var subject = await dbContext.Subjects
+            .Include(s => s.Major)
+            .FirstOrDefaultAsync(s => s.Id == subjectId);
+        if (subject is null)
+        {
+            return NotFound(new { message = BilingualErrorMessages.GetSubjectNotFoundMessage(Lang) });
+        }
+
+        // For admin, verify they can only access students from their major
+        if (adminId is not null)
+        {
+            var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
+            if (admin is null)
             {
-                Id = ssl.StudentCredential.Id,
-                StudentNumber = ssl.StudentCredential.StudentNumber,
-                FullName = Lang == Controllers.Languages.En
-                    ? (ssl.StudentCredential.FirstName.En ?? "") + " " + (ssl.StudentCredential.LastName.En ?? "")
-                    : (ssl.StudentCredential.FirstName.Ar ?? "") + " " + (ssl.StudentCredential.LastName.Ar ?? "")
+                return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+            }
+
+            if (admin.MajorId != subject.MajorId)
+            {
+                return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
+            }
+        }
+
+        // For super admin, verify they can only access students from their faculty
+        if (superAdminId is not null)
+        {
+            var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
+            if (superAdmin is null)
+            {
+                return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+            }
+
+            if (subject.Major.FacultyId != superAdmin.FacultyId)
+            {
+                return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
+            }
+        }
+
+        // Get eligible students (students in the same major and year as the subject)
+        var eligibleStudents = await dbContext.StudentCredentials
+            .Where(sc => sc.MajorId == subject.MajorId && sc.Year == subject.Year)
+            .Select(sc => new EligibleStudentDto
+            {
+                Id = sc.Id,
+                StudentNumber = sc.StudentNumber,
+                FullName = sc.FirstName.GetTranslatedString(Lang) + " " + sc.LastName.GetTranslatedString(Lang)
             })
             .ToListAsync();
 
-        return Ok(new EligibleStudentsCollectionDto { Students = students });
+        return Ok(new EligibleStudentsCollectionDto
+        {
+            Students = eligibleStudents
+        });
     }
 }

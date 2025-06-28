@@ -7,6 +7,7 @@ using UniSphere.Api.DTOs.Announcements;
 using UniSphere.Api.DTOs.Info;
 using UniSphere.Api.DTOs.Statistics;
 using UniSphere.Api.Extensions;
+using UniSphere.Api.Helpers;
 
 namespace UniSphere.Api.Controllers;
 
@@ -54,7 +55,7 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
         var average = await dbContext.SubjectStudentLinks
             .Where(s => s.StudentId == studentId
@@ -69,7 +70,7 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
             .FirstOrDefaultAsync();
         if (statistics is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
         var studentInfo = await dbContext.StudentCredentials
      .Where(sc => sc.Id == studentId)
@@ -84,7 +85,7 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
 
         if (studentInfo is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
 
         var announcements = await dbContext.FacultyAnnouncements

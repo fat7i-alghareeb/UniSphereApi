@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using UniSphere.Api.Database;
 using UniSphere.Api.DTOs.Announcements;
 using UniSphere.Api.Extensions;
+using UniSphere.Api.Helpers;
 
 namespace UniSphere.Api.Controllers;
 
@@ -20,7 +21,7 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         // First get all needed data in one query
@@ -35,7 +36,7 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
 
         if (studentInfo is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var studentSubjectsIdsForNotTheCurrentYear = await dbContext.SubjectStudentLinks
@@ -71,7 +72,7 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var studentInfo = await dbContext.StudentCredentials
@@ -87,7 +88,7 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
 
         if (studentInfo is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var announcements = await dbContext.FacultyAnnouncements
@@ -108,7 +109,7 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
         var adminId = HttpContext.User.GetAdminId();
         if (adminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var admin = await dbContext.Admins
@@ -116,7 +117,7 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
             .FirstOrDefaultAsync(a => a.Id == adminId);
         if (admin is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var query = dbContext.MajorAnnouncements
@@ -144,7 +145,7 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
         var adminId = HttpContext.User.GetAdminId();
         if (adminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var admin = await dbContext.Admins
@@ -153,7 +154,7 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
             .FirstOrDefaultAsync(a => a.Id == adminId);
         if (admin is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var announcements = await dbContext.FacultyAnnouncements
@@ -175,20 +176,20 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
         var superAdminId = HttpContext.User.GetSuperAdminId();
         if (superAdminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
         if (superAdmin is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var announcement = await dbContext.FacultyAnnouncements
             .FirstOrDefaultAsync(a => a.Id == id && a.FacultyId == superAdmin.FacultyId);
         if (announcement is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
 
         var announcementDto = announcement.ToFacultyAnnouncementsDto(Lang);
@@ -212,25 +213,25 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
         var superAdminId = HttpContext.User.GetSuperAdminId();
         if (superAdminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
         if (superAdmin is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var announcement = await dbContext.FacultyAnnouncements
             .FirstOrDefaultAsync(a => a.Id == id && a.FacultyId == superAdmin.FacultyId);
         if (announcement is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
 
         dbContext.FacultyAnnouncements.Remove(announcement);
         await dbContext.SaveChangesAsync();
-        return NoContent();
+        return Ok(new { message = Lang == Languages.En ? "Faculty announcement deleted successfully" : "تم حذف إعلان الكلية بنجاح" });
     }
 
     [HttpPatch("MajorAnnouncements/{id:guid}")]
@@ -246,7 +247,7 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
             var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
             if (admin is null)
             {
-                return Unauthorized();
+                return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
             }
             majorId = admin.MajorId;
         }
@@ -255,7 +256,7 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
             var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
             if (superAdmin is null)
             {
-                return Unauthorized();
+                return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
             }
             // For superAdmin, we need to check if the announcement belongs to their faculty
             var existingAnnouncement = await dbContext.MajorAnnouncements
@@ -263,12 +264,12 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
                 .FirstOrDefaultAsync(a => a.Id == id);
             if (existingAnnouncement is null || existingAnnouncement.Major.FacultyId != superAdmin.FacultyId)
             {
-                return Forbid();
+                return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
             }
         }
         else
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var query = dbContext.MajorAnnouncements.Where(a => a.Id == id);
@@ -280,7 +281,7 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
         var announcement = await query.FirstOrDefaultAsync();
         if (announcement is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
 
         var announcementDto = announcement.ToStudentAnnouncementsDto(Lang);
@@ -310,7 +311,7 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
             var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
             if (admin is null)
             {
-                return Unauthorized();
+                return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
             }
             majorId = admin.MajorId;
         }
@@ -319,7 +320,7 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
             var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
             if (superAdmin is null)
             {
-                return Unauthorized();
+                return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
             }
             // For superAdmin, we need to check if the announcement belongs to their faculty
             var existingAnnouncement = await dbContext.MajorAnnouncements
@@ -327,12 +328,12 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
                 .FirstOrDefaultAsync(a => a.Id == id);
             if (existingAnnouncement is null || existingAnnouncement.Major.FacultyId != superAdmin.FacultyId)
             {
-                return Forbid();
+                return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
             }
         }
         else
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var query = dbContext.MajorAnnouncements.Where(a => a.Id == id);
@@ -344,12 +345,12 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
         var announcement = await query.FirstOrDefaultAsync();
         if (announcement is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
 
         dbContext.MajorAnnouncements.Remove(announcement);
         await dbContext.SaveChangesAsync();
-        return NoContent();
+        return Ok(new { message = Lang == Languages.En ? "Major announcement deleted successfully" : "تم حذف إعلان التخصص بنجاح" });
     }
 
     // Admin Announcement Creation Endpoints
@@ -360,13 +361,13 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
         var superAdminId = HttpContext.User.GetSuperAdminId();
         if (superAdminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
         if (superAdmin is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var facultyAnnouncement = createDto.ToFacultyAnnouncement(superAdmin.FacultyId);
@@ -390,7 +391,7 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
             var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
             if (admin is null)
             {
-                return Unauthorized();
+                return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
             }
             majorId = admin.MajorId;
         }
@@ -398,19 +399,19 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
         {
             if (createDto.MajorId is null)
             {
-                return BadRequest("MajorId is required for super admin.");
+                return BadRequest(new { message = Lang == Languages.En ? "MajorId is required for super admin." : "معرف التخصص مطلوب للمسؤول الأعلى." });
             }
             var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
             var major = await dbContext.Majors.FirstOrDefaultAsync(m => m.Id == createDto.MajorId);
             if (superAdmin is null || major is null || superAdmin.FacultyId != major.FacultyId)
             {
-                return Forbid();
+                return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
             }
             majorId = createDto.MajorId.Value;
         }
         else
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         // Verify subject belongs to the selected major
@@ -419,7 +420,7 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
 
         if (subject is null)
         {
-            return BadRequest("Subject does not belong to the selected major");
+            return BadRequest(new { message = Lang == Languages.En ? "Subject does not belong to the selected major" : "المادة لا تنتمي إلى التخصص المحدد" });
         }
 
         var majorAnnouncement = createDto.ToMajorAnnouncement(majorId);

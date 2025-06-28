@@ -7,6 +7,7 @@ using UniSphere.Api.Database;
 using UniSphere.Api.DTOs.Auth;
 using UniSphere.Api.Entities;
 using UniSphere.Api.Services;
+using UniSphere.Api.Helpers;
 
 namespace UniSphere.Api.Controllers;
 
@@ -30,16 +31,12 @@ public sealed class StudentAuthController(
         
         if (studentCredential is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetStudentNotFoundMessage(Lang) });
         }
 
         if (!await authService.ValidateOneTimeCodeAsync(studentCredential, checkOneTimeCodeDto.Code))
         {
-            return Problem(
-                detail: "Code is not valid",
-                title: "Code is not valid",
-                statusCode: StatusCodes.Status400BadRequest
-            );
+            return BadRequest(new { message = BilingualErrorMessages.GetInvalidCodeMessage(Lang) });
         }
 
         return Ok(studentCredential.ToSimpleStudentDto());
@@ -59,7 +56,7 @@ public sealed class StudentAuthController(
         
         if (studentCredential is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetStudentNotFoundMessage(Lang) });
         }
 
         var applicationUser = new ApplicationUser
@@ -70,7 +67,7 @@ public sealed class StudentAuthController(
         
         if (registerStudentDto.Password != registerStudentDto.ConfirmPassword)
         {
-            return BadRequest("Password and ConfirmPassword must be the same");
+            return BadRequest(new { message = BilingualErrorMessages.GetPasswordMismatchMessage(Lang) });
         }
 
         IdentityResult createStudentResult = await userManager.CreateAsync(applicationUser, registerStudentDto.Password);
@@ -82,8 +79,8 @@ public sealed class StudentAuthController(
             };
 
             return Problem(
-                detail: "Error creating Student",
-                title: "Error creating Student",
+                detail: BilingualErrorMessages.GetErrorCreatingStudentMessage(Lang),
+                title: BilingualErrorMessages.GetErrorCreatingStudentMessage(Lang),
                 statusCode: StatusCodes.Status400BadRequest,
                 extensions: extensions
             );
@@ -98,8 +95,8 @@ public sealed class StudentAuthController(
             };
 
             return Problem(
-                detail: "Error creating Student",
-                title: "Error creating Student",
+                detail: BilingualErrorMessages.GetErrorCreatingStudentMessage(Lang),
+                title: BilingualErrorMessages.GetErrorCreatingStudentMessage(Lang),
                 statusCode: StatusCodes.Status400BadRequest,
                 extensions: extensions
             );
@@ -131,31 +128,19 @@ public sealed class StudentAuthController(
         
         if (studentCredential is null)
         {
-            return Problem(
-                detail: "Student not found",
-                title: "Student not found",
-                statusCode: StatusCodes.Status404NotFound
-            );
+            return NotFound(new { message = BilingualErrorMessages.GetStudentNotFoundMessage(Lang) });
         }
 
         ApplicationUser? applicationUser =
             await userManager.Users.FirstOrDefaultAsync(u => u.StudentId == studentCredential.Id);
         if (applicationUser is null)
         {
-            return Problem(
-                detail: "Student not Registered",
-                title: "Student not Registered",
-                statusCode: StatusCodes.Status401Unauthorized
-            );
+            return Unauthorized(new { message = BilingualErrorMessages.GetStudentNotRegisteredMessage(Lang) });
         }
 
         if (!await userManager.CheckPasswordAsync(applicationUser, loginStudentDto.Password))
         {
-            return Problem(
-                detail: "Wrong password",
-                title: "Wrong password",
-                statusCode: StatusCodes.Status401Unauthorized
-            );
+            return Unauthorized(new { message = BilingualErrorMessages.GetWrongPasswordMessage(Lang) });
         }
 
         IList<string> roles = await userManager.GetRolesAsync(applicationUser);

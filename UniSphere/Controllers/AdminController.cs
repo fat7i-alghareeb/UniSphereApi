@@ -8,6 +8,7 @@ using UniSphere.Api.DTOs.Auth;
 using UniSphere.Api.Entities;
 using UniSphere.Api.Extensions;
 using UniSphere.Api.Services;
+using UniSphere.Api.Helpers;
 
 namespace UniSphere.Api.Controllers;
 
@@ -30,23 +31,23 @@ public class AdminController(
         var adminId = HttpContext.User.GetAdminId();
         if (adminId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
         if (admin is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         if (dto.TargetRole != AssignOneTimeCodeTargetRole.Student)
         {
-            return BadRequest("Admin can only assign one-time codes to students.");
+            return BadRequest(new { message = Lang == Languages.En ? "Admin can only assign one-time codes to students." : "يمكن للمسؤول تعيين رموز لمرة واحدة للطلاب فقط." });
         }
 
         if (dto.StudentId is null)
         {
-            return BadRequest("StudentId is required.");
+            return BadRequest(new { message = BilingualErrorMessages.GetStudentNotFoundMessage(Lang) });
         }
 
         var student = await dbContext.StudentCredentials
@@ -55,7 +56,7 @@ public class AdminController(
 
         if (student is null || student.MajorId != admin.MajorId)
         {
-            return Forbid();
+            return Forbid(BilingualErrorMessages.GetNoAccessToSubjectMessage(Lang));
         }
 
         int code = Random.Shared.Next(100_000, 1_000_000); // 6-digit code
@@ -69,7 +70,7 @@ public class AdminController(
         await dbContext.SaveChangesAsync();
         return Ok(new
         {
-            message = "One-time code assigned successfully to student.",
+            message = Lang == Languages.En ? "One-time code assigned successfully to student." : "تم تعيين رمز لمرة واحدة للطالب بنجاح.",
             code,
             expiresAt = now.AddMinutes(expiration)
         });
@@ -84,18 +85,18 @@ public class AdminController(
             var adminId = HttpContext.User.GetAdminId();
             if (adminId is null)
             {
-                return Unauthorized();
+                return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
             }
 
             var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
             if (admin is null)
             {
-                return NotFound("Admin not found");
+                return NotFound(new { message = BilingualErrorMessages.GetStudentNotFoundMessage(Lang) });
             }
 
             if (image == null || image.Length == 0)
             {
-                return BadRequest("No image file provided");
+                return BadRequest(new { message = Lang == Languages.En ? "No image file provided" : "لم يتم توفير ملف صورة" });
             }
 
             // Validate image file type
@@ -104,13 +105,13 @@ public class AdminController(
             
             if (!allowedExtensions.Contains(fileExtension))
             {
-                return BadRequest("Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp");
+                return BadRequest(new { message = Lang == Languages.En ? "Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp" : "تنسيق الصورة غير صالح. التنسيقات المسموح بها: jpg, jpeg, png, gif, bmp, webp" });
             }
 
             // Validate file size (max 5MB for profile images)
             if (image.Length > 5 * 1024 * 1024)
             {
-                return BadRequest("Image file size must be less than 5MB");
+                return BadRequest(new { message = Lang == Languages.En ? "Image file size must be less than 5MB" : "يجب أن يكون حجم ملف الصورة أقل من 5 ميجابايت" });
             }
 
             // Save the image using LocalStorageService
@@ -122,7 +123,7 @@ public class AdminController(
 
             return Ok(new
             {
-                message = "Profile image uploaded successfully",
+                message = Lang == Languages.En ? "Profile image uploaded successfully" : "تم رفع صورة الملف الشخصي بنجاح",
                 imageUrl,
                 fileName = image.FileName,
                 fileSize = image.Length
@@ -144,14 +145,14 @@ public class AdminController(
             .FirstOrDefaultAsync(a => a.Gmail == checkOneTimeCodeDto.Gmail && a.MajorId == checkOneTimeCodeDto.MajorId);
         if (admin is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetStudentNotFoundMessage(Lang) });
         }
 
         if (!await authService.ValidateOneTimeCodeAsync(admin, checkOneTimeCodeDto.Code))
         {
             return Problem(
-                detail: "Code is not valid",
-                title: "Code is not valid",
+                detail: Lang == Languages.En ? "Code is not valid" : "الرمز غير صالح",
+                title: Lang == Languages.En ? "Code is not valid" : "الرمز غير صالح",
                 statusCode: StatusCodes.Status400BadRequest
             );
         }
@@ -172,7 +173,7 @@ public class AdminController(
             .FirstOrDefaultAsync(a => a.Id == registerAdminDto.AdminId);
         if (admin is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetStudentNotFoundMessage(Lang) });
         }
 
         var applicationUser = new ApplicationUser
@@ -184,7 +185,7 @@ public class AdminController(
         };
         if (registerAdminDto.Password != registerAdminDto.ConfirmPassword)
         {
-            return BadRequest("Password and ConfirmPassword must be the same");
+            return BadRequest(new { message = Lang == Languages.En ? "Password and ConfirmPassword must be the same" : "يجب أن تكون كلمة المرور وتأكيد كلمة المرور متطابقتين" });
         }
 
         IdentityResult createAdminResult = await userManager.CreateAsync(applicationUser, registerAdminDto.Password);
@@ -196,8 +197,8 @@ public class AdminController(
             };
 
             return Problem(
-                detail: "Error creating Admin",
-                title: "Error creating Admin",
+                detail: Lang == Languages.En ? "Error creating Admin" : "حدث خطأ أثناء إنشاء المسؤول",
+                title: Lang == Languages.En ? "Error creating Admin" : "حدث خطأ أثناء إنشاء المسؤول",
                 statusCode: StatusCodes.Status400BadRequest,
                 extensions: extensions
             );
@@ -211,8 +212,8 @@ public class AdminController(
             };
 
             return Problem(
-                detail: "Error creating Admin",
-                title: "Error creating Admin",
+                detail: Lang == Languages.En ? "Error creating Admin" : "حدث خطأ أثناء إنشاء المسؤول",
+                title: Lang == Languages.En ? "Error creating Admin" : "حدث خطأ أثناء إنشاء المسؤول",
                 statusCode: StatusCodes.Status400BadRequest,
                 extensions: extensions
             );
@@ -236,8 +237,8 @@ public class AdminController(
         if (applicationUser is null)
         {
             return Problem(
-                detail: "Admin not found",
-                title: "Admin not found",
+                detail: Lang == Languages.En ? "Admin not found" : "لم يتم العثور على المسؤول",
+                title: Lang == Languages.En ? "Admin not found" : "لم يتم العثور على المسؤول",
                 statusCode: StatusCodes.Status404NotFound
             );
         }
@@ -246,8 +247,8 @@ public class AdminController(
         if (applicationUser.AdminId is null)
         {
             return Problem(
-                detail: "User is not an admin",
-                title: "User is not an admin",
+                detail: Lang == Languages.En ? "User is not an admin" : "المستخدم ليس مسؤولاً",
+                title: Lang == Languages.En ? "User is not an admin" : "المستخدم ليس مسؤولاً",
                 statusCode: StatusCodes.Status401Unauthorized
             );
         }
@@ -258,8 +259,8 @@ public class AdminController(
         if (admin is null)
         {
             return Problem(
-                detail: "Admin not found",
-                title: "Admin not found",
+                detail: Lang == Languages.En ? "Admin not found" : "لم يتم العثور على المسؤول",
+                title: Lang == Languages.En ? "Admin not found" : "لم يتم العثور على المسؤول",
                 statusCode: StatusCodes.Status404NotFound
             );
         }
@@ -267,8 +268,8 @@ public class AdminController(
         if (!await userManager.CheckPasswordAsync(applicationUser, loginAdminDto.Password))
         {
             return Problem(
-                detail: "Wrong password",
-                title: "Wrong password",
+                detail: Lang == Languages.En ? "Wrong password" : "كلمة المرور غير صحيحة",
+                title: Lang == Languages.En ? "Wrong password" : "كلمة المرور غير صحيحة",
                 statusCode: StatusCodes.Status401Unauthorized
             );
         }

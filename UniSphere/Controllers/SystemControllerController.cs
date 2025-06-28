@@ -9,6 +9,7 @@ using UniSphere.Api.DTOs.Auth;
 using UniSphere.Api.Entities;
 using UniSphere.Api.Extensions;
 using UniSphere.Api.Services;
+using UniSphere.Api.Helpers;
 
 namespace UniSphere.Api.Controllers;
 
@@ -33,18 +34,18 @@ public class SystemControllerController(
             var systemControllerId = HttpContext.User.GetSystemControllerId();
             if (systemControllerId is null)
             {
-                return Unauthorized();
+                return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
             }
 
             var systemController = await applicationDbContext.SystemControllers.FirstOrDefaultAsync(sc => sc.Id == systemControllerId);
             if (systemController is null)
             {
-                return NotFound("SystemController not found");
+                return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
             }
 
             if (image == null || image.Length == 0)
             {
-                return BadRequest("No image file provided");
+                return BadRequest(new { message = Lang == Languages.En ? "No image file provided" : "لم يتم توفير ملف صورة" });
             }
 
             // Validate image file type
@@ -53,25 +54,25 @@ public class SystemControllerController(
             
             if (!allowedExtensions.Contains(fileExtension))
             {
-                return BadRequest("Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp");
+                return BadRequest(new { message = Lang == Languages.En ? "Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp" : "تنسيق الصورة غير صالح. التنسيقات المسموح بها: jpg, jpeg, png, gif, bmp, webp" });
             }
 
             // Validate file size (max 5MB for profile images)
             if (image.Length > 5 * 1024 * 1024)
             {
-                return BadRequest("Image file size must be less than 5MB");
+                return BadRequest(new { message = Lang == Languages.En ? "Image file size must be less than 5MB" : "يجب أن يكون حجم ملف الصورة أقل من 5 ميجابايت" });
             }
 
             // Save the image using LocalStorageService
             var imageUrl = await storageService.SaveFileAsync(image, "systemcontroller-profiles");
 
-            // Update the systemController's image URL
+            // Update the system controller's image URL
             systemController.Image = imageUrl;
             await applicationDbContext.SaveChangesAsync();
 
             return Ok(new
             {
-                message = "Profile image uploaded successfully",
+                message = Lang == Languages.En ? "Profile image uploaded successfully" : "تم رفع صورة الملف الشخصي بنجاح",
                 imageUrl,
                 fileName = image.FileName,
                 fileSize = image.Length
@@ -122,7 +123,7 @@ public class SystemControllerController(
         var superAdmin = await applicationDbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
         if (superAdmin is null)
         {
-            return NotFound("SuperAdmin not found");
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
 
         // Check if SuperAdmin has any associated ApplicationUser
@@ -135,7 +136,7 @@ public class SystemControllerController(
         applicationDbContext.SuperAdmins.Remove(superAdmin);
         await applicationDbContext.SaveChangesAsync();
 
-        return NoContent();
+        return Ok(new { message = Lang == Languages.En ? "SuperAdmin removed successfully" : "تمت إزالة المسؤول الأعلى بنجاح" });
     }
 
     [HttpPost("SuperAdmin/AssignOneTimeCode")]
@@ -144,7 +145,7 @@ public class SystemControllerController(
         var superAdmin = await applicationDbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == dto.SuperAdminId);
         if (superAdmin is null)
         {
-            return NotFound("SuperAdmin not found");
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
 
         int code = Random.Shared.Next(100_000, 1_000_000); // 6-digit code
@@ -159,7 +160,7 @@ public class SystemControllerController(
 
         return Ok(new
         {
-            message = "One-time code assigned successfully.",
+            message = Lang == Languages.En ? "One-time code assigned successfully to super admin." : "تم تعيين رمز لمرة واحدة للمسؤول الأعلى بنجاح.",
             code,
             expiresAt = now.AddMinutes(expiration)
         });
@@ -187,7 +188,7 @@ public class SystemControllerController(
         var enrollmentStatus = await applicationDbContext.EnrollmentStatuses.FirstOrDefaultAsync(es => es.Id == id);
         if (enrollmentStatus is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
 
         return Ok(enrollmentStatus);
@@ -211,7 +212,7 @@ public class SystemControllerController(
         var enrollmentStatus = await applicationDbContext.EnrollmentStatuses.FirstOrDefaultAsync(es => es.Id == id);
         if (enrollmentStatus is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
 
         var updateDto = new UpdateEnrollmentStatusDto();
@@ -244,19 +245,19 @@ public class SystemControllerController(
         
         if (enrollmentStatus is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
 
         // Check if any students are using this enrollment status
         if (enrollmentStatus.StudentCredentials.Any())
         {
-            return BadRequest("Cannot remove enrollment status that is being used by students");
+            return BadRequest(new { message = Lang == Languages.En ? "Cannot delete enrollment status that is being used by students" : "لا يمكن حذف حالة التسجيل المستخدمة من قبل الطلاب" });
         }
 
         applicationDbContext.EnrollmentStatuses.Remove(enrollmentStatus);
         await applicationDbContext.SaveChangesAsync();
 
-        return NoContent();
+        return Ok(new { message = Lang == Languages.En ? "Enrollment status removed successfully" : "تمت إزالة حالة التسجيل بنجاح" });
     }
 
     // Authentication Endpoints
@@ -269,8 +270,8 @@ public class SystemControllerController(
         if (applicationUser is null)
         {
             return Problem(
-                detail: "SystemController not found",
-                title: "SystemController not found",
+                detail: Lang == Languages.En ? "SystemController not found" : "لم يتم العثور على مسؤول النظام",
+                title: Lang == Languages.En ? "SystemController not found" : "لم يتم العثور على مسؤول النظام",
                 statusCode: StatusCodes.Status404NotFound
             );
         }
@@ -279,8 +280,8 @@ public class SystemControllerController(
         if (applicationUser.SystemControllerId is null)
         {
             return Problem(
-                detail: "User is not a system controller",
-                title: "User is not a system controller",
+                detail: Lang == Languages.En ? "User is not a system controller" : "المستخدم ليس مسؤول نظام",
+                title: Lang == Languages.En ? "User is not a system controller" : "المستخدم ليس مسؤول نظام",
                 statusCode: StatusCodes.Status401Unauthorized
             );
         }
@@ -290,8 +291,8 @@ public class SystemControllerController(
         if (systemController is null)
         {
             return Problem(
-                detail: "SystemController not found",
-                title: "SystemController not found",
+                detail: Lang == Languages.En ? "SystemController not found" : "لم يتم العثور على مسؤول النظام",
+                title: Lang == Languages.En ? "SystemController not found" : "لم يتم العثور على مسؤول النظام",
                 statusCode: StatusCodes.Status404NotFound
             );
         }
@@ -299,8 +300,8 @@ public class SystemControllerController(
         if (!await userManager.CheckPasswordAsync(applicationUser, loginSystemControllerDto.Password))
         {
             return Problem(
-                detail: "Wrong password",
-                title: "Wrong password",
+                detail: Lang == Languages.En ? "Wrong password" : "كلمة المرور غير صحيحة",
+                title: Lang == Languages.En ? "Wrong password" : "كلمة المرور غير صحيحة",
                 statusCode: StatusCodes.Status401Unauthorized
             );
         }
@@ -327,7 +328,7 @@ public class SystemControllerController(
             .FirstOrDefaultAsync(sc => sc.Id == registerSystemControllerDto.SystemControllerId);
         if (systemController is null)
         {
-            return NotFound();
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
         }
 
         var applicationUser = new ApplicationUser
@@ -339,7 +340,7 @@ public class SystemControllerController(
         };
         if (registerSystemControllerDto.Password != registerSystemControllerDto.ConfirmPassword)
         {
-            return BadRequest("Password and ConfirmPassword must be the same");
+            return BadRequest(new { message = Lang == Languages.En ? "Password and ConfirmPassword must be the same" : "يجب أن تكون كلمة المرور وتأكيد كلمة المرور متطابقتين" });
         }
 
         IdentityResult createSystemControllerResult = await userManager.CreateAsync(applicationUser, registerSystemControllerDto.Password);
@@ -351,8 +352,8 @@ public class SystemControllerController(
             };
 
             return Problem(
-                detail: "Error creating SystemController",
-                title: "Error creating SystemController",
+                detail: Lang == Languages.En ? "Error creating SystemController" : "حدث خطأ أثناء إنشاء مسؤول النظام",
+                title: Lang == Languages.En ? "Error creating SystemController" : "حدث خطأ أثناء إنشاء مسؤول النظام",
                 statusCode: StatusCodes.Status400BadRequest,
                 extensions: extensions
             );
@@ -366,8 +367,8 @@ public class SystemControllerController(
             };
 
             return Problem(
-                detail: "Error creating SystemController",
-                title: "Error creating SystemController",
+                detail: Lang == Languages.En ? "Error creating SystemController" : "حدث خطأ أثناء إنشاء مسؤول النظام",
+                title: Lang == Languages.En ? "Error creating SystemController" : "حدث خطأ أثناء إنشاء مسؤول النظام",
                 statusCode: StatusCodes.Status400BadRequest,
                 extensions: extensions
             );

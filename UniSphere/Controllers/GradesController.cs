@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using UniSphere.Api.Database;
 using UniSphere.Api.DTOs.Grades;
 using UniSphere.Api.Extensions;
+using UniSphere.Api.Helpers;
 
 namespace UniSphere.Api.Controllers;
 
@@ -20,7 +21,7 @@ public class GradesController(ApplicationDbContext dbContext) : BaseController
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
-            return Unauthorized();
+            return Unauthorized(new { Message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var collectionInfo = await dbContext.SubjectStudentLinks
@@ -40,7 +41,7 @@ public class GradesController(ApplicationDbContext dbContext) : BaseController
 
         if (collectionInfo is null)
         {
-            return NotFound();
+            return NotFound(new { Message = BilingualErrorMessages.GetNoGradesFoundMessage(Lang) });
         }
 
         var gradeDto = await dbContext.SubjectStudentLinks
@@ -51,10 +52,6 @@ public class GradesController(ApplicationDbContext dbContext) : BaseController
             )
             .Include(ss=>ss.Subject)
             .Select(GradesQueries.ProjectToDto(Lang)).ToListAsync();
-
-
-        // .SumAsync(s => s.TotalGrade);
-
 
         return Ok(new GradesCollection
         {
@@ -70,17 +67,17 @@ public class GradesController(ApplicationDbContext dbContext) : BaseController
     {
         if (dto.StudentGrades == null || dto.StudentGrades.Count == 0)
         {
-            return BadRequest("StudentGrades list cannot be empty.");
+            return BadRequest(new { Message = BilingualErrorMessages.GetStudentGradesEmptyMessage(Lang) });
         }
 
         if (!dto.SubjectId.HasValue)
         {
-            return BadRequest("SubjectId is required.");
+            return BadRequest(new { Message = BilingualErrorMessages.GetSubjectIdRequiredMessage(Lang) });
         }
 
         if (!dto.PassGrade.HasValue)
         {
-            return BadRequest("PassGrade is required.");
+            return BadRequest(new { Message = BilingualErrorMessages.GetPassGradeRequiredMessage(Lang) });
         }
 
         var subjectLinks = await dbContext.SubjectStudentLinks
@@ -94,7 +91,8 @@ public class GradesController(ApplicationDbContext dbContext) : BaseController
 
         if (notFoundStudents.Any())
         {
-            return NotFound($"Some students are not enrolled in the subject: {string.Join(", ", notFoundStudents)}");
+            var studentIdsString = string.Join(", ", notFoundStudents);
+            return NotFound(new { Message = BilingualErrorMessages.GetStudentsNotEnrolledMessage(Lang, studentIdsString) });
         }
 
         foreach (var sg in dto.StudentGrades)
@@ -117,6 +115,9 @@ public class GradesController(ApplicationDbContext dbContext) : BaseController
         }
 
         await dbContext.SaveChangesAsync();
-        return Ok(new { Success = true });
+        return Ok(new { 
+            Success = true, 
+            Message = BilingualErrorMessages.GetSuccessMessage(Lang) 
+        });
     }
 }
