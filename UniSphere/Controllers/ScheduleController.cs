@@ -187,6 +187,45 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
         return Ok(monthSchedule);
     }
 
+    [HttpGet("Admin/GetScheduleByMonth")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<MonthScheduleDto>> GetAdminScheduleByMonth([Required] int month, [Required] int year)
+    {
+        var adminId = HttpContext.User.GetAdminId();
+        if (adminId is null)
+        {
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+        }
+
+        var admin = await dbContext.Admins
+            .Include(a => a.Major)
+            .FirstOrDefaultAsync(a => a.Id == adminId);
+        if (admin is null)
+        {
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+        }
+
+        var targetMonth = new DateOnly(year, month, 1);
+        DateOnly startDate = targetMonth;
+        var endDate = targetMonth.AddMonths(1).AddDays(-1);
+
+        var schedules = await dbContext.Schedules
+            .Where(s => s.MajorId == admin.MajorId &&
+                        s.Year == year &&
+                        s.ScheduleDate >= startDate &&
+                        s.ScheduleDate <= endDate)
+            .Include(s => s.Lectures)
+            .ToListAsync();
+
+        if (!schedules.Any())
+        {
+            return NotFound(new { message = Lang == Languages.En ? "No schedule found for the target month" : "لم يتم العثور على جدول دراسي للشهر المحدد" });
+        }
+
+        var monthSchedule = schedules.CombineSchedulesIntoMonth(targetMonth, Lang);
+        return Ok(monthSchedule);
+    }
+
     [HttpPatch("{id:guid}")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<MonthScheduleDto>> UpdateSchedule(Guid id, JsonPatchDocument<CreateScheduleDto> patchDocument)

@@ -46,7 +46,7 @@ public class SuperAdminController(
                 if (dto.AdminId is null)
                 {
                     return BadRequest(new { message = BilingualErrorMessages.GetBadRequestMessage(Lang) });
-                }
+        }
                 var admin = await dbContext.Admins
                     .Include(a => a.Major)
                     .FirstOrDefaultAsync(a => a.Id == dto.AdminId);

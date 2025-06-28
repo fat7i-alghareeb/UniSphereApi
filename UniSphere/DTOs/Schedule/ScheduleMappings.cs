@@ -134,15 +134,7 @@ internal static class ScheduleMappings
             MajorId = dto.MajorId,
             Year = dto.Year,
             ScheduleDate = dto.ScheduleDate,
-            Lectures = dto.Lectures.Select(l => new Lecture
-            {
-                Id = l.Id ?? Guid.NewGuid(),
-                SubjectName = new MultilingualText { En = l.SubjectNameEn, Ar = l.SubjectNameAr },
-                LecturerName = new MultilingualText { En = l.LecturerNameEn, Ar = l.LecturerNameAr },
-                StartTime = l.StartTime,
-                EndTime = l.EndTime,
-                LectureHall = new MultilingualText { En = l.LectureHallEn, Ar = l.LectureHallAr }
-            }).ToList()
+            Lectures = dto.Lectures.Select(l => l.ToLecture(Guid.Empty)).ToList()
         };
     }
 
@@ -158,5 +150,16 @@ internal static class ScheduleMappings
             EndTime = dto.EndTime,
             LectureHall = new MultilingualText { En = dto.LectureHallEn, Ar = dto.LectureHallAr }
         };
+    }
+
+    public static Lecture UpdateFromDto(this Lecture lecture, CreateLectureDto dto)
+    {
+        lecture.SubjectName = new MultilingualText { En = dto.SubjectNameEn, Ar = dto.SubjectNameAr };
+        lecture.LecturerName = new MultilingualText { En = dto.LecturerNameEn, Ar = dto.LecturerNameAr };
+        lecture.StartTime = dto.StartTime;
+        lecture.EndTime = dto.EndTime;
+        lecture.LectureHall = new MultilingualText { En = dto.LectureHallEn, Ar = dto.LectureHallAr };
+        
+        return lecture;
     }
 }
