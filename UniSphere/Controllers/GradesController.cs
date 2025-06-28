@@ -73,8 +73,18 @@ public class GradesController(ApplicationDbContext dbContext) : BaseController
             return BadRequest("StudentGrades list cannot be empty.");
         }
 
+        if (!dto.SubjectId.HasValue)
+        {
+            return BadRequest("SubjectId is required.");
+        }
+
+        if (!dto.PassGrade.HasValue)
+        {
+            return BadRequest("PassGrade is required.");
+        }
+
         var subjectLinks = await dbContext.SubjectStudentLinks
-            .Where(link => link.SubjectId == dto.SubjectId && dto.StudentGrades.Select(sg => sg.StudentId).Contains(link.StudentId))
+            .Where(link => link.SubjectId == dto.SubjectId.Value && dto.StudentGrades.Select(sg => sg.StudentId).Contains(link.StudentId))
             .ToListAsync();
 
         var notFoundStudents = dto.StudentGrades
@@ -98,7 +108,7 @@ public class GradesController(ApplicationDbContext dbContext) : BaseController
             link.MidtermGrade = sg.MidTermGrade;
             link.FinalGrade = sg.FinalGrade;
             double totalGrade = (sg.MidTermGrade ?? 0) + (sg.FinalGrade ?? 0);
-            if (totalGrade >= dto.PassGrade)
+            if (totalGrade >= dto.PassGrade.Value)
             {
                 link.IsPassed = true;
                 link.IsCurrentlyEnrolled = false;

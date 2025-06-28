@@ -68,7 +68,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
     }
 
     [HttpPost("AddLecture")]
-    public async Task<ActionResult<DayScheduleDto>> AddLecture(AddLectureDto addDto)
+    public async Task<ActionResult<DayScheduleDto>> AddLecture([Required] Guid scheduleId, CreateLectureDto addDto)
     {
         var adminId = HttpContext.User.GetAdminId();
         if (adminId is null)
@@ -79,7 +79,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         // Verify admin has access to this schedule
         var schedule = await dbContext.Schedules
             .Include(s => s.Major)
-            .FirstOrDefaultAsync(s => s.Id == addDto.ScheduleId);
+            .FirstOrDefaultAsync(s => s.Id == scheduleId);
 
         if (schedule is null)
         {
@@ -94,7 +94,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
             return Forbid();
         }
 
-        var lecture = addDto.ToLecture(addDto.ScheduleId);
+        var lecture = addDto.ToLecture(scheduleId);
 
         dbContext.Lectures.Add(lecture);
         await dbContext.SaveChangesAsync();
@@ -102,7 +102,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         // Return the updated day schedule
         var updatedSchedule = await dbContext.Schedules
             .Include(s => s.Lectures)
-            .FirstOrDefaultAsync(s => s.Id == addDto.ScheduleId);
+            .FirstOrDefaultAsync(s => s.Id == scheduleId);
 
         if (updatedSchedule is null)
         {
@@ -112,6 +112,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         var dayLectures = updatedSchedule.Lectures
             .Select(l => new DayLectureDto
             {
+                Id = l.Id,
                 SubjectName = l.SubjectName.GetTranslatedString(Lang),
                 LectureName = l.SubjectName.GetTranslatedString(Lang),
                 LectureHall = l.LectureHall.GetTranslatedString(Lang),
@@ -189,6 +190,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         var dayLectures = schedule.Lectures
             .Select(l => new DayLectureDto
             {
+                Id = l.Id,
                 SubjectName = l.SubjectName.GetTranslatedString(Lang),
                 LectureName = l.SubjectName.GetTranslatedString(Lang),
                 LectureHall = l.LectureHall.GetTranslatedString(Lang),

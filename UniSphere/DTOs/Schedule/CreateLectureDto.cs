@@ -1,10 +1,8 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace UniSphere.Api.DTOs.Schedule;
 
-public sealed record AddLectureDto
+public sealed record CreateLectureDto
 {
-    public required Guid ScheduleId { get; init; }
+    public Guid? Id { get; init; } // Optional for creation, required for patching
     public required string SubjectNameEn { get; init; }
     public required string SubjectNameAr { get; init; }
     public required string LecturerNameEn { get; init; }
