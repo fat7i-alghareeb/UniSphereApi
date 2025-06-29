@@ -49,6 +49,29 @@ internal static class AnnouncementsMappings
         };
     }
 
+    public static FacultyAnnouncement ToFacultyAnnouncementWithImages(this CreateFacultyAnnouncementWithImagesDto dto, Guid facultyId)
+    {
+        return new FacultyAnnouncement
+        {
+            Id = Guid.NewGuid(),
+            FacultyId = facultyId,
+            Title = new MultilingualText { En = dto.TitleEn, Ar = dto.TitleAr },
+            Content = new MultilingualText { En = dto.ContentEn, Ar = dto.ContentAr },
+            CreatedAt = DateTime.UtcNow,
+            Images = new List<FacultyAnnouncementImage>()
+        };
+    }
+
+    public static FacultyAnnouncementImageDto ToImageDto(this FacultyAnnouncementImage image)
+    {
+        return new FacultyAnnouncementImageDto
+        {
+            Id = image.Id,
+            Url = image.Url,
+            CreatedAt = image.CreatedAt
+        };
+    }
+
     public static MajorAnnouncement ToMajorAnnouncement(this CreateMajorAnnouncementDto dto, Guid majorId)
     {
         return new MajorAnnouncement

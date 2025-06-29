@@ -374,4 +374,26 @@ public static class BilingualErrorMessages
         Languages.Ar => "تنسيق الرابط غير صالح.",
         _ => "Invalid link format."
     };
+
+    // Faculty Announcement Image Messages
+    public static string GetFacultyAnnouncementImageUploadErrorMessage(Languages lang) => lang switch
+    {
+        Languages.En => "Error uploading faculty announcement image.",
+        Languages.Ar => "حدث خطأ أثناء رفع صورة إعلان الكلية.",
+        _ => "Error uploading faculty announcement image."
+    };
+
+    public static string GetFacultyAnnouncementImageUploadSuccessMessage(Languages lang) => lang switch
+    {
+        Languages.En => "Faculty announcement image uploaded successfully.",
+        Languages.Ar => "تم رفع صورة إعلان الكلية بنجاح.",
+        _ => "Faculty announcement image uploaded successfully."
+    };
+
+    public static string GetFacultyAnnouncementCreatedWithImagesMessage(Languages lang) => lang switch
+    {
+        Languages.En => "Faculty announcement created successfully with images.",
+        Languages.Ar => "تم إنشاء إعلان الكلية بنجاح مع الصور.",
+        _ => "Faculty announcement created successfully with images."
+    };
 } 

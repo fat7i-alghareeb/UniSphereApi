@@ -10,6 +10,5 @@ public class FacultyAnnouncement
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public Faculty Faculty { get; set; }
     public Guid FacultyId { get; set; }
-    //public List<Image>? Images { get; set; } = new();
-    
+    public List<FacultyAnnouncementImage>? Images { get; set; } = new();
 }

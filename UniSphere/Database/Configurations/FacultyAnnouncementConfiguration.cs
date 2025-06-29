@@ -27,5 +27,9 @@ public class FacultyAnnouncementConfiguration : IEntityTypeConfiguration<Faculty
             .HasForeignKey(fa => fa.FacultyId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasMany(fa => fa.Images)
+            .WithOne(fai => fai.FacultyAnnouncement)
+            .HasForeignKey(fai => fai.FacultyAnnouncementId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

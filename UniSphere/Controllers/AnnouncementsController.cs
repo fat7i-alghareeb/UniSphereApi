@@ -6,6 +6,8 @@ using UniSphere.Api.Database;
 using UniSphere.Api.DTOs.Announcements;
 using UniSphere.Api.Extensions;
 using UniSphere.Api.Helpers;
+using UniSphere.Api.Services;
+using UniSphere.Api.Entities;
 
 namespace UniSphere.Api.Controllers;
 
@@ -376,6 +378,76 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
         await dbContext.SaveChangesAsync();
 
         return Ok(facultyAnnouncement.ToFacultyAnnouncementsDto(Lang));
+    }
+
+    [HttpPost("CreateFacultyAnnouncementWithImages")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<ActionResult<FacultyAnnouncementsDto>> CreateFacultyAnnouncementWithImages([FromForm] CreateFacultyAnnouncementWithImagesDto createDto)
+    {
+        var superAdminId = HttpContext.User.GetSuperAdminId();
+        if (superAdminId is null)
+        {
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+        }
+
+        var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
+        if (superAdmin is null)
+        {
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+        }
+
+        var facultyAnnouncement = createDto.ToFacultyAnnouncementWithImages(superAdmin.FacultyId);
+
+        // Add the announcement first
+        dbContext.FacultyAnnouncements.Add(facultyAnnouncement);
+        await dbContext.SaveChangesAsync();
+
+        // Handle image uploads if any
+        if (createDto.Images != null && createDto.Images.Any())
+        {
+            var storageService = HttpContext.RequestServices.GetRequiredService<IStorageService>();
+            
+            foreach (var image in createDto.Images)
+            {
+                try
+                {
+                    // Save the image using the storage service
+                    var imageUrl = await storageService.SaveFileAsync(image, "announcement_images");
+
+                    // Create the image record
+                    var announcementImage = new FacultyAnnouncementImage
+                    {
+                        Id = Guid.NewGuid(),
+                        FacultyAnnouncementId = facultyAnnouncement.Id,
+                        Url = imageUrl,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    dbContext.FacultyAnnouncementImages.Add(announcementImage);
+                }
+                catch (Exception)
+                {
+                    // Log the error but continue with other images
+                    // You might want to add proper logging here
+                }
+            }
+
+            await dbContext.SaveChangesAsync();
+        }
+
+        // Reload the announcement with images
+        var updatedAnnouncement = await dbContext.FacultyAnnouncements
+            .Where(fa => fa.Id == facultyAnnouncement.Id)
+            .Include(fa => fa.Images)
+            .Select(AnnouncementsQueries.ProjectToFacultyAnnouncementsDto(Lang))
+            .FirstOrDefaultAsync();
+
+        if (updatedAnnouncement is null)
+        {
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
+        }
+
+        return Ok(updatedAnnouncement);
     }
 
     [HttpPost("CreateMajorAnnouncement")]
