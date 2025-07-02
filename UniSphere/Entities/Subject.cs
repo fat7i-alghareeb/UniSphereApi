@@ -26,5 +26,6 @@ public class Subject
     public List<SubjectStudentLink>? SubjectStudentLinks { get; set; }
     public List<MajorAnnouncement>? MajorAnnouncements { get; set; }
     public List<Material>? Materials { get; set; }
+    public List<Lecture>? Lectures { get; set; }
 }
 

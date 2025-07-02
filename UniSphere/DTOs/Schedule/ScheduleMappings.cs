@@ -10,11 +10,13 @@ internal static class ScheduleMappings
         return new DayLectureDto
         {
             Id = lecture.Id,
-            SubjectName = lecture.SubjectName.GetTranslatedString(lang),
-            LectureName = lecture.LecturerName.GetTranslatedString(lang),
+            SubjectName = lecture.Subject.Name.GetTranslatedString(lang),
+            ProfessorName = $"{lecture.Professor.FirstName.GetTranslatedString(lang)} {lecture.Professor.LastName.GetTranslatedString(lang)}",
             LectureHall = lecture.LectureHall.GetTranslatedString(lang),
             StartTime = lecture.StartTime,
-            EndTime = lecture.EndTime
+            EndTime = lecture.EndTime,
+            SubjectId = lecture.SubjectId,
+            ProfessorId = lecture.ProfessorId
         };
     }
 
@@ -23,10 +25,8 @@ internal static class ScheduleMappings
         return new CreateLectureDto
         {
             Id = lecture.Id,
-            SubjectNameEn = lecture.SubjectName.En ?? string.Empty,
-            SubjectNameAr = lecture.SubjectName.Ar ?? string.Empty,
-            LecturerNameEn = lecture.LecturerName.En ?? string.Empty,
-            LecturerNameAr = lecture.LecturerName.Ar ?? string.Empty,
+            SubjectId = lecture.SubjectId,
+            ProfessorId = lecture.ProfessorId,
             StartTime = lecture.StartTime,
             EndTime = lecture.EndTime,
             LectureHallEn = lecture.LectureHall.En ?? string.Empty,
@@ -148,8 +148,8 @@ internal static class ScheduleMappings
         {
             Id = dto.Id ?? Guid.NewGuid(),
             ScheduleId = scheduleId,
-            SubjectName = new MultilingualText { En = dto.SubjectNameEn, Ar = dto.SubjectNameAr },
-            LecturerName = new MultilingualText { En = dto.LecturerNameEn, Ar = dto.LecturerNameAr },
+            SubjectId = dto.SubjectId,
+            ProfessorId = dto.ProfessorId,
             StartTime = dto.StartTime,
             EndTime = dto.EndTime,
             LectureHall = new MultilingualText { En = dto.LectureHallEn, Ar = dto.LectureHallAr }
@@ -158,8 +158,8 @@ internal static class ScheduleMappings
 
     public static Lecture UpdateFromDto(this Lecture lecture, CreateLectureDto dto)
     {
-        lecture.SubjectName = new MultilingualText { En = dto.SubjectNameEn, Ar = dto.SubjectNameAr };
-        lecture.LecturerName = new MultilingualText { En = dto.LecturerNameEn, Ar = dto.LecturerNameAr };
+        lecture.SubjectId = dto.SubjectId;
+        lecture.ProfessorId = dto.ProfessorId;
         lecture.StartTime = dto.StartTime;
         lecture.EndTime = dto.EndTime;
         lecture.LectureHall = new MultilingualText { En = dto.LectureHallEn, Ar = dto.LectureHallAr };

@@ -26,7 +26,7 @@ if (app.Environment.IsDevelopment())
     using var scope = app.Services.CreateScope();
     var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
     //await seeder.ClearIdentityDataAsync();
-    //await seeder.ClearApplicationDataAsync();
+   // await seeder.ClearApplicationDataAsync();
     await seeder.SeedRolesAsync();
     await seeder.SeedAsync();
 }

@@ -34,5 +34,9 @@ public class ProfessorConfiguration : IEntityTypeConfiguration<Professor>
             .WithOne(pfl => pfl.Professor)
             .HasForeignKey(pfl => pfl.ProfessorId)
             .OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(p => p.Lectures)
+            .WithOne(l => l.Professor)
+            .HasForeignKey(l => l.ProfessorId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

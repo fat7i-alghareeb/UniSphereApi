@@ -10,10 +10,14 @@ public class LectureSeedData(ApplicationDbContext context) : SeedData(context)
         if (!await Context.Lectures.AnyAsync())
         {
             List<Schedule> schedules = await Context.Schedules.ToListAsync();
-            if(schedules.Count == 0)
+            List<Subject> subjects = await Context.Subjects.ToListAsync();
+            List<Professor> professors = await Context.Professors.ToListAsync();
+            
+            if(schedules.Count == 0 || subjects.Count == 0 || professors.Count == 0)
             {
                 return;
             }
+            
             var lectures = new List<Lecture>
             {
                 // Morning Lectures
@@ -21,8 +25,8 @@ public class LectureSeedData(ApplicationDbContext context) : SeedData(context)
                 {
                     Id = Guid.NewGuid(),
                     ScheduleId = schedules[0].Id,
-                    SubjectName = new MultilingualText { Ar = "برمجة الويب", En = "Web Programming" },
-                    LecturerName = new MultilingualText { Ar = "أحمد محمد", En = "Ahmed Mohammed" },
+                    SubjectId = subjects[0].Id,
+                    ProfessorId = professors[0].Id,
                     StartTime = new TimeSpan(8, 0, 0),
                     EndTime = new TimeSpan(10, 0, 0),
                     LectureHall = new MultilingualText { Ar = "القاعة 101", En = "Hall 101" }
@@ -31,8 +35,8 @@ public class LectureSeedData(ApplicationDbContext context) : SeedData(context)
                 {
                     Id = Guid.NewGuid(),
                     ScheduleId = schedules[0].Id,
-                    SubjectName = new MultilingualText { Ar = "قواعد البيانات", En = "Databases" },
-                    LecturerName = new MultilingualText { Ar = "سارة علي", En = "Sarah Ali" },
+                    SubjectId = subjects[1].Id,
+                    ProfessorId = professors[1].Id,
                     StartTime = new TimeSpan(10, 30, 0),
                     EndTime = new TimeSpan(12, 30, 0),
                     LectureHall = new MultilingualText { Ar = "القاعة 202", En = "Hall 202" }
@@ -43,8 +47,8 @@ public class LectureSeedData(ApplicationDbContext context) : SeedData(context)
                 {
                     Id = Guid.NewGuid(),
                     ScheduleId = schedules[1].Id,
-                    SubjectName = new MultilingualText { Ar = "الذكاء الاصطناعي", En = "Artificial Intelligence" },
-                    LecturerName = new MultilingualText { Ar = "محمد خالد", En = "Mohammed Khaled" },
+                    SubjectId = subjects[2].Id,
+                    ProfessorId = professors[2].Id,
                     StartTime = new TimeSpan(12, 0, 0),
                     EndTime = new TimeSpan(14, 0, 0),
                     LectureHall = new MultilingualText { Ar = "القاعة 303", En = "Hall 303" }
@@ -53,8 +57,8 @@ public class LectureSeedData(ApplicationDbContext context) : SeedData(context)
                 {
                     Id = Guid.NewGuid(),
                     ScheduleId = schedules[1].Id,
-                    SubjectName = new MultilingualText { Ar = "معمارية الحاسوب", En = "Computer Architecture" },
-                    LecturerName = new MultilingualText { Ar = "علي حسين", En = "Ali Hussein" },
+                    SubjectId = subjects[3].Id,
+                    ProfessorId = professors[3].Id,
                     StartTime = new TimeSpan(14, 30, 0),
                     EndTime = new TimeSpan(16, 30, 0),
                     LectureHall = new MultilingualText { Ar = "القاعة 404", En = "Hall 404" }
@@ -65,8 +69,8 @@ public class LectureSeedData(ApplicationDbContext context) : SeedData(context)
                 {
                     Id = Guid.NewGuid(),
                     ScheduleId = schedules[2].Id,
-                    SubjectName = new MultilingualText { Ar = "الدوائر الكهربائية", En = "Electric Circuits" },
-                    LecturerName = new MultilingualText { Ar = "فاطمة أحمد", En = "Fatima Ahmed" },
+                    SubjectId = subjects[4].Id,
+                    ProfessorId = professors[4].Id,
                     StartTime = new TimeSpan(16, 0, 0),
                     EndTime = new TimeSpan(18, 0, 0),
                     LectureHall = new MultilingualText { Ar = "القاعة 505", En = "Hall 505" }
@@ -75,8 +79,8 @@ public class LectureSeedData(ApplicationDbContext context) : SeedData(context)
                 {
                     Id = Guid.NewGuid(),
                     ScheduleId = schedules[2].Id,
-                    SubjectName = new MultilingualText { Ar = "ميكانيكا التربة", En = "Soil Mechanics" },
-                    LecturerName = new MultilingualText { Ar = "خالد محمد", En = "Khaled Mohammed" },
+                    SubjectId = subjects[5].Id,
+                    ProfessorId = professors[5].Id,
                     StartTime = new TimeSpan(18, 30, 0),
                     EndTime = new TimeSpan(20, 30, 0),
                     LectureHall = new MultilingualText { Ar = "القاعة 606", En = "Hall 606" }

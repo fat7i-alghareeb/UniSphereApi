@@ -13,5 +13,6 @@ public class Professor
     public string? Image { get; set; }
     public List<SubjectProfessorLink>? SubjectProfessorLinks { get; set; }
     public List<ProfessorFacultyLink>? ProfessorFacultyLinks { get; set; }
+    public List<Lecture>? Lectures { get; set; }
     public string? IdentityId { get; set; }
 }

@@ -73,5 +73,10 @@ public class SubjectConfiguration : IEntityTypeConfiguration<Subject>
             .WithOne(m => m.Subject)
             .HasForeignKey(m => m.SubjectId)
             .OnDelete(DeleteBehavior.Cascade);
+            
+        builder.HasMany(s => s.Lectures)
+            .WithOne(l => l.Subject)
+            .HasForeignKey(l => l.SubjectId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

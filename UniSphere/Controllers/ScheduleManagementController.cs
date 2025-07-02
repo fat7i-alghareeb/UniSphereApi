@@ -104,6 +104,9 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         // Return the updated day schedule
         var updatedSchedule = await dbContext.Schedules
             .Include(s => s.Lectures)
+            .ThenInclude(l => l.Subject)
+            .Include(s => s.Lectures)
+            .ThenInclude(l => l.Professor)
             .FirstOrDefaultAsync(s => s.Id == scheduleId);
 
         if (updatedSchedule is null)
@@ -115,11 +118,13 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
             .Select(l => new DayLectureDto
             {
                 Id = l.Id,
-                SubjectName = l.SubjectName.GetTranslatedString(Lang),
-                LectureName = l.SubjectName.GetTranslatedString(Lang),
+                SubjectName = l.Subject.Name.GetTranslatedString(Lang),
+                ProfessorName = $"{l.Professor.FirstName.GetTranslatedString(Lang)} {l.Professor.LastName.GetTranslatedString(Lang)}",
                 LectureHall = l.LectureHall.GetTranslatedString(Lang),
                 StartTime = l.StartTime,
-                EndTime = l.EndTime
+                EndTime = l.EndTime,
+                SubjectId = l.SubjectId,
+                ProfessorId = l.ProfessorId
             })
             .ToList();
 
@@ -175,6 +180,9 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
 
         var schedule = await dbContext.Schedules
             .Include(s => s.Lectures)
+            .ThenInclude(l => l.Subject)
+            .Include(s => s.Lectures)
+            .ThenInclude(l => l.Professor)
             .FirstOrDefaultAsync(s => s.Id == scheduleId);
 
         if (schedule is null)
@@ -194,11 +202,13 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
             .Select(l => new DayLectureDto
             {
                 Id = l.Id,
-                SubjectName = l.SubjectName.GetTranslatedString(Lang),
-                LectureName = l.SubjectName.GetTranslatedString(Lang),
+                SubjectName = l.Subject.Name.GetTranslatedString(Lang),
+                ProfessorName = $"{l.Professor.FirstName.GetTranslatedString(Lang)} {l.Professor.LastName.GetTranslatedString(Lang)}",
                 LectureHall = l.LectureHall.GetTranslatedString(Lang),
                 StartTime = l.StartTime,
-                EndTime = l.EndTime
+                EndTime = l.EndTime,
+                SubjectId = l.SubjectId,
+                ProfessorId = l.ProfessorId
             })
             .ToList();
 
@@ -241,10 +251,8 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         var lectureDto = new CreateLectureDto
         {
             Id = lecture.Id,
-            SubjectNameEn = lecture.SubjectName.En ?? "",
-            SubjectNameAr = lecture.SubjectName.Ar ?? "",
-            LecturerNameEn = lecture.LecturerName.En ?? "",
-            LecturerNameAr = lecture.LecturerName.Ar ?? "",
+            SubjectId = lecture.SubjectId,
+            ProfessorId = lecture.ProfessorId,
             StartTime = lecture.StartTime,
             EndTime = lecture.EndTime,
             LectureHallEn = lecture.LectureHall.En ?? "",
@@ -266,6 +274,9 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         // Get all lectures for this schedule to return the complete day schedule
         var updatedSchedule = await dbContext.Schedules
             .Include(s => s.Lectures)
+            .ThenInclude(l => l.Subject)
+            .Include(s => s.Lectures)
+            .ThenInclude(l => l.Professor)
             .FirstOrDefaultAsync(s => s.Id == lecture.ScheduleId);
 
         if (updatedSchedule is null)
@@ -277,11 +288,13 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
             .Select(l => new DayLectureDto
             {
                 Id = l.Id,
-                SubjectName = l.SubjectName.GetTranslatedString(Lang),
-                LectureName = l.SubjectName.GetTranslatedString(Lang),
+                SubjectName = l.Subject.Name.GetTranslatedString(Lang),
+                ProfessorName = $"{l.Professor.FirstName.GetTranslatedString(Lang)} {l.Professor.LastName.GetTranslatedString(Lang)}",
                 LectureHall = l.LectureHall.GetTranslatedString(Lang),
                 StartTime = l.StartTime,
-                EndTime = l.EndTime
+                EndTime = l.EndTime,
+                SubjectId = l.SubjectId,
+                ProfessorId = l.ProfessorId
             })
             .ToList();
 

@@ -13,12 +13,10 @@ public class LectureConfiguration : IEntityTypeConfiguration<Lecture>
         builder.Property(l => l.ScheduleId)
             .IsRequired();
             
-        builder.Property(l => l.SubjectName)
-            .HasColumnType("jsonb")
+        builder.Property(l => l.SubjectId)
             .IsRequired();
             
-        builder.Property(l => l.LecturerName)
-            .HasColumnType("jsonb")
+        builder.Property(l => l.ProfessorId)
             .IsRequired();
             
         builder.Property(l => l.StartTime)
@@ -35,5 +33,15 @@ public class LectureConfiguration : IEntityTypeConfiguration<Lecture>
             .WithMany(s => s.Lectures)
             .HasForeignKey(l => l.ScheduleId)
             .OnDelete(DeleteBehavior.Cascade);
+            
+        builder.HasOne(l => l.Subject)
+            .WithMany(s => s.Lectures)
+            .HasForeignKey(l => l.SubjectId)
+            .OnDelete(DeleteBehavior.Restrict);
+            
+        builder.HasOne(l => l.Professor)
+            .WithMany(p => p.Lectures)
+            .HasForeignKey(l => l.ProfessorId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 } 

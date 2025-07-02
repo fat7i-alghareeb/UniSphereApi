@@ -4,12 +4,14 @@ public class Lecture
 {
     public Guid Id { get; set; }
     public Guid ScheduleId { get; set; }
-    public MultilingualText SubjectName { get; set; } = new();
-    public MultilingualText LecturerName { get; set; }
+    public Guid SubjectId { get; set; }
+    public Guid ProfessorId { get; set; }
     public TimeSpan StartTime { get; set; }
     public TimeSpan EndTime { get; set; }
     public MultilingualText LectureHall { get; set; } = new();
     
-    // Navigation property
+    // Navigation properties
     public Schedule Schedule { get; set; } = null!;
+    public Subject Subject { get; set; } = null!;
+    public Professor Professor { get; set; } = null!;
 } 

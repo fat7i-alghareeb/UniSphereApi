@@ -34,6 +34,7 @@ public class DatabaseSeeder(
     public async Task ClearApplicationDataAsync()
     {
         logger.LogInformation("Starting to delete all data from the database...");
+        await applicationDbContext.Lectures.ExecuteDeleteAsync();
 
         // Delete in reverse dependency order to avoid FK issues
         await applicationDbContext.SuperAdmins.ExecuteDeleteAsync();

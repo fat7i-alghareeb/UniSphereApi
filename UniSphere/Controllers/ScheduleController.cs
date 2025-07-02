@@ -51,6 +51,9 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
                         s.ScheduleDate >= startDate &&
                         s.ScheduleDate <= endDate)
             .Include(s => s.Lectures)
+            .ThenInclude(l => l.Subject)
+            .Include(s => s.Lectures)
+            .ThenInclude(l => l.Professor)
             .ToListAsync();
 
         if (!schedules.Any())
@@ -95,7 +98,9 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
                         s.ScheduleDate >= startDate &&
                         s.ScheduleDate <= endDate)
             .Include(s => s.Lectures)
-            
+            .ThenInclude(l => l.Subject)
+            .Include(s => s.Lectures)
+            .ThenInclude(l => l.Professor)
             .ToListAsync();
 
         if (!schedules.Any())
@@ -176,6 +181,9 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
 
         var schedules = await query
             .Include(s => s.Lectures)
+            .ThenInclude(l => l.Subject)
+            .Include(s => s.Lectures)
+            .ThenInclude(l => l.Professor)
             .ToListAsync();
 
         if (!schedules.Any())
@@ -215,6 +223,9 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
                         s.ScheduleDate >= startDate &&
                         s.ScheduleDate <= endDate)
             .Include(s => s.Lectures)
+            .ThenInclude(l => l.Subject)
+            .Include(s => s.Lectures)
+            .ThenInclude(l => l.Professor)
             .ToListAsync();
 
         if (!schedules.Any())
@@ -244,6 +255,9 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
 
         var schedule = await dbContext.Schedules
             .Include(s => s.Lectures)
+            .ThenInclude(l => l.Subject)
+            .Include(s => s.Lectures)
+            .ThenInclude(l => l.Professor)
             .FirstOrDefaultAsync(s => s.Id == id && s.MajorId == admin.MajorId);
         if (schedule is null)
         {
