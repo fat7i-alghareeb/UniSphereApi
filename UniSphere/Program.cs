@@ -35,6 +35,9 @@ app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 
+// Enable static file serving from wwwroot
+app.UseStaticFiles();
+
 app.UseAuthentication();
 app.UseAuthorization();
 

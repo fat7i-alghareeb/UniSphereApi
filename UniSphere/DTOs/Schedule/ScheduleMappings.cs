@@ -99,9 +99,13 @@ internal static class ScheduleMappings
                 dayLectures.AddRange(scheduleLectures);
             }
             
+            // Use the first schedule's ID if there are schedules for this day, otherwise use empty GUID
+            var scheduleId = daySchedules.Any() ? daySchedules[0].Id : Guid.Empty;
+            
             daysInMonth.Add(new DayScheduleDto
             {
                 Date = currentDate,
+                ScheduleId = scheduleId,
                 Lectures = dayLectures
             });
             

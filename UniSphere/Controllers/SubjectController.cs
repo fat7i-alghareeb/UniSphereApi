@@ -446,7 +446,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
             if (uploadDto.IsFileUpload)
             {
                 // Handle file upload
-                materialUrl = await storageService.SaveFileAsync(uploadDto.File!, "materials");
+                materialUrl = await storageService.SaveFileAsync(uploadDto.File!);
                 materialType = uploadDto.CustomType ?? LocalStorageService.GetMaterialTypeFromUrl(uploadDto.File!.FileName);
             }
             else

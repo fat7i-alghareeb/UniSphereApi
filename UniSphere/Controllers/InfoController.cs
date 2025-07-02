@@ -13,11 +13,11 @@ namespace UniSphere.Api.Controllers;
 
 [ApiController]
 [Produces("application/json")]
-[AllowAnonymous]
 [Route("api/[controller]")]
 public class InfoController(ApplicationDbContext dbContext) : BaseController
 {
     [HttpGet("GetFaculties")]
+    [AllowAnonymous]
     public async Task<ActionResult<FacultiesCollectionDto>> GetFaculties()
     {
         var faculties = await dbContext.Faculties
@@ -32,6 +32,7 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
     }
 
     [HttpGet("GetMajors")]
+    [AllowAnonymous]
     public async Task<ActionResult<MajorsCollectionDto>> GetMajors([Required] Guid facultyId)
     {
         var majors = await dbContext.Majors
@@ -47,7 +48,41 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
         );
     }
 
+    [HttpGet("SuperAdmin/GetMyFacultyMajors")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<ActionResult<MajorsCollectionDto>> GetSuperAdminFacultyMajors()
+    {
+        var superAdminId = HttpContext.User.GetSuperAdminId();
+        if (superAdminId is null)
+        {
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+        }
+
+        // Get the faculty ID for the super admin
+        var facultyId = await dbContext.SuperAdmins
+            .Where(sa => sa.Id == superAdminId)
+            .Select(sa => sa.FacultyId)
+            .FirstOrDefaultAsync();
+
+        if (facultyId == Guid.Empty)
+        {
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+        }
+
+        // Get majors for the super admin's faculty
+        var majors = await dbContext.Majors
+            .Where(m => m.FacultyId == facultyId)
+            .Select(InfoQueries.ProjectToMajorNameDto(Lang))
+            .ToListAsync();
+
+        return Ok(new MajorsCollectionDto
+        {
+            Majors = majors
+        });
+    }
+
     [HttpGet("GetHomePageInfo")]
+    [AllowAnonymous]
     public async Task<ActionResult<HomeDto>> GetHomePageInfo()
     {
         

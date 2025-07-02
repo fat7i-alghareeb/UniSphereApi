@@ -148,6 +148,7 @@ internal static class AuthMappings{
             AdminId = admin.Id,
             Role = role ?? "Admin",
             Image = admin.Image,
+            NumberOfYears = admin.Major.NumberOfYears,
             AccessToken = accessToken,
             RefreshToken = refreshToken
         };
@@ -176,7 +177,8 @@ internal static class AuthMappings{
             MajorId = admin.MajorId,
             AdminId = admin.Id,
             Role = role ?? "Admin",
-            Image = admin.Image
+            Image = admin.Image,
+            NumberOfYears = admin.Major.NumberOfYears
         };
     }
 

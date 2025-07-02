@@ -189,7 +189,7 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
 
     [HttpGet("Admin/GetScheduleByMonth")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<MonthScheduleDto>> GetAdminScheduleByMonth([Required] int month, [Required] int year)
+    public async Task<ActionResult<MonthScheduleDto>> GetAdminScheduleByMonth([Required] int month, [Required] int year , [Required] int majorYear)
     {
         var adminId = HttpContext.User.GetAdminId();
         if (adminId is null)
@@ -211,7 +211,7 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
 
         var schedules = await dbContext.Schedules
             .Where(s => s.MajorId == admin.MajorId &&
-                        s.Year == year &&
+                        s.Year == majorYear &&
                         s.ScheduleDate >= startDate &&
                         s.ScheduleDate <= endDate)
             .Include(s => s.Lectures)

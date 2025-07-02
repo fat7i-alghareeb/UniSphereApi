@@ -126,6 +126,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         return Ok(new DayScheduleDto
         {
             Date = updatedSchedule.ScheduleDate,
+            ScheduleId = updatedSchedule.Id,
             Lectures = dayLectures
         });
     }
@@ -204,6 +205,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         return Ok(new DayScheduleDto
         {
             Date = schedule.ScheduleDate,
+            ScheduleId = schedule.Id,
             Lectures = dayLectures
         });
     }
@@ -286,6 +288,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         return Ok(new DayScheduleDto
         {
             Date = updatedSchedule.ScheduleDate,
+            ScheduleId = updatedSchedule.Id,
             Lectures = dayLectures
         });
     }

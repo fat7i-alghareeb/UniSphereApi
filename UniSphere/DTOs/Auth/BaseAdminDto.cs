@@ -10,4 +10,5 @@ public record BaseAdminDto
     public required Guid AdminId { get; init; }
     public required string Role { get; init; } = "Admin";
     public string? Image { get; init; }
+    public int? NumberOfYears { get; init; }
 } 

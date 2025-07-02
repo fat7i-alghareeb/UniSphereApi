@@ -9,8 +9,8 @@ public sealed record UnifiedSubjectDto
     public Guid? LabId { get; init; }
     public required int Year { get; init; }
     public required int Semester { get; init; }
-    public required int MidtermGrade { get; init; }
-    public required int FinalGrade { get; init; }
+    public required double MidtermGrade { get; init; }
+    public required double FinalGrade { get; init; }
     public required bool IsLabRequired { get; init; }
     public required bool IsMultipleChoice { get; init; }
     public required bool IsOpenBook { get; init; }

@@ -19,7 +19,8 @@ internal static class InfoMappings
         return new MajorNameDto()
         {
             Id = major.Id,
-            Name = major.Name.GetTranslatedString(lang)
+            Name = major.Name.GetTranslatedString(lang),
+            NumberOfYears = major.NumberOfYears
         };
     }
 }
