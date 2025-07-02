@@ -6,6 +6,7 @@ using UniSphere.Api.Database;
 using UniSphere.Api.DTOs.Announcements;
 using UniSphere.Api.DTOs.Info;
 using UniSphere.Api.DTOs.Statistics;
+using UniSphere.Api.DTOs.Subjects;
 using UniSphere.Api.Extensions;
 using UniSphere.Api.Helpers;
 
@@ -140,6 +141,38 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
             DaysToTheFinal = daysToTheFinal,
             Statistics = statistics
         });
+    }
+
+    [HttpGet("Admin/MyMajorSubjects")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<List<SubjectNameIdDto>>> GetAdminMajorSubjects()
+    {
+        var adminId = HttpContext.User.GetAdminId();
+        if (adminId is null)
+        {
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+        }
+
+        var majorId = await dbContext.Admins
+            .Where(a => a.Id == adminId)
+            .Select(a => a.MajorId)
+            .FirstOrDefaultAsync();
+
+        if (majorId == Guid.Empty)
+        {
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
+        }
+
+        var subjects = await dbContext.Subjects
+            .Where(s => s.MajorId == majorId)
+            .Select(s => new SubjectNameIdDto
+            {
+                Id = s.Id,
+                Name = s.Name.GetTranslatedString(Lang)
+            })
+            .ToListAsync();
+
+        return Ok(subjects);
     }
 
 }

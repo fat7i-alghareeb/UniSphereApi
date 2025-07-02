@@ -281,7 +281,15 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
 
         foreach (var lectureDto in scheduleDto.Lectures)
         {
-            var lecture = lectureDto.ToLecture(schedule.Id);
+            var professorId = await dbContext.SubjectProfessorLinks
+                .Where(spl => spl.SubjectId == lectureDto.SubjectId)
+                .Select(spl => spl.ProfessorId)
+                .FirstOrDefaultAsync();
+            if (professorId == Guid.Empty)
+            {
+                return BadRequest(new { message = $"No professor assigned to subject {lectureDto.SubjectId}." });
+            }
+            var lecture = lectureDto.ToLecture(schedule.Id, professorId);
             schedule.Lectures.Add(lecture);
         }
 

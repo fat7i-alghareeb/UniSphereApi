@@ -57,8 +57,17 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         // Add lectures to the schedule
         foreach (var lectureDto in createDto.Lectures)
         {
-            var lecture = lectureDto.ToLecture(schedule.Id);
-            schedule.Lectures.Add(lecture);
+            // Ensure ScheduleId is set
+            // Find the professor for the subject
+            var professorId = await dbContext.SubjectProfessorLinks
+                .Where(spl => spl.SubjectId == lectureDto.SubjectId)
+                .Select(spl => spl.ProfessorId)
+                .FirstOrDefaultAsync();
+            if (professorId == Guid.Empty)
+            {
+                return BadRequest(new { message = $"No professor assigned to subject {lectureDto.SubjectId}." });
+            }
+            schedule.Lectures.Add(lectureDto.ToLecture(schedule.Id, professorId));
         }
 
         dbContext.Schedules.Add(schedule);
@@ -96,7 +105,17 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
             return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
         }
 
-        var lecture = addDto.ToLecture(scheduleId);
+        // Find the professor for the subject
+        var professorId = await dbContext.SubjectProfessorLinks
+            .Where(spl => spl.SubjectId == addDto.SubjectId)
+            .Select(spl => spl.ProfessorId)
+            .FirstOrDefaultAsync();
+        if (professorId == Guid.Empty)
+        {
+            return BadRequest(new { message = "No professor assigned to this subject." });
+        }
+
+        var lecture = addDto.ToLecture(scheduleId, professorId);
 
         dbContext.Lectures.Add(lecture);
         await dbContext.SaveChangesAsync();
@@ -119,6 +138,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
             {
                 Id = l.Id,
                 SubjectName = l.Subject.Name.GetTranslatedString(Lang),
+                LectureName = l.Subject.Name.GetTranslatedString(Lang),
                 ProfessorName = $"{l.Professor.FirstName.GetTranslatedString(Lang)} {l.Professor.LastName.GetTranslatedString(Lang)}",
                 LectureHall = l.LectureHall.GetTranslatedString(Lang),
                 StartTime = l.StartTime,
@@ -203,6 +223,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
             {
                 Id = l.Id,
                 SubjectName = l.Subject.Name.GetTranslatedString(Lang),
+                LectureName = l.Subject.Name.GetTranslatedString(Lang),
                 ProfessorName = $"{l.Professor.FirstName.GetTranslatedString(Lang)} {l.Professor.LastName.GetTranslatedString(Lang)}",
                 LectureHall = l.LectureHall.GetTranslatedString(Lang),
                 StartTime = l.StartTime,
@@ -252,7 +273,6 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         {
             Id = lecture.Id,
             SubjectId = lecture.SubjectId,
-            ProfessorId = lecture.ProfessorId,
             StartTime = lecture.StartTime,
             EndTime = lecture.EndTime,
             LectureHallEn = lecture.LectureHall.En ?? "",
@@ -264,6 +284,20 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         if (!TryValidateModel(lectureDto))
         {
             return ValidationProblem(ModelState);
+        }
+
+        // If SubjectId changed, update ProfessorId accordingly
+        if (lecture.SubjectId != lectureDto.SubjectId)
+        {
+            var newProfessorId = await dbContext.SubjectProfessorLinks
+                .Where(spl => spl.SubjectId == lectureDto.SubjectId)
+                .Select(spl => spl.ProfessorId)
+                .FirstOrDefaultAsync();
+            if (newProfessorId == Guid.Empty)
+            {
+                return BadRequest(new { message = "No professor assigned to the new subject." });
+            }
+            lecture.ProfessorId = newProfessorId;
         }
 
         // Update the lecture with patched values using the mapping method
@@ -289,6 +323,7 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
             {
                 Id = l.Id,
                 SubjectName = l.Subject.Name.GetTranslatedString(Lang),
+                LectureName = l.Subject.Name.GetTranslatedString(Lang),
                 ProfessorName = $"{l.Professor.FirstName.GetTranslatedString(Lang)} {l.Professor.LastName.GetTranslatedString(Lang)}",
                 LectureHall = l.LectureHall.GetTranslatedString(Lang),
                 StartTime = l.StartTime,

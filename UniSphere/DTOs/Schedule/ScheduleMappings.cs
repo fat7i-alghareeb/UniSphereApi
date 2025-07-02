@@ -11,6 +11,7 @@ internal static class ScheduleMappings
         {
             Id = lecture.Id,
             SubjectName = lecture.Subject.Name.GetTranslatedString(lang),
+            LectureName = lecture.Subject.Name.GetTranslatedString(lang),
             ProfessorName = $"{lecture.Professor.FirstName.GetTranslatedString(lang)} {lecture.Professor.LastName.GetTranslatedString(lang)}",
             LectureHall = lecture.LectureHall.GetTranslatedString(lang),
             StartTime = lecture.StartTime,
@@ -26,7 +27,6 @@ internal static class ScheduleMappings
         {
             Id = lecture.Id,
             SubjectId = lecture.SubjectId,
-            ProfessorId = lecture.ProfessorId,
             StartTime = lecture.StartTime,
             EndTime = lecture.EndTime,
             LectureHallEn = lecture.LectureHall.En ?? string.Empty,
@@ -138,18 +138,18 @@ internal static class ScheduleMappings
             MajorId = dto.MajorId,
             Year = dto.Year,
             ScheduleDate = dto.ScheduleDate,
-            Lectures = dto.Lectures.Select(l => l.ToLecture(Guid.Empty)).ToList()
+            Lectures = dto.Lectures.Select(l => l.ToLecture(Guid.Empty, Guid.Empty)).ToList()
         };
     }
 
-    public static Lecture ToLecture(this CreateLectureDto dto, Guid scheduleId)
+    public static Lecture ToLecture(this CreateLectureDto dto, Guid scheduleId, Guid professorId)
     {
         return new Lecture
         {
             Id = dto.Id ?? Guid.NewGuid(),
             ScheduleId = scheduleId,
             SubjectId = dto.SubjectId,
-            ProfessorId = dto.ProfessorId,
+            ProfessorId = professorId,
             StartTime = dto.StartTime,
             EndTime = dto.EndTime,
             LectureHall = new MultilingualText { En = dto.LectureHallEn, Ar = dto.LectureHallAr }
@@ -159,11 +159,9 @@ internal static class ScheduleMappings
     public static Lecture UpdateFromDto(this Lecture lecture, CreateLectureDto dto)
     {
         lecture.SubjectId = dto.SubjectId;
-        lecture.ProfessorId = dto.ProfessorId;
         lecture.StartTime = dto.StartTime;
         lecture.EndTime = dto.EndTime;
         lecture.LectureHall = new MultilingualText { En = dto.LectureHallEn, Ar = dto.LectureHallAr };
-        
         return lecture;
     }
 }
