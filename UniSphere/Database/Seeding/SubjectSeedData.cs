@@ -30,7 +30,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -44,8 +45,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -59,7 +60,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -73,7 +75,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = true,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -87,7 +90,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = true,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
 
                 // Year 2 - Software Engineering Subjects
@@ -103,7 +107,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -117,7 +122,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -131,7 +137,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -145,7 +152,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -159,7 +167,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
 
                 // Year 3 - Software Engineering Subjects
@@ -175,7 +184,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -189,7 +199,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -203,7 +214,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -217,7 +229,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -231,7 +244,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
 
                 // Year 4 - Software Engineering Subjects
@@ -247,7 +261,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -261,7 +276,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -275,7 +291,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -289,7 +306,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -303,7 +321,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
 
                 // Year 5 - Software Engineering Subjects (Optional/Elective)
@@ -319,7 +338,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -333,7 +353,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
                 new()
                 {
@@ -347,7 +368,8 @@ public class SubjectSeedData(ApplicationDbContext context) : SeedData(context)
                     IsMultipleChoice = false,
                     IsOpenBook = false,
                     MidtermGrade = 30,
-                    FinalGrade = 70
+                    FinalGrade = 70,
+                    PassGrade = 70
                 },
 
                 // Keep existing subjects for other majors

@@ -175,5 +175,22 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
         return Ok(subjects);
     }
 
+    [HttpGet("Subject/{subjectId:guid}/EligibleStudents")]
+    public async Task<ActionResult<EligibleStudentsCollectionDto>> GetEligibleStudentsForSubject(Guid subjectId)
+    {
+        var students = await dbContext.SubjectStudentLinks
+            .Where(link => link.SubjectId == subjectId && link.IsCurrentlyEnrolled && !link.IsPassed)
+            .Include(link => link.StudentCredential)
+            .Select(link => link.StudentCredential)
+            .Distinct()
+            .ToListAsync();
+
+        var result = new EligibleStudentsCollectionDto
+        {
+            Students = students.Select(s => s.ToEligibleStudentDto(Lang)).ToList()
+        };
+        return Ok(result);
+    }
+
 }
 

@@ -75,10 +75,12 @@ public class GradesController(ApplicationDbContext dbContext) : BaseController
             return BadRequest(new { Message = BilingualErrorMessages.GetSubjectIdRequiredMessage(Lang) });
         }
 
-        if (!dto.PassGrade.HasValue)
+        var subject = await dbContext.Subjects.FindAsync(dto.SubjectId.Value);
+        if (subject == null)
         {
-            return BadRequest(new { Message = BilingualErrorMessages.GetPassGradeRequiredMessage(Lang) });
+            return NotFound(new { Message = BilingualErrorMessages.GetSubjectNotFoundMessage(Lang) });
         }
+        double passGrade = subject.PassGrade;
 
         var subjectLinks = await dbContext.SubjectStudentLinks
             .Where(link => link.SubjectId == dto.SubjectId.Value && dto.StudentGrades.Select(sg => sg.StudentId).Contains(link.StudentId))
@@ -106,7 +108,7 @@ public class GradesController(ApplicationDbContext dbContext) : BaseController
             link.MidtermGrade = sg.MidTermGrade;
             link.FinalGrade = sg.FinalGrade;
             double totalGrade = (sg.MidTermGrade ?? 0) + (sg.FinalGrade ?? 0);
-            if (totalGrade >= dto.PassGrade.Value)
+            if (totalGrade >= passGrade)
             {
                 link.IsPassed = true;
                 link.IsCurrentlyEnrolled = false;

@@ -81,7 +81,7 @@ public class DatabaseSeeder(
         await applicationDbContext.Database.EnsureCreatedAsync();
 
         // Clear all data before seeding to avoid conflicts
-      //  await ClearApplicationDataAsync();
+      // await ClearApplicationDataAsync();
 
         // Seed in the correct order based on dependencies
         await universitySeedData.SeedAsync();

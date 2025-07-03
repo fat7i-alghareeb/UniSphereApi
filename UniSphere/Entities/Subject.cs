@@ -15,6 +15,7 @@ public class Subject
     public required int Semester { get; set; }
     public double MidtermGrade { get; set; } = 30;
     public double FinalGrade { get; set; } = 70;
+    public double PassGrade { get; set; } = 70;
     public bool IsLabRequired { get; set; }
     public bool IsMultipleChoice { get; set; }
     public bool IsOpenBook { get; set; }

@@ -394,6 +394,7 @@ public sealed class SubjectController(ApplicationDbContext dbContext, IStorageSe
         subject.IsMultipleChoice = subjectDto.IsMultipleChoice;
         subject.IsOpenBook = subjectDto.IsOpenBook;
         subject.Image = subjectDto.Image;
+        subject.PassGrade = subjectDto.PassGrade;
 
         await dbContext.SaveChangesAsync();
         return Ok(subject.ToUnifiedDto(Lang));

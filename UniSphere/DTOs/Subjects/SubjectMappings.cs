@@ -30,8 +30,10 @@ internal static class SubjectMappings
             Materials = subject.Materials?.Select(m => new MaterialInfo
             {
                 Url = m.Url,
-                Type = m.Type
-            }).ToList() ?? new List<MaterialInfo>()
+                Type = m.Type,
+                PassGrade = subject.PassGrade
+            }).ToList() ?? new List<MaterialInfo>(),
+            PassGrade = subject.PassGrade
         };
     }
     
@@ -55,8 +57,10 @@ internal static class SubjectMappings
             Materials = subject.Materials?.Select(m => new MaterialInfo
             {
                 Url = m.Url,
-                Type = m.Type
-            }).ToList() ?? new List<MaterialInfo>()
+                Type = m.Type,
+                PassGrade = subject.PassGrade
+            }).ToList() ?? new List<MaterialInfo>(),
+            PassGrade = subject.PassGrade
         };
     }
     
@@ -76,7 +80,8 @@ internal static class SubjectMappings
             IsLabRequired = dto.IsLabRequired,
             IsMultipleChoice = dto.IsMultipleChoice,
             IsOpenBook = dto.IsOpenBook,
-            Image = dto.Image
+            Image = dto.Image,
+            PassGrade = dto.PassGrade
         };
         return subject;
     }
@@ -84,6 +89,7 @@ internal static class SubjectMappings
     public static Subject UpdateFromDto(this Subject subject, SubjectDto subjectDto)
     {
         subject.Id = subjectDto.Id;
+        subject.PassGrade = subjectDto.PassGrade;
         return subject;
     }
 }

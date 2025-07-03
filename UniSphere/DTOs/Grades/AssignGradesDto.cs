@@ -5,7 +5,6 @@ namespace UniSphere.Api.DTOs.Grades;
 public sealed record AssignGradesDto
 {
     public Guid? SubjectId { get; init; }
-    public double? PassGrade { get; init; }
     public List<StudentGradeDto> StudentGrades { get; init; } = new();
 }
 
@@ -22,9 +21,6 @@ public class AssignGradesDtoValidator : AbstractValidator<AssignGradesDto>
     {
         RuleFor(x => x.SubjectId)
             .NotNull().WithMessage("SubjectId is required. | معرف المادة مطلوب.");
-        RuleFor(x => x.PassGrade)
-            .NotNull().WithMessage("PassGrade is required. | درجة النجاح مطلوبة.")
-            .GreaterThanOrEqualTo(0).WithMessage("PassGrade must be greater than or equal to 0. | يجب أن تكون درجة النجاح أكبر من أو تساوي 0.");
         RuleFor(x => x.StudentGrades)
             .NotNull().WithMessage("StudentGrades list cannot be null. | قائمة درجات الطلاب لا يمكن أن تكون فارغة.")
             .Must(list => list.Count > 0).WithMessage("StudentGrades list cannot be empty. | قائمة درجات الطلاب لا يمكن أن تكون فارغة.");

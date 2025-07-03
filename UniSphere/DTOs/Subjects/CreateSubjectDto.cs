@@ -13,6 +13,7 @@ public sealed record CreateSubjectDto
     public required int Semester { get; init; }
     public required int MidtermGrade { get; init; } = 30;
     public required int FinalGrade { get; init; } = 70;
+    public required double PassGrade { get; init; }
     public required bool IsLabRequired { get; init; }
     public required bool IsMultipleChoice { get; init; }
     public required bool IsOpenBook { get; init; }
@@ -61,5 +62,10 @@ public class CreateSubjectDtoValidator : AbstractValidator<CreateSubjectDto>
             
         RuleFor(x => x.MidtermGrade + x.FinalGrade)
             .Equal(100).WithMessage("Midterm and final grades must sum to 100. | يجب أن يكون مجموع درجات منتصف الفصل ونهاية الفصل 100.");
+
+        RuleFor(x => x.PassGrade)
+            .NotNull().WithMessage("Pass grade is required. | درجة النجاح مطلوبة.")
+            .GreaterThanOrEqualTo(0).WithMessage("Pass grade cannot be negative. | لا يمكن أن تكون درجة النجاح سالبة.")
+            .LessThanOrEqualTo(100).WithMessage("Pass grade cannot exceed 100. | لا يمكن أن تتجاوز درجة النجاح 100.");
     }
 }

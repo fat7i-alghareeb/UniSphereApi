@@ -42,6 +42,10 @@ public class SubjectConfiguration : IEntityTypeConfiguration<Subject>
         builder.Property(s => s.FinalGrade)
             .HasDefaultValue(70);
         
+        builder.Property(s => s.PassGrade)
+            .HasDefaultValue(70)
+            .IsRequired();
+        
         builder.HasOne(s => s.Major)
             .WithMany(m => m.Subjects)
             .HasForeignKey(s => s.MajorId)
