@@ -79,7 +79,7 @@ internal static class ScheduleMappings
 
     public static MonthScheduleDto CombineSchedulesIntoMonth(this List<Entities.Schedule> schedules, DateOnly month ,Languages lang)
     {
-        // Create a list of all days in the month
+        // Create a list of days that have schedules
         var daysInMonth = new List<DayScheduleDto>();
         var currentDate = month;
         
@@ -90,24 +90,28 @@ internal static class ScheduleMappings
             // Get all schedules for this specific day
             var daySchedules = schedules.Where(s => s.ScheduleDate == currentDate).ToList();
             
-            // Combine all lectures from all schedules for this day
-            foreach (var schedule in daySchedules)
+            // Only add the day if there are actual schedules for it
+            if (daySchedules.Any())
             {
-                var scheduleLectures = schedule.Lectures
-                    .Select(l => l.ToDayLectureDto(lang));
+                // Combine all lectures from all schedules for this day
+                foreach (var schedule in daySchedules)
+                {
+                    var scheduleLectures = schedule.Lectures
+                        .Select(l => l.ToDayLectureDto(lang));
+                    
+                    dayLectures.AddRange(scheduleLectures);
+                }
                 
-                dayLectures.AddRange(scheduleLectures);
+                // Use the first schedule's ID
+                var scheduleId = daySchedules[0].Id;
+                
+                daysInMonth.Add(new DayScheduleDto
+                {
+                    Date = currentDate,
+                    ScheduleId = scheduleId,
+                    Lectures = dayLectures
+                });
             }
-            
-            // Use the first schedule's ID if there are schedules for this day, otherwise use empty GUID
-            var scheduleId = daySchedules.Any() ? daySchedules[0].Id : Guid.Empty;
-            
-            daysInMonth.Add(new DayScheduleDto
-            {
-                Date = currentDate,
-                ScheduleId = scheduleId,
-                Lectures = dayLectures
-            });
             
             currentDate = currentDate.AddDays(1);
         }
@@ -123,10 +127,8 @@ internal static class ScheduleMappings
     {
         return new CreateScheduleDto
         {
-            MajorId = schedule.MajorId,
             Year = schedule.Year,
             ScheduleDate = schedule.ScheduleDate,
-            Lectures = schedule.Lectures.Select(l => l.ToCreateLectureDto()).ToList()
         };
     }
 
@@ -135,10 +137,8 @@ internal static class ScheduleMappings
         return new Entities.Schedule
         {
             Id = Guid.NewGuid(),
-            MajorId = dto.MajorId,
             Year = dto.Year,
             ScheduleDate = dto.ScheduleDate,
-            Lectures = dto.Lectures.Select(l => l.ToLecture(Guid.Empty, Guid.Empty)).ToList()
         };
     }
 

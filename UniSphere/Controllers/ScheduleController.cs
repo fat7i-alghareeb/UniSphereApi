@@ -237,68 +237,68 @@ public sealed class ScheduleController(ApplicationDbContext dbContext) : BaseCon
         return Ok(monthSchedule);
     }
 
-    [HttpPatch("{id:guid}")]
-    [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<MonthScheduleDto>> UpdateSchedule(Guid id, JsonPatchDocument<CreateScheduleDto> patchDocument)
-    {
-        var adminId = HttpContext.User.GetAdminId();
-        if (adminId is null)
-        {
-            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
-        }
+    // [HttpPatch("{id:guid}")]
+    // [Authorize(Roles = "Admin")]
+    // public async Task<ActionResult<MonthScheduleDto>> UpdateSchedule(Guid id, JsonPatchDocument<CreateScheduleDto> patchDocument)
+    // {
+    //     var adminId = HttpContext.User.GetAdminId();
+    //     if (adminId is null)
+    //     {
+    //         return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+    //     }
 
-        var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
-        if (admin is null)
-        {
-            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
-        }
+    //     var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
+    //     if (admin is null)
+    //     {
+    //         return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+    //     }
 
-        var schedule = await dbContext.Schedules
-            .Include(s => s.Lectures)
-            .ThenInclude(l => l.Subject)
-            .Include(s => s.Lectures)
-            .ThenInclude(l => l.Professor)
-            .FirstOrDefaultAsync(s => s.Id == id && s.MajorId == admin.MajorId);
-        if (schedule is null)
-        {
-            return NotFound(new { message = BilingualErrorMessages.GetScheduleNotFoundMessage(Lang) });
-        }
+    //     var schedule = await dbContext.Schedules
+    //         .Include(s => s.Lectures)
+    //         .ThenInclude(l => l.Subject)
+    //         .Include(s => s.Lectures)
+    //         .ThenInclude(l => l.Professor)
+    //         .FirstOrDefaultAsync(s => s.Id == id && s.MajorId == admin.MajorId);
+    //     if (schedule is null)
+    //     {
+    //         return NotFound(new { message = BilingualErrorMessages.GetScheduleNotFoundMessage(Lang) });
+    //     }
 
-        var scheduleDto = schedule.ToCreateScheduleDto();
-        patchDocument.ApplyTo(scheduleDto, ModelState);
-        if (!TryValidateModel(scheduleDto))
-        {
-            return ValidationProblem(ModelState);
-        }
+    //     var scheduleDto = schedule.ToCreateScheduleDto();
+    //     patchDocument.ApplyTo(scheduleDto, ModelState);
+    //     if (!TryValidateModel(scheduleDto))
+    //     {
+    //         return ValidationProblem(ModelState);
+    //     }
 
-        // Update the schedule
-        schedule.Year = scheduleDto.Year;
-        schedule.ScheduleDate = scheduleDto.ScheduleDate;
+    //     // Update the schedule
+    //     schedule.Year = scheduleDto.Year;
+    //     schedule.ScheduleDate = scheduleDto.ScheduleDate;
 
-        // Update lectures
-        dbContext.Lectures.RemoveRange(schedule.Lectures);
-        schedule.Lectures.Clear();
+    //     // Update lectures
+    //     dbContext.Lectures.RemoveRange(schedule.Lectures);
+    //     schedule.Lectures.Clear();
 
-        foreach (var lectureDto in scheduleDto.Lectures)
-        {
-            var professorId = await dbContext.SubjectProfessorLinks
-                .Where(spl => spl.SubjectId == lectureDto.SubjectId)
-                .Select(spl => spl.ProfessorId)
-                .FirstOrDefaultAsync();
-            if (professorId == Guid.Empty)
-            {
-                return BadRequest(new { message = $"No professor assigned to subject {lectureDto.SubjectId}." });
-            }
-            var lecture = lectureDto.ToLecture(schedule.Id, professorId);
-            schedule.Lectures.Add(lecture);
-        }
+    //     foreach (var lectureDto in scheduleDto.Lectures)
+    //     {
+    //         var professorId = await dbContext.SubjectProfessorLinks
+    //             .Where(spl => spl.SubjectId == lectureDto.SubjectId)
+    //             .Select(spl => spl.ProfessorId)
+    //             .FirstOrDefaultAsync();
+    //         if (professorId == Guid.Empty)
+    //         {
+    //             return BadRequest(new { message = $"No professor assigned to subject {lectureDto.SubjectId}." });
+    //         }
+    //         var lecture = lectureDto.ToLecture(schedule.Id, professorId);
+    //         schedule.Lectures.Add(lecture);
+    //     }
 
-        await dbContext.SaveChangesAsync();
+    //     await dbContext.SaveChangesAsync();
 
-        // Return the updated schedule
-        var monthSchedule = new List<Schedule> { schedule }.CombineSchedulesIntoMonth(schedule.ScheduleDate, Lang);
-        return Ok(monthSchedule);
-    }
+    //     // Return the updated schedule
+    //     var monthSchedule = new List<Schedule> { schedule }.CombineSchedulesIntoMonth(schedule.ScheduleDate, Lang);
+    //     return Ok(monthSchedule);
+    // }
 
     [HttpDelete("{id:guid}")]
     [Authorize(Roles = "Admin")]

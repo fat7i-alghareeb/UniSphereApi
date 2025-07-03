@@ -145,7 +145,7 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
 
     [HttpGet("Admin/MyMajorSubjects")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<List<SubjectNameIdDto>>> GetAdminMajorSubjects()
+    public async Task<ActionResult<List<SubjectNameIdDto>>> GetAdminMajorSubjects([Required] int year)
     {
         var adminId = HttpContext.User.GetAdminId();
         if (adminId is null)
@@ -164,7 +164,7 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
         }
 
         var subjects = await dbContext.Subjects
-            .Where(s => s.MajorId == majorId)
+            .Where(s => s.MajorId == majorId && s.Year == year)
             .Select(s => new SubjectNameIdDto
             {
                 Id = s.Id,

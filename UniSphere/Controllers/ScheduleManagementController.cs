@@ -25,18 +25,18 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
             return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
-        // Verify admin has access to this major
+        // Get admin's MajorId
         var admin = await dbContext.Admins
             .FirstOrDefaultAsync(a => a.Id == adminId);
 
-        if (admin is null || admin.MajorId != createDto.MajorId)
+        if (admin is null)
         {
             return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
         }
 
         // Check if schedule already exists for this date, major, and year
         var existingSchedule = await dbContext.Schedules
-            .FirstOrDefaultAsync(s => s.MajorId == createDto.MajorId && 
+            .FirstOrDefaultAsync(s => s.MajorId == admin.MajorId && 
                                      s.Year == createDto.Year && 
                                      s.ScheduleDate == createDto.ScheduleDate);
 
@@ -48,27 +48,11 @@ public class ScheduleManagementController(ApplicationDbContext dbContext) : Base
         var schedule = new Schedule
         {
             Id = Guid.NewGuid(),
-            MajorId = createDto.MajorId,
+            MajorId = admin.MajorId,
             Year = createDto.Year,
             ScheduleDate = createDto.ScheduleDate,
             Lectures = new List<Lecture>()
         };
-
-        // Add lectures to the schedule
-        foreach (var lectureDto in createDto.Lectures)
-        {
-            // Ensure ScheduleId is set
-            // Find the professor for the subject
-            var professorId = await dbContext.SubjectProfessorLinks
-                .Where(spl => spl.SubjectId == lectureDto.SubjectId)
-                .Select(spl => spl.ProfessorId)
-                .FirstOrDefaultAsync();
-            if (professorId == Guid.Empty)
-            {
-                return BadRequest(new { message = $"No professor assigned to subject {lectureDto.SubjectId}." });
-            }
-            schedule.Lectures.Add(lectureDto.ToLecture(schedule.Id, professorId));
-        }
 
         dbContext.Schedules.Add(schedule);
         await dbContext.SaveChangesAsync();
