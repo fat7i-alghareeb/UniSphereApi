@@ -84,6 +84,29 @@ public class LectureSeedData(ApplicationDbContext context) : SeedData(context)
                     StartTime = new TimeSpan(18, 30, 0),
                     EndTime = new TimeSpan(20, 30, 0),
                     LectureHall = new MultilingualText { Ar = "القاعة 606", En = "Hall 606" }
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    ScheduleId = schedules[3].Id,
+                    SubjectId = subjects[6].Id,
+                    ProfessorId = professors[2].Id,
+                    StartTime = new TimeSpan(20, 30, 0),
+                    EndTime = new TimeSpan(22, 30, 0),
+                    LectureHall = new MultilingualText { Ar = "القاعة 707", En = "Hall 707" }
+                    
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    ScheduleId = schedules[4].Id,
+                    SubjectId = subjects[6].Id,
+                    ProfessorId = professors[6].Id,
+                    StartTime = new TimeSpan(20, 30, 0),
+                    EndTime = new TimeSpan(22, 30, 0),
+                    LectureHall = new MultilingualText { Ar = "القاعة 707", En = "Hall 707" }
+                    
+                    
                 }
             };
             await Context.Lectures.AddRangeAsync(lectures);

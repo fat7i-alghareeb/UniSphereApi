@@ -26,6 +26,34 @@ public class ScheduleSeedData(ApplicationDbContext context) : SeedData(context)
                 },
                 new()
                 {
+                    Id = Guid.Parse("88888958-8888-8888-8888-888888888881"),
+                    MajorId = majors[0].Id,
+                    Year = 2,
+                    ScheduleDate = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(1))
+                },
+                new()
+                {
+                    Id = Guid.Parse("88288888-8888-8888-8888-888888888881"),
+                    MajorId = majors[0].Id,
+                    Year = 2,
+                        ScheduleDate = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(2))
+                },
+                new()
+                {
+                    Id = Guid.Parse("88888888-8858-8888-8888-888888888881"),
+                    MajorId = majors[0].Id,
+                    Year = 2,
+                    ScheduleDate = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(3))
+                },
+                new()
+                {
+                    Id = Guid.Parse("88888888-8888-8888-8888-888888848881"),
+                    MajorId = majors[0].Id,
+                    Year = 2,
+                    ScheduleDate = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(4))
+                },
+                new()
+                {
                     Id = Guid.Parse("88888888-8888-8888-8888-888888888882"),
                     MajorId = majors[0].Id,
                     Year = 3,

@@ -33,5 +33,6 @@ public class ScheduleConfiguration : IEntityTypeConfiguration<Schedule>
             .WithOne(l => l.Schedule)
             .HasForeignKey(l => l.ScheduleId)
             .OnDelete(DeleteBehavior.Cascade);
+        builder.HasIndex(s => new { s.MajorId, s.Year, s.ScheduleDate }).IsUnique();
     }
 } 

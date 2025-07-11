@@ -86,8 +86,8 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
     [AllowAnonymous]
     public async Task<ActionResult<HomeDto>> GetHomePageInfo()
     {
-        
-        
+
+
         var studentId = HttpContext.User.GetStudentId();
         if (studentId is null)
         {
