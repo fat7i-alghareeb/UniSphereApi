@@ -9,6 +9,7 @@ using UniSphere.Api.DTOs.Statistics;
 using UniSphere.Api.DTOs.Subjects;
 using UniSphere.Api.Extensions;
 using UniSphere.Api.Helpers;
+using UniSphere.Api.DTOs.Auth;
 
 namespace UniSphere.Api.Controllers;
 
@@ -192,5 +193,173 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
         return Ok(result);
     }
 
+    // Task 1: Get Unassigned Subjects (SuperAdmin only)
+    [HttpGet("SuperAdmin/GetUnassignedSubjects")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<ActionResult<List<DTOs.Subjects.SubjectNameIdDto>>> GetUnassignedSubjects([FromQuery] Guid majorId, [FromQuery] int majorYear)
+    {
+        // Only subjects in the given major and year, with no assigned professor
+        var subjects = await dbContext.Subjects
+            .Where(s => s.MajorId == majorId && s.Year == majorYear)
+            .Include(s => s.SubjectLecturers)
+            .Where(s => s.SubjectLecturers == null || !s.SubjectLecturers.Any())
+            .Select(s => s.ToSubjectNameIdDto(Lang))
+            .ToListAsync();
+        return Ok(subjects);
+    }
+
+    // Task 2: Get Professors by Faculty (SuperAdmin only)
+    [HttpGet("SuperAdmin/GetProfessorsByFaculty")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<ActionResult<List<SimpleProfessorDto>>> GetProfessorsByFaculty()
+    {
+        var superAdminId = HttpContext.User.GetSuperAdminId();
+        if (superAdminId is null)
+        {
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+        }
+        var facultyId = await dbContext.SuperAdmins
+            .Where(sa => sa.Id == superAdminId)
+            .Select(sa => sa.FacultyId)
+            .FirstOrDefaultAsync();
+        if (facultyId == Guid.Empty)
+        {
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+        }
+        var professors = await dbContext.ProfessorFacultyLinks
+            .Where(pfl => pfl.FacultyId == facultyId)
+            .Include(pfl => pfl.Professor)
+            .Select(pfl => pfl.Professor)
+            .Distinct()
+            .Select(p => AuthMappings.ToSimpleProfessorDto(p))
+            .ToListAsync();
+        return Ok(professors);
+    }
+
+    // Task 3: Get Unregistered Students by Major (Admin only)
+    [HttpGet("Admin/GetUnregisteredStudentsByMajor")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<AdminIdNameDto>> GetUnregisteredStudentsByMajor([FromQuery] string studentNumber)
+    {
+        var adminId = HttpContext.User.GetAdminId();
+        if (adminId is null)
+        {
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+        }
+        var majorId = await dbContext.Admins
+            .Where(a => a.Id == adminId)
+            .Select(a => a.MajorId)
+            .FirstOrDefaultAsync();
+        if (majorId == Guid.Empty)
+        {
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
+        }
+        var student = await dbContext.StudentCredentials
+            .Where(sc => sc.MajorId == majorId && sc.IdentityId == null && sc.StudentNumber == studentNumber)
+            .Include(sc => sc.Major)
+            .Select(sc => new AdminIdNameDto
+            {
+                Id = sc.Id,
+                Name = sc.FirstName.GetTranslatedString(Lang) + " " + sc.LastName.GetTranslatedString(Lang)
+            })
+            .SingleOrDefaultAsync();
+        if (student == null)
+        {
+            return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
+        }
+        return Ok(student);
+    }
+
+    // Task 4: Get Unregistered Admins by Faculty (SuperAdmin only)
+    [HttpGet("SuperAdmin/GetUnregisteredAdminsByFaculty")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<ActionResult<List<AdminIdNameDto>>> GetUnregisteredAdminsByFaculty()
+    {
+        var superAdminId = HttpContext.User.GetSuperAdminId();
+        if (superAdminId is null)
+        {
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+        }
+        var facultyId = await dbContext.SuperAdmins
+            .Where(sa => sa.Id == superAdminId)
+            .Select(sa => sa.FacultyId)
+            .FirstOrDefaultAsync();
+        if (facultyId == Guid.Empty)
+        {
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+        }
+        var admins = await dbContext.Admins
+            .Include(a => a.Major)
+            .Where(a => a.IdentityId == null && a.Major.FacultyId == facultyId)
+            .Select(a => new AdminIdNameDto
+            {
+                Id = a.Id,
+                Name = a.FirstName.GetTranslatedString(Lang) + " " + a.LastName.GetTranslatedString(Lang)
+            })
+            .ToListAsync();
+        return Ok(admins);
+    }
+
+    // Returns all professors (Id and Name only) for SuperAdmin or Admin
+    [HttpGet("GetProfessorsIdName")]
+    [Authorize(Roles = "SuperAdmin,Admin")]
+    public async Task<ActionResult<List<ProfessorIdNameDto>>> GetProfessorsIdName()
+    {
+        var professors = await dbContext.Professors
+            .Select(p => new ProfessorIdNameDto
+            {
+                Id = p.Id,
+                Name = p.FirstName.GetTranslatedString(Lang) + " " + p.LastName.GetTranslatedString(Lang)
+            })
+            .ToListAsync();
+        return Ok(professors);
+    }
+
+    // Returns all admins (Id and Name only) for SuperAdmin only
+    [HttpGet("GetAdminsIdName")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<ActionResult<List<AdminIdNameDto>>> GetAdminsIdName()
+    {
+        var admins = await dbContext.Admins
+            .Select(a => new AdminIdNameDto
+            {
+                Id = a.Id,
+                Name = a.FirstName.GetTranslatedString(Lang) + " " + a.LastName.GetTranslatedString(Lang)
+            })
+            .ToListAsync();
+        return Ok(admins);
+    }
+
+    // Returns all unregistered professors (Id and Name only) for SuperAdmin's faculty
+    [HttpGet("SuperAdmin/GetUnregisteredProfessors")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<ActionResult<List<ProfessorIdNameDto>>> GetUnregisteredProfessors()
+    {
+        var superAdminId = HttpContext.User.GetSuperAdminId();
+        if (superAdminId is null)
+        {
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+        }
+        var facultyId = await dbContext.SuperAdmins
+            .Where(sa => sa.Id == superAdminId)
+            .Select(sa => sa.FacultyId)
+            .FirstOrDefaultAsync();
+        if (facultyId == Guid.Empty)
+        {
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+        }
+        var professors = await dbContext.ProfessorFacultyLinks
+            .Include(pfl => pfl.Professor)
+            .Where(pfl => pfl.FacultyId == facultyId && pfl.Professor.IdentityId == null)
+            .Select(pfl => pfl.Professor)
+            .Distinct()
+            .Select(p => new ProfessorIdNameDto
+            {
+                Id = p.Id,
+                Name = p.FirstName.GetTranslatedString(Lang) + " " + p.LastName.GetTranslatedString(Lang)
+            })
+            .ToListAsync();
+        return Ok(professors);
+    }
 }
 

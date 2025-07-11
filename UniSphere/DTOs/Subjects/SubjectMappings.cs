@@ -92,4 +92,13 @@ internal static class SubjectMappings
         subject.PassGrade = subjectDto.PassGrade;
         return subject;
     }
+
+    public static SubjectNameIdDto ToSubjectNameIdDto(this Subject subject, Languages lang)
+    {
+        return new SubjectNameIdDto
+        {
+            Id = subject.Id,
+            Name = subject.Name.GetTranslatedString(lang)
+        };
+    }
 }

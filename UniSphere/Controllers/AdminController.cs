@@ -59,7 +59,7 @@ public class AdminController(
             return Forbid(BilingualErrorMessages.GetNoAccessToSubjectMessage(Lang));
         }
 
-        int code = Random.Shared.Next(100_000, 1_000_000); // 6-digit code
+        int code = dto.OneTimeCode ?? 1234 ; // Use provided code or generate
         int expiration = dto.ExpirationInMinutes ?? 10;
         DateTime now = DateTime.UtcNow;
 

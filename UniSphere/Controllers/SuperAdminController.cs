@@ -87,7 +87,7 @@ public class SuperAdminController(
                 return BadRequest(new { message = BilingualErrorMessages.GetBadRequestMessage(Lang) });
         }
 
-        int code = Random.Shared.Next(100_000, 1_000_000); // 6-digit code
+        int code = dto.OneTimeCode ?? 1234 ; // Use provided code or generate
         int expiration = dto.ExpirationInMinutes ?? 10;
         DateTime now = DateTime.UtcNow;
 
@@ -159,11 +159,11 @@ public class SuperAdminController(
     [AllowAnonymous]
     public async Task<ActionResult<FullInfoSuperAdminDto>> Register(RegisterSuperAdminDto registerSuperAdminDto)
     {
-        using IDbContextTransaction transaction = await identityDbContext.Database.BeginTransactionAsync();
+        await using IDbContextTransaction transaction = await identityDbContext.Database.BeginTransactionAsync();
         dbContext.Database.SetDbConnection(identityDbContext.Database.GetDbConnection());
         await dbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
 
-        SuperAdmin? superAdmin = await dbContext.SuperAdmins
+        var superAdmin = await dbContext.SuperAdmins
             .Include(sa => sa.Faculty)
             .FirstOrDefaultAsync(sa => sa.Id == registerSuperAdminDto.SuperAdminId);
         if (superAdmin is null)
