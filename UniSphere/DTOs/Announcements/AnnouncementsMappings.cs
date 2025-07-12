@@ -72,14 +72,14 @@ internal static class AnnouncementsMappings
         };
     }
 
-    public static MajorAnnouncement ToMajorAnnouncement(this CreateMajorAnnouncementDto dto, Guid majorId)
+    public static MajorAnnouncement ToMajorAnnouncement(this CreateMajorAnnouncementDto dto, Guid majorId, int year)
     {
         return new MajorAnnouncement
         {
             Id = Guid.NewGuid(),
             MajorId = majorId,
             SubjectId = dto.SubjectId,
-            Year = dto.Year,
+            Year = year,
             Title = new MultilingualText { En = dto.TitleEn, Ar = dto.TitleAr },
             Content = new MultilingualText { En = dto.ContentEn, Ar = dto.ContentAr },
             CreatedAt = DateTime.UtcNow

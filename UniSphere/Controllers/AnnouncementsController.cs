@@ -140,27 +140,24 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
         });
     }
 
-    [HttpGet("Admin/GetFacultyAnnouncements")]
-    [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<FacultyAnnouncementsCollectionDto>> GetAdminFacultyAnnouncements()
+    [HttpGet("SuperAdmin/GetFacultyAnnouncements")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<ActionResult<FacultyAnnouncementsCollectionDto>> GetSuperAdminFacultyAnnouncements()
     {
-        var adminId = HttpContext.User.GetAdminId();
-        if (adminId is null)
+        var superAdminId = HttpContext.User.GetSuperAdminId();
+        if (superAdminId is null)
         {
             return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
-        var admin = await dbContext.Admins
-            .Include(a => a.Major)
-            .ThenInclude(m => m.Faculty)
-            .FirstOrDefaultAsync(a => a.Id == adminId);
-        if (admin is null)
+        var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
+        if (superAdmin is null)
         {
             return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
         var announcements = await dbContext.FacultyAnnouncements
-            .Where(a => a.FacultyId == admin.Major.FacultyId)
+            .Where(a => a.FacultyId == superAdmin.FacultyId)
             .Select(AnnouncementsQueries.ProjectToFacultyAnnouncementsDto(Lang))
             .ToListAsync();
 
@@ -358,31 +355,7 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
     // Admin Announcement Creation Endpoints
     [HttpPost("CreateFacultyAnnouncement")]
     [Authorize(Roles = "SuperAdmin")]
-    public async Task<ActionResult<FacultyAnnouncementsDto>> CreateFacultyAnnouncement(CreateFacultyAnnouncementDto createDto)
-    {
-        var superAdminId = HttpContext.User.GetSuperAdminId();
-        if (superAdminId is null)
-        {
-            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
-        }
-
-        var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
-        if (superAdmin is null)
-        {
-            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
-        }
-
-        var facultyAnnouncement = createDto.ToFacultyAnnouncement(superAdmin.FacultyId);
-
-        dbContext.FacultyAnnouncements.Add(facultyAnnouncement);
-        await dbContext.SaveChangesAsync();
-
-        return Ok(facultyAnnouncement.ToFacultyAnnouncementsDto(Lang));
-    }
-
-    [HttpPost("CreateFacultyAnnouncementWithImages")]
-    [Authorize(Roles = "SuperAdmin")]
-    public async Task<ActionResult<FacultyAnnouncementsDto>> CreateFacultyAnnouncementWithImages([FromForm] CreateFacultyAnnouncementWithImagesDto createDto)
+    public async Task<ActionResult<FacultyAnnouncementsDto>> CreateFacultyAnnouncement([FromForm] CreateFacultyAnnouncementWithImagesDto createDto)
     {
         var superAdminId = HttpContext.User.GetSuperAdminId();
         if (superAdminId is null)
@@ -451,51 +424,32 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
     }
 
     [HttpPost("CreateMajorAnnouncement")]
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<StudentAnnouncementsDto>> CreateMajorAnnouncement(CreateMajorAnnouncementDto createDto)
     {
         var adminId = HttpContext.User.GetAdminId();
-        var superAdminId = HttpContext.User.GetSuperAdminId();
-        Guid majorId;
-
-        if (adminId is not null)
-        {
-            var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
-            if (admin is null)
-            {
-                return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
-            }
-            majorId = admin.MajorId;
-        }
-        else if (superAdminId is not null)
-        {
-            if (createDto.MajorId is null)
-            {
-                return BadRequest(new { message = Lang == Languages.En ? "MajorId is required for super admin." : "معرف التخصص مطلوب للمسؤول الأعلى." });
-            }
-            var superAdmin = await dbContext.SuperAdmins.FirstOrDefaultAsync(sa => sa.Id == superAdminId);
-            var major = await dbContext.Majors.FirstOrDefaultAsync(m => m.Id == createDto.MajorId);
-            if (superAdmin is null || major is null || superAdmin.FacultyId != major.FacultyId)
-            {
-                return Forbid(BilingualErrorMessages.GetForbiddenMessage(Lang));
-            }
-            majorId = createDto.MajorId.Value;
-        }
-        else
+        if (adminId is null)
         {
             return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
         }
 
-        // Verify subject belongs to the selected major
+        var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
+        if (admin is null)
+        {
+            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+        }
+
+        // Verify subject belongs to the admin's major
         var subject = await dbContext.Subjects
-            .FirstOrDefaultAsync(s => s.Id == createDto.SubjectId && s.MajorId == majorId);
+            .FirstOrDefaultAsync(s => s.Id == createDto.SubjectId && s.MajorId == admin.MajorId);
 
         if (subject is null)
         {
-            return BadRequest(new { message = Lang == Languages.En ? "Subject does not belong to the selected major" : "المادة لا تنتمي إلى التخصص المحدد" });
+            return BadRequest(new { message = Lang == Languages.En ? "Subject does not belong to your major" : "المادة لا تنتمي إلى تخصصك" });
         }
 
-        var majorAnnouncement = createDto.ToMajorAnnouncement(majorId);
+        // Use the subject's year for the announcement
+        var majorAnnouncement = createDto.ToMajorAnnouncement(admin.MajorId, subject.Year);
 
         dbContext.MajorAnnouncements.Add(majorAnnouncement);
         await dbContext.SaveChangesAsync();
