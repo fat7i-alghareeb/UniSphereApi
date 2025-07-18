@@ -9,8 +9,8 @@ internal static class AuthMappings{
         {
             FullName = new MultilingualNameDto 
             { 
-                En = studentCredential.FirstName.En ?? "", 
-                Ar = studentCredential.FirstName.Ar ?? "" 
+                En = $"{studentCredential.FirstName.En ?? ""} {studentCredential.LastName.En ?? ""}".Trim(), 
+                Ar = $"{studentCredential.FirstName.Ar ?? ""} {studentCredential.LastName.Ar ?? ""}".Trim()
             },
             StudentNumber = studentCredential.StudentNumber,
             MajorName = new MultilingualNameDto 
