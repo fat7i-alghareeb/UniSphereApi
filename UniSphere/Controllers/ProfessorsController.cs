@@ -23,7 +23,7 @@ public class ProfessorsController(
     ApplicationIdentityDbContext identityDbContext,
     TokenProvider tokenProvider,
     IAuthService authService,
-    IStorageService storageService
+    IProfileImageService profileImageService
 ) : BaseController
 {
     [HttpPost("UploadProfileImage")]
@@ -44,30 +44,7 @@ public class ProfessorsController(
                 return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
             }
 
-            if (image == null || image.Length == 0)
-            {
-                return BadRequest(new { message = Lang == Languages.En ? "No image file provided" : "لم يتم توفير ملف صورة" });
-            }
-
-            // Validate image file type
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
-            var fileExtension = Path.GetExtension(image.FileName).ToLowerInvariant();
-            
-            if (!allowedExtensions.Contains(fileExtension))
-            {
-                return BadRequest(new { message = Lang == Languages.En ? "Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp" : "تنسيق الصورة غير صالح. التنسيقات المسموح بها: jpg, jpeg, png, gif, bmp, webp" });
-            }
-
-            // Validate file size (max 5MB for profile images)
-            if (image.Length > 5 * 1024 * 1024)
-            {
-                return BadRequest(new { message = Lang == Languages.En ? "Image file size must be less than 5MB" : "يجب أن يكون حجم ملف الصورة أقل من 5 ميجابايت" });
-            }
-
-            // Save the image using LocalStorageService
-            var imageUrl = await storageService.SaveFileAsync(image, "professor-profiles");
-
-            // Update the professor's image URL
+            var imageUrl = await profileImageService.UploadProfileImageAsync(image, "professor-profiles");
             professor.Image = imageUrl;
             await dbContext.SaveChangesAsync();
 
@@ -87,6 +64,9 @@ public class ProfessorsController(
 
     [HttpPost("AddProfessorToFaculty")]
     [Authorize(Roles = "SuperAdmin")]
+    /// <summary>
+    /// Links a professor to the current super admin's faculty. Prevents duplicate links.
+    /// </summary>
     public async Task<IActionResult> AddProfessorToFaculty(AddProfessorToFacultyDto dto)
     {
         var superAdminId = HttpContext.User.GetSuperAdminId();
@@ -159,6 +139,9 @@ public class ProfessorsController(
 
     [HttpPost("AssignProfessorToSubject")]
     [Authorize(Roles = "SuperAdmin")]
+    /// <summary>
+    /// Assigns a professor to a subject, ensuring both belong to the super admin's faculty.
+    /// </summary>
     public async Task<IActionResult> AssignProfessorToSubject([FromBody] AssignProfessorToSubjectDto dto)
     {
         var superAdminId = HttpContext.User.GetSuperAdminId();
@@ -254,6 +237,9 @@ public class ProfessorsController(
 
     [HttpPatch("EditProfessor/{professorId:guid}")]
     [Authorize(Roles = "SuperAdmin,Professor")]
+    /// <summary>
+    /// Allows a super admin or the professor themselves to edit professor details using a JSON patch document.
+    /// </summary>
     public async Task<IActionResult> EditProfessor(Guid professorId, [FromBody] JsonPatchDocument<ProfessorUpdateDto> patchDoc)
     {
         var superAdminId = HttpContext.User.GetSuperAdminId();
@@ -305,6 +291,9 @@ public class ProfessorsController(
 
     [HttpPost("Auth/Register")]
     [AllowAnonymous]
+    /// <summary>
+    /// Registers a new professor user and links to the professor entity. Handles transaction and role assignment.
+    /// </summary>
     public async Task<ActionResult<FullInfoProfessorDto>> Register(RegisterProfessorDto registerProfessorDto)
     {
         using IDbContextTransaction transaction = await identityDbContext.Database.BeginTransactionAsync();
@@ -372,6 +361,9 @@ public class ProfessorsController(
 
     [HttpPost("Auth/Login")]
     [AllowAnonymous]
+    /// <summary>
+    /// Authenticates a professor and returns full info with tokens.
+    /// </summary>
     public async Task<ActionResult<FullInfoProfessorDto>> Login(LoginProfessorDto loginProfessorDto)
     {
         // Find user by email

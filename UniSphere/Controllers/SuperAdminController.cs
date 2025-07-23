@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -21,7 +22,7 @@ public class SuperAdminController(
     ApplicationIdentityDbContext identityDbContext,
     TokenProvider tokenProvider,
     IAuthService authService,
-    IStorageService storageService
+    IProfileImageService profileImageService
 ) : BaseController
 {
     [HttpPost("AssignOneTimeCode")]
@@ -98,9 +99,7 @@ public class SuperAdminController(
                 var adminToUpdate = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == dto.AdminId);
                 if (adminToUpdate is not null)
                 {
-                    adminToUpdate.OneTimeCode = code;
-                    adminToUpdate.OneTimeCodeCreatedDate = now;
-                    adminToUpdate.OneTimeCodeExpirationInMinutes = expiration;
+                    OneTimeCodeHelper.AssignOneTimeCode(adminToUpdate, code, expiration);
                 }
                 break;
 
@@ -108,9 +107,7 @@ public class SuperAdminController(
                 var professorToUpdate = await dbContext.Professors.FirstOrDefaultAsync(p => p.Id == dto.ProfessorId);
                 if (professorToUpdate is not null)
                 {
-                    professorToUpdate.OneTimeCode = code;
-                    professorToUpdate.OneTimeCodeCreatedDate = now;
-                    professorToUpdate.OneTimeCodeExpirationInMinutes = expiration;
+                    OneTimeCodeHelper.AssignOneTimeCode(professorToUpdate, code, expiration);
                 }
                 break;
 
@@ -118,9 +115,7 @@ public class SuperAdminController(
                 var studentToUpdate = await dbContext.StudentCredentials.FirstOrDefaultAsync(sc => sc.Id == dto.StudentId);
                 if (studentToUpdate is not null)
                 {
-                    studentToUpdate.OneTimeCode = code;
-                    studentToUpdate.OneTimeCodeCreatedDate = now;
-                    studentToUpdate.OneTimeCodeExpirationInMinutes = expiration;
+                    OneTimeCodeHelper.AssignOneTimeCode(studentToUpdate, code, expiration);
                 }
                 break;
         }
@@ -284,30 +279,7 @@ public class SuperAdminController(
                 return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
             }
 
-            if (image == null || image.Length == 0)
-            {
-                return BadRequest(new { message = BilingualErrorMessages.GetNoImageFileMessage(Lang) });
-            }
-
-            // Validate image file type
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
-            var fileExtension = Path.GetExtension(image.FileName).ToLowerInvariant();
-            
-            if (!allowedExtensions.Contains(fileExtension))
-            {
-                return BadRequest(new { message = BilingualErrorMessages.GetInvalidImageFormatMessage(Lang) });
-            }
-
-            // Validate file size (max 5MB for profile images)
-            if (image.Length > 5 * 1024 * 1024)
-            {
-                return BadRequest(new { message = BilingualErrorMessages.GetImageFileSizeTooLargeMessage(Lang) });
-            }
-
-            // Save the image using LocalStorageService
-            var imageUrl = await storageService.SaveFileAsync(image, "superadmin-profiles");
-
-            // Update the superAdmin's image URL
+            var imageUrl = await profileImageService.UploadProfileImageAsync(image, "superadmin-profiles");
             superAdmin.Image = imageUrl;
             await dbContext.SaveChangesAsync();
 
@@ -319,9 +291,9 @@ public class SuperAdminController(
                 fileSize = image.Length
             });
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return BadRequest(new { message = BilingualErrorMessages.GetFileUploadErrorMessage(Lang) });
+            return BadRequest(new { message = ex.Message });
         }
     }
 } 

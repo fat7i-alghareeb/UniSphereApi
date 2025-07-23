@@ -17,7 +17,7 @@ namespace UniSphere.Api.Controllers;
 [Produces("application/json")]
 [Authorize]
 [Route("api/[controller]")]
-public class StudentController(ApplicationDbContext dbContext, IStorageService storageService) : BaseController
+public class StudentController(ApplicationDbContext dbContext, IProfileImageService profileImageService) : BaseController
 {
     [HttpGet("GetMyStatistics")]
     public async Task<ActionResult<StatisticsDto>> GetMyStatistics()
@@ -79,6 +79,9 @@ public class StudentController(ApplicationDbContext dbContext, IStorageService s
 
     [HttpPost("AddStudent")]
     [Authorize(Roles = nameof(Roles.SuperAdmin) + "," + nameof(Roles.Admin))]
+    /// <summary>
+    /// Adds a new student to the system. SuperAdmins can add to any major in their faculty; Admins can only add to their assigned major.
+    /// </summary>
     public async Task<IActionResult> AddStudent([FromBody] CreateStudentDto dto)
     {
         var userRole = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
@@ -168,30 +171,7 @@ public class StudentController(ApplicationDbContext dbContext, IStorageService s
                 return NotFound(new { message = BilingualErrorMessages.GetStudentNotFoundMessage(Lang) });
             }
 
-            if (image == null || image.Length == 0)
-            {
-                return BadRequest(new { message = Lang == Languages.En ? "No image file provided" : "لم يتم توفير ملف صورة" });
-            }
-
-            // Validate image file type
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
-            var fileExtension = Path.GetExtension(image.FileName).ToLowerInvariant();
-            
-            if (!allowedExtensions.Contains(fileExtension))
-            {
-                return BadRequest(new { message = Lang == Languages.En ? "Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp" : "تنسيق الصورة غير صالح. التنسيقات المسموح بها: jpg, jpeg, png, gif, bmp, webp" });
-            }
-
-            // Validate file size (max 5MB for profile images)
-            if (image.Length > 5 * 1024 * 1024)
-            {
-                return BadRequest(new { message = Lang == Languages.En ? "Image file size must be less than 5MB" : "يجب أن يكون حجم ملف الصورة أقل من 5 ميجابايت" });
-            }
-
-            // Save the image using LocalStorageService
-            var imageUrl = await storageService.SaveFileAsync(image, "student-profiles");
-
-            // Update the student's image URL
+            var imageUrl = await profileImageService.UploadProfileImageAsync(image, "student-profiles");
             student.Image = imageUrl;
             await dbContext.SaveChangesAsync();
 
@@ -210,6 +190,9 @@ public class StudentController(ApplicationDbContext dbContext, IStorageService s
     }
 
     [HttpGet("EligibleStudentsForSubject")]
+    /// <summary>
+    /// Returns eligible students for a subject, enforcing access control for Admins and SuperAdmins.
+    /// </summary>
     public async Task<ActionResult<DTOs.Info.EligibleStudentsCollectionDto>> GetEligibleStudentsForSubject([FromQuery] Guid subjectId)
     {
         var adminId = HttpContext.User.GetAdminId();
@@ -262,17 +245,11 @@ public class StudentController(ApplicationDbContext dbContext, IStorageService s
         // Get eligible students (students in the same major and year as the subject)
         var eligibleStudents = await dbContext.StudentCredentials
             .Where(sc => sc.MajorId == subject.MajorId && sc.Year == subject.Year)
-            .Select(sc => new EligibleStudentDto
-            {
-                Id = sc.Id,
-                StudentNumber = sc.StudentNumber,
-                FullName = sc.FirstName.GetTranslatedString(Lang) + " " + sc.LastName.GetTranslatedString(Lang)
-            })
             .ToListAsync();
 
         return Ok(new EligibleStudentsCollectionDto
         {
-            Students = eligibleStudents
+            Students = eligibleStudents.Select(s => s.ToEligibleStudentDto(Lang)).ToList()
         });
     }
 }

@@ -9,6 +9,7 @@ using UniSphere.Api.Entities;
 using UniSphere.Api.Extensions;
 using UniSphere.Api.Services;
 using UniSphere.Api.Helpers;
+using static UniSphere.Api.Helpers.OneTimeCodeHelper;
 
 namespace UniSphere.Api.Controllers;
 
@@ -21,63 +22,54 @@ public class AdminController(
     ApplicationIdentityDbContext identityDbContext,
     TokenProvider tokenProvider,
     IAuthService authService,
-    IStorageService storageService
+    IProfileImageService profileImageService
 ) : BaseController
 {
     [HttpPost("AssignOneTimeCodeToStudent")]
     [Authorize(Roles = "Admin")]
+    /// <summary>
+    /// Assigns a one-time code to a student in the admin's major. Only Admins can assign codes to students in their own major.
+    /// </summary>
     public async Task<IActionResult> AssignOneTimeCodeToStudent([FromBody] AssignOneTimeCodeRequestDto dto)
     {
         var adminId = HttpContext.User.GetAdminId();
         if (adminId is null)
         {
-            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+            return Problem(statusCode: 401, title: "Unauthorized", detail: BilingualErrorMessages.GetUnauthorizedMessage(Lang));
         }
-
         var admin = await dbContext.Admins.FirstOrDefaultAsync(a => a.Id == adminId);
         if (admin is null)
         {
-            return Unauthorized(new { message = BilingualErrorMessages.GetUnauthorizedMessage(Lang) });
+            return Problem(statusCode: 401, title: "Unauthorized", detail: BilingualErrorMessages.GetUnauthorizedMessage(Lang));
         }
-
         if (dto.TargetRole != AssignOneTimeCodeTargetRole.Student)
         {
-            return BadRequest(new { message = Lang == Languages.En ? "Admin can only assign one-time codes to students." : "يمكن للمسؤول تعيين رموز لمرة واحدة للطلاب فقط." });
+            return Problem(statusCode: 400, title: "Bad Request", detail: Lang == Languages.En ? "Admin can only assign one-time codes to students." : "يمكن للمسؤول تعيين رموز لمرة واحدة للطلاب فقط.");
         }
-
-        if (dto.StudentId is null)
-        {
-            return BadRequest(new { message = BilingualErrorMessages.GetStudentNotFoundMessage(Lang) });
-        }
-
         var student = await dbContext.StudentCredentials
             .Include(sc => sc.Major)
             .FirstOrDefaultAsync(sc => sc.Id == dto.StudentId);
-
         if (student is null || student.MajorId != admin.MajorId)
         {
-            return Forbid(BilingualErrorMessages.GetNoAccessToSubjectMessage(Lang));
+            return Problem(statusCode: 403, title: "Forbidden", detail: BilingualErrorMessages.GetNoAccessToSubjectMessage(Lang));
         }
-
         int code = dto.OneTimeCode ?? 1234 ; // Use provided code or generate
         int expiration = dto.ExpirationInMinutes ?? 10;
-        DateTime now = DateTime.UtcNow;
-
-        student.OneTimeCode = code;
-        student.OneTimeCodeCreatedDate = now;
-        student.OneTimeCodeExpirationInMinutes = expiration;
-
+        AssignOneTimeCode(student, code, expiration);
         await dbContext.SaveChangesAsync();
         return Ok(new
         {
             message = Lang == Languages.En ? "One-time code assigned successfully to student." : "تم تعيين رمز لمرة واحدة للطالب بنجاح.",
             code,
-            expiresAt = now.AddMinutes(expiration)
+            expiresAt = student.OneTimeCodeExpirationInMinutes.HasValue ? DateTime.UtcNow.AddMinutes(student.OneTimeCodeExpirationInMinutes.Value) : (DateTime?)null
         });
     }
 
     [HttpPost("UploadProfileImage")]
     [Authorize(Roles = "Admin")]
+    /// <summary>
+    /// Uploads a profile image for the current admin. Validates and stores the image.
+    /// </summary>
     public async Task<IActionResult> UploadProfileImage(IFormFile image)
     {
         try
@@ -94,30 +86,7 @@ public class AdminController(
                 return NotFound(new { message = BilingualErrorMessages.GetStudentNotFoundMessage(Lang) });
             }
 
-            if (image == null || image.Length == 0)
-            {
-                return BadRequest(new { message = Lang == Languages.En ? "No image file provided" : "لم يتم توفير ملف صورة" });
-            }
-
-            // Validate image file type
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
-            var fileExtension = Path.GetExtension(image.FileName).ToLowerInvariant();
-            
-            if (!allowedExtensions.Contains(fileExtension))
-            {
-                return BadRequest(new { message = Lang == Languages.En ? "Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp" : "تنسيق الصورة غير صالح. التنسيقات المسموح بها: jpg, jpeg, png, gif, bmp, webp" });
-            }
-
-            // Validate file size (max 5MB for profile images)
-            if (image.Length > 5 * 1024 * 1024)
-            {
-                return BadRequest(new { message = Lang == Languages.En ? "Image file size must be less than 5MB" : "يجب أن يكون حجم ملف الصورة أقل من 5 ميجابايت" });
-            }
-
-            // Save the image using LocalStorageService
-            var imageUrl = await storageService.SaveFileAsync(image, "admin-profiles");
-
-            // Update the admin's image URL
+            var imageUrl = await profileImageService.UploadProfileImageAsync(image, "admin-profiles");
             admin.Image = imageUrl;
             await dbContext.SaveChangesAsync();
 
@@ -162,20 +131,21 @@ public class AdminController(
 
     [HttpPost("Auth/Register")]
     [AllowAnonymous]
+    /// <summary>
+    /// Registers a new admin user and links to the admin entity. Handles transaction and role assignment.
+    /// </summary>
     public async Task<ActionResult<FullInfoAdminDto>> Register(RegisterAdminDto registerAdminDto)
     {
         using IDbContextTransaction transaction = await identityDbContext.Database.BeginTransactionAsync();
         dbContext.Database.SetDbConnection(identityDbContext.Database.GetDbConnection());
         await dbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
-
         Admin? admin = await dbContext.Admins
             .Include(a => a.Major)
             .FirstOrDefaultAsync(a => a.Id == registerAdminDto.AdminId);
         if (admin is null)
         {
-            return NotFound(new { message = BilingualErrorMessages.GetStudentNotFoundMessage(Lang) });
+            return Problem(statusCode: 404, title: "Not Found", detail: BilingualErrorMessages.GetStudentNotFoundMessage(Lang));
         }
-
         var applicationUser = new ApplicationUser
         {
             UserName = admin.Gmail,
@@ -183,11 +153,6 @@ public class AdminController(
             EmailConfirmed = true,
             AdminId = registerAdminDto.AdminId,
         };
-        if (registerAdminDto.Password != registerAdminDto.ConfirmPassword)
-        {
-            return BadRequest(new { message = Lang == Languages.En ? "Password and ConfirmPassword must be the same" : "يجب أن تكون كلمة المرور وتأكيد كلمة المرور متطابقتين" });
-        }
-
         IdentityResult createAdminResult = await userManager.CreateAsync(applicationUser, registerAdminDto.Password);
         if (!createAdminResult.Succeeded)
         {
@@ -195,7 +160,6 @@ public class AdminController(
             {
                 { "errors", createAdminResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
             };
-
             return Problem(
                 detail: Lang == Languages.En ? "Error creating Admin" : "حدث خطأ أثناء إنشاء المسؤول",
                 title: Lang == Languages.En ? "Error creating Admin" : "حدث خطأ أثناء إنشاء المسؤول",
@@ -210,7 +174,6 @@ public class AdminController(
             {
                 { "errors", createAdminResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
             };
-
             return Problem(
                 detail: Lang == Languages.En ? "Error creating Admin" : "حدث خطأ أثناء إنشاء المسؤول",
                 title: Lang == Languages.En ? "Error creating Admin" : "حدث خطأ أثناء إنشاء المسؤول",
@@ -230,6 +193,9 @@ public class AdminController(
 
     [HttpPost("Auth/Login")]
     [AllowAnonymous]
+    /// <summary>
+    /// Authenticates an admin and returns full info with tokens.
+    /// </summary>
     public async Task<ActionResult<FullInfoAdminDto>> Login(LoginAdminDto loginAdminDto)
     {
         // Find user by email

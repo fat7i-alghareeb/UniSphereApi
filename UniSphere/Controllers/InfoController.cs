@@ -146,7 +146,7 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
 
     [HttpGet("Admin/MyMajorSubjects")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<List<SubjectNameIdDto>>> GetAdminMajorSubjects([Required] int year)
+    public async Task<ActionResult<SubjectNameIdCollectionDto>> GetAdminMajorSubjects([Required] int year)
     {
         var adminId = HttpContext.User.GetAdminId();
         if (adminId is null)
@@ -173,7 +173,7 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
             })
             .ToListAsync();
 
-        return Ok(subjects);
+        return Ok(new SubjectNameIdCollectionDto { Subjects = subjects });
     }
 
     [HttpGet("Subject/{subjectId:guid}/EligibleStudents")]
@@ -196,7 +196,7 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
     // Task 1: Get Unassigned Subjects (SuperAdmin only)
     [HttpGet("SuperAdmin/GetUnassignedSubjects")]
     [Authorize(Roles = "SuperAdmin")]
-    public async Task<ActionResult<List<DTOs.Subjects.SubjectNameIdDto>>> GetUnassignedSubjects([FromQuery] Guid majorId, [FromQuery] int majorYear)
+    public async Task<ActionResult<SubjectNameIdCollectionDto>> GetUnassignedSubjects([FromQuery] Guid majorId, [FromQuery] int majorYear)
     {
         // Only subjects in the given major and year, with no assigned professor
         var subjects = await dbContext.Subjects
@@ -205,13 +205,13 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
             .Where(s => s.SubjectLecturers == null || !s.SubjectLecturers.Any())
             .Select(s => s.ToSubjectNameIdDto(Lang))
             .ToListAsync();
-        return Ok(subjects);
+        return Ok(new SubjectNameIdCollectionDto { Subjects = subjects });
     }
 
     // Task 2: Get Professors by Faculty (SuperAdmin only)
     [HttpGet("SuperAdmin/GetProfessorsByFaculty")]
     [Authorize(Roles = "SuperAdmin")]
-    public async Task<ActionResult<List<SimpleProfessorDto>>> GetProfessorsByFaculty()
+    public async Task<ActionResult<SimpleProfessorCollectionDto>> GetProfessorsByFaculty()
     {
         var superAdminId = HttpContext.User.GetSuperAdminId();
         if (superAdminId is null)
@@ -233,7 +233,7 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
             .Distinct()
             .Select(p => AuthMappings.ToSimpleProfessorDto(p))
             .ToListAsync();
-        return Ok(professors);
+        return Ok(new SimpleProfessorCollectionDto { Professors = professors });
     }
 
     // Task 3: Get Unregistered Students by Major (Admin only)
@@ -273,7 +273,7 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
     // Task 4: Get Unregistered Admins by Faculty (SuperAdmin only)
     [HttpGet("SuperAdmin/GetUnregisteredAdminsByFaculty")]
     [Authorize(Roles = "SuperAdmin")]
-    public async Task<ActionResult<List<AdminIdNameDto>>> GetUnregisteredAdminsByFaculty()
+    public async Task<ActionResult<AdminIdNameCollectionDto>> GetUnregisteredAdminsByFaculty()
     {
         var superAdminId = HttpContext.User.GetSuperAdminId();
         if (superAdminId is null)
@@ -297,13 +297,13 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
                 Name = a.FirstName.GetTranslatedString(Lang) + " " + a.LastName.GetTranslatedString(Lang)
             })
             .ToListAsync();
-        return Ok(admins);
+        return Ok(new AdminIdNameCollectionDto { Admins = admins });
     }
 
     // Returns all professors (Id and Name only) for SuperAdmin or Admin
     [HttpGet("GetProfessorsIdName")]
     [Authorize(Roles = "SuperAdmin,Admin")]
-    public async Task<ActionResult<List<ProfessorIdNameDto>>> GetProfessorsIdName()
+    public async Task<ActionResult<ProfessorIdNameCollectionDto>> GetProfessorsIdName()
     {
         var professors = await dbContext.Professors
             .Select(p => new ProfessorIdNameDto
@@ -312,13 +312,13 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
                 Name = p.FirstName.GetTranslatedString(Lang) + " " + p.LastName.GetTranslatedString(Lang)
             })
             .ToListAsync();
-        return Ok(professors);
+        return Ok(new ProfessorIdNameCollectionDto { Professors = professors });
     }
 
     // Returns all admins (Id and Name only) for SuperAdmin only
     [HttpGet("GetAdminsIdName")]
     [Authorize(Roles = "SuperAdmin")]
-    public async Task<ActionResult<List<AdminIdNameDto>>> GetAdminsIdName()
+    public async Task<ActionResult<AdminIdNameCollectionDto>> GetAdminsIdName()
     {
         var admins = await dbContext.Admins
             .Select(a => new AdminIdNameDto
@@ -327,13 +327,13 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
                 Name = a.FirstName.GetTranslatedString(Lang) + " " + a.LastName.GetTranslatedString(Lang)
             })
             .ToListAsync();
-        return Ok(admins);
+        return Ok(new AdminIdNameCollectionDto { Admins = admins });
     }
 
     // Returns all unregistered professors (Id and Name only) for SuperAdmin's faculty
     [HttpGet("SuperAdmin/GetUnregisteredProfessors")]
     [Authorize(Roles = "SuperAdmin")]
-    public async Task<ActionResult<List<ProfessorIdNameDto>>> GetUnregisteredProfessors()
+    public async Task<ActionResult<ProfessorIdNameCollectionDto>> GetUnregisteredProfessors()
     {
         var superAdminId = HttpContext.User.GetSuperAdminId();
         if (superAdminId is null)
@@ -359,7 +359,7 @@ public class InfoController(ApplicationDbContext dbContext) : BaseController
                 Name = p.FirstName.GetTranslatedString(Lang) + " " + p.LastName.GetTranslatedString(Lang)
             })
             .ToListAsync();
-        return Ok(professors);
+        return Ok(new ProfessorIdNameCollectionDto { Professors = professors });
     }
 }
 

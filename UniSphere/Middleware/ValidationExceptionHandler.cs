@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace UniSphere.Api.Middleware;
@@ -14,20 +15,26 @@ public sealed class ValidationExceptionHandler(IProblemDetailsService problemDet
         {
             return false;
         }
-        httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-        var context = new ProblemDetailsContext
-        {
-            HttpContext = httpContext,
-            ProblemDetails = new ProblemDetails
-            {
-                Title = "One or more validation errors occurred.",
-                Status = StatusCodes.Status400BadRequest,
-            }
-        };
+
         var errors = validationException.Errors
             .GroupBy(e => e.PropertyName)
-            .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
-        context.ProblemDetails.Extensions.Add("errors", errors);
-        return await problemDetailsService.TryWriteAsync(context);
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(e => e.ErrorMessage).ToArray()
+            );
+
+        var problemDetails = new ValidationProblemDetails(errors)
+        {
+            Status = StatusCodes.Status400BadRequest,
+            Title = "Validation failed",
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
+        };
+
+        httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+        return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
+        {
+            HttpContext = httpContext,
+            ProblemDetails = problemDetails
+        });
     }
 }

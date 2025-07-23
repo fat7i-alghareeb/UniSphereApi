@@ -1,25 +1,30 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using UniSphere.Api.Helpers;
 
 namespace UniSphere.Api.Middleware;
 
 public class GlobalExceptionHandler(IProblemDetailsService problemDetailsService) : IExceptionHandler
 {
-    public ValueTask<bool> TryHandleAsync(HttpContext httpContext,
+    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext,
         Exception exception,
         CancellationToken cancellationToken)
     {
-        return problemDetailsService.TryWriteAsync(new ProblemDetailsContext
+        var problemDetails = new ProblemDetails
+        {
+            Status = StatusCodes.Status500InternalServerError,
+            Title = "An unexpected error occurred",
+            Detail = exception.Message,
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1"
+        };
+
+        httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
         {
             HttpContext = httpContext,
-            Exception = exception,
-            ProblemDetails = new ProblemDetails
-            {
-                Title = "Internal server error",
-                Detail = "An error occurred while processing your request. Please try again later.",
-                Status = StatusCodes.Status500InternalServerError,
-            }
-        }
-        );
+            ProblemDetails = problemDetails
+        });
     }
 }

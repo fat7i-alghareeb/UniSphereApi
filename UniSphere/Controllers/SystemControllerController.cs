@@ -10,6 +10,8 @@ using UniSphere.Api.Entities;
 using UniSphere.Api.Extensions;
 using UniSphere.Api.Services;
 using UniSphere.Api.Helpers;
+using static UniSphere.Api.Helpers.OneTimeCodeHelper;
+using UniSphere.Api.DTOs.Info;
 
 namespace UniSphere.Api.Controllers;
 
@@ -22,7 +24,7 @@ public class SystemControllerController(
     ApplicationIdentityDbContext identityDbContext,
     TokenProvider tokenProvider,
     IAuthService authService,
-    IStorageService storageService
+    IProfileImageService profileImageService
 ) : BaseController
 {
     [HttpPost("UploadProfileImage")]
@@ -43,30 +45,7 @@ public class SystemControllerController(
                 return NotFound(new { message = BilingualErrorMessages.GetNotFoundMessage(Lang) });
             }
 
-            if (image == null || image.Length == 0)
-            {
-                return BadRequest(new { message = Lang == Languages.En ? "No image file provided" : "لم يتم توفير ملف صورة" });
-            }
-
-            // Validate image file type
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
-            var fileExtension = Path.GetExtension(image.FileName).ToLowerInvariant();
-            
-            if (!allowedExtensions.Contains(fileExtension))
-            {
-                return BadRequest(new { message = Lang == Languages.En ? "Invalid image format. Allowed formats: jpg, jpeg, png, gif, bmp, webp" : "تنسيق الصورة غير صالح. التنسيقات المسموح بها: jpg, jpeg, png, gif, bmp, webp" });
-            }
-
-            // Validate file size (max 5MB for profile images)
-            if (image.Length > 5 * 1024 * 1024)
-            {
-                return BadRequest(new { message = Lang == Languages.En ? "Image file size must be less than 5MB" : "يجب أن يكون حجم ملف الصورة أقل من 5 ميجابايت" });
-            }
-
-            // Save the image using LocalStorageService
-            var imageUrl = await storageService.SaveFileAsync(image, "systemcontroller-profiles");
-
-            // Update the system controller's image URL
+            var imageUrl = await profileImageService.UploadProfileImageAsync(image, "systemcontroller-profiles");
             systemController.Image = imageUrl;
             await applicationDbContext.SaveChangesAsync();
 
@@ -195,10 +174,10 @@ public class SystemControllerController(
     }
 
     [HttpGet("EnrollmentStatus")]
-    public async Task<ActionResult<List<EnrollmentStatus>>> GetAllEnrollmentStatuses()
+    public async Task<ActionResult<EnrollmentStatusCollectionDto>> GetAllEnrollmentStatuses()
     {
         var enrollmentStatuses = await applicationDbContext.EnrollmentStatuses.ToListAsync();
-        return Ok(enrollmentStatuses);
+        return Ok(new EnrollmentStatusCollectionDto { EnrollmentStatuses = enrollmentStatuses });
     }
 
     [HttpPatch("EnrollmentStatus/{id:guid}")]

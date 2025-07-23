@@ -170,6 +170,7 @@ public static class DependenciesInjection
         
         // Register storage services
         builder.Services.AddScoped<IStorageService, LocalStorageService>();
+        builder.Services.AddScoped<IProfileImageService, ProfileImageService>();
         
         return builder;
     }

@@ -355,6 +355,9 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
     // Admin Announcement Creation Endpoints
     [HttpPost("CreateFacultyAnnouncement")]
     [Authorize(Roles = "SuperAdmin")]
+    /// <summary>
+    /// Creates a new faculty announcement with optional images. Only SuperAdmins can create for their faculty.
+    /// </summary>
     public async Task<ActionResult<FacultyAnnouncementsDto>> CreateFacultyAnnouncement([FromForm] CreateFacultyAnnouncementWithImagesDto createDto)
     {
         var superAdminId = HttpContext.User.GetSuperAdminId();
@@ -425,6 +428,9 @@ public class AnnouncementsController(ApplicationDbContext dbContext) : BaseContr
 
     [HttpPost("CreateMajorAnnouncement")]
     [Authorize(Roles = "Admin")]
+    /// <summary>
+    /// Creates a new major announcement for the admin's major. Only Admins can create for their major.
+    /// </summary>
     public async Task<ActionResult<StudentAnnouncementsDto>> CreateMajorAnnouncement(CreateMajorAnnouncementDto createDto)
     {
         var adminId = HttpContext.User.GetAdminId();
